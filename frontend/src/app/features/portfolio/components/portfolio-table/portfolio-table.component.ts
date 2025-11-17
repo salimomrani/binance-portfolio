@@ -1,10 +1,12 @@
-// T082-T084, T110: Portfolio table component with sortable columns and gain/loss badge
+// T082-T084, T110, T154: Portfolio table component with sortable columns, gain/loss badge, and configurable columns
 
-import { Component, input, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Holding } from '../../../../shared/models/portfolio.model';
 import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-badge/gain-loss-badge.component';
 import { TrendIndicatorComponent } from '../../../../shared/components/trend-indicator/trend-indicator.component';
+import { ColumnSettingsComponent } from '../../../../shared/components/column-settings/column-settings.component';
+import { TableSettingsService } from '../../../../core/services/table-settings.service';
 
 type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage' | 'priceChange24h' | 'volume24h' | 'marketCap';
 type SortOrder = 'asc' | 'desc';
@@ -12,7 +14,7 @@ type SortOrder = 'asc' | 'desc';
 @Component({
   selector: 'app-portfolio-table',
   standalone: true,
-  imports: [CommonModule, GainLossBadgeComponent, TrendIndicatorComponent],
+  imports: [CommonModule, GainLossBadgeComponent, TrendIndicatorComponent, ColumnSettingsComponent],
   templateUrl: './portfolio-table.component.html',
   styleUrl: './portfolio-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +22,10 @@ type SortOrder = 'asc' | 'desc';
 export class PortfolioTableComponent {
   // Signal-based inputs (Angular 17+)
   holdings = input<Holding[]>([]);
+
+  // T154: Inject table settings service for column visibility
+  private readonly tableSettingsService = inject(TableSettingsService);
+  protected readonly columnSettings = this.tableSettingsService.getColumnSettings();
 
   private readonly sortColumn = signal<SortColumn>('currentValue');
   private readonly sortOrder = signal<SortOrder>('desc');

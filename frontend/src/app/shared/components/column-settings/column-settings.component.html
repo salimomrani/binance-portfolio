@@ -1,0 +1,80 @@
+<!-- T154: Column settings dropdown -->
+
+<div class="relative inline-block">
+  <!-- Trigger Button -->
+  <button
+    type="button"
+    (click)="toggleDropdown()"
+    class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-neutral transition hover:border-primary hover:text-primary shadow-sm"
+  >
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <path d="M3 6h18M7 12h10M10 18h4"></path>
+    </svg>
+    <span>Columns</span>
+    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  @if (isOpen()) {
+    <div class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+      <!-- Header -->
+      <div class="border-b border-gray-100 px-4 py-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-900">Visible Columns</h3>
+          <button
+            type="button"
+            (click)="closeDropdown()"
+            class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+          >
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Column List -->
+      <div class="max-h-80 overflow-y-auto p-2">
+        @for (column of columns; track column.key) {
+          <label
+            class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer transition"
+            [class.opacity-50]="['symbol', 'actions'].includes(column.key)"
+          >
+            <input
+              type="checkbox"
+              [checked]="columnSettings()[column.key]"
+              (change)="toggleColumn(column.key)"
+              [disabled]="['symbol', 'actions'].includes(column.key)"
+              class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 transition"
+            />
+            <span class="text-sm text-gray-700">{{ column.label }}</span>
+            @if (['symbol', 'actions'].includes(column.key)) {
+              <span class="ml-auto text-xs text-gray-400">Required</span>
+            }
+          </label>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="border-t border-gray-100 px-4 py-3">
+        <button
+          type="button"
+          (click)="resetToDefaults()"
+          class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-neutral hover:bg-gray-50 transition"
+        >
+          Reset to Defaults
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Backdrop to close dropdown when clicking outside -->
+  @if (isOpen()) {
+    <div
+      class="fixed inset-0 z-40"
+      (click)="closeDropdown()"
+    ></div>
+  }
+</div>

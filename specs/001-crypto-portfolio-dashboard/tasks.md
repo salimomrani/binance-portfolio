@@ -513,7 +513,7 @@
   - 24h Change % (with trend-indicator)
   - Volume 24h
   - Market Cap
-- [ ] T154 [US4] Make table columns configurable (show/hide via settings)
+- [X] T154 [US4] Make table columns configurable (show/hide via settings)
 
 ### Frontend: Price Update Service
 
