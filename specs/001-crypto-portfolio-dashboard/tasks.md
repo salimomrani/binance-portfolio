@@ -26,32 +26,32 @@
 
 ### Backend Setup
 
-- [ ] T001 Create backend project structure with directories: backend/src/{config,modules,shared,prisma}
-- [ ] T002 Initialize Node.js TypeScript project in backend/ with package.json and tsconfig.json (strict mode)
-- [ ] T003 [P] Install backend dependencies: Express.js 4.18+, Prisma 5.0+, Zod 3.22+, Jest 29+, TypeScript 5.3+
-- [ ] T004 [P] Install security dependencies: Helmet, cors, express-rate-limit, bcrypt, dotenv
-- [ ] T005 [P] Install utility dependencies: Decimal.js, Winston (logger), axios (HTTP client)
-- [ ] T006 [P] Configure ESLint and Prettier in backend/.eslintrc.json and backend/.prettierrc
-- [ ] T007 [P] Create backend/.env.example based on specs/001-crypto-portfolio-dashboard/contracts/.env.example
-- [ ] T008 [P] Setup Jest configuration in backend/jest.config.js for unit and integration tests
-- [ ] T009 [P] Configure TypeScript tsconfig.json with strict mode, paths, and decorators
+- [X] T001 Create backend project structure with directories: backend/src/{config,modules,shared,prisma}
+- [X] T002 Initialize Node.js TypeScript project in backend/ with package.json and tsconfig.json (strict mode)
+- [X] T003 [P] Install backend dependencies: Express.js 4.18+, Prisma 5.0+, Zod 3.22+, Jest 29+, TypeScript 5.3+
+- [X] T004 [P] Install security dependencies: Helmet, cors, express-rate-limit, bcrypt, dotenv
+- [X] T005 [P] Install utility dependencies: Decimal.js, Winston (logger), axios (HTTP client)
+- [X] T006 [P] Configure ESLint and Prettier in backend/.eslintrc.json and backend/.prettierrc
+- [X] T007 [P] Create backend/.env.example based on specs/001-crypto-portfolio-dashboard/contracts/.env.example
+- [X] T008 [P] Setup Jest configuration in backend/jest.config.js for unit and integration tests
+- [X] T009 [P] Configure TypeScript tsconfig.json with strict mode, paths, and decorators
 
 ### Frontend Setup
 
-- [ ] T010 Create frontend/ directory and initialize Angular 19 project with standalone components
-- [ ] T011 [P] Install frontend dependencies: NgRx 18+, TailwindCSS 3.4+, RxJS 7+, Chart.js, Jest 29+
-- [ ] T012 [P] Configure TailwindCSS in frontend/tailwind.config.js with custom theme (profit/loss colors)
-- [ ] T013 [P] Configure ESLint in frontend/.eslintrc.json for Angular best practices
-- [ ] T014 [P] Setup Jest for Angular in frontend/jest.config.js
-- [ ] T015 [P] Configure frontend/tsconfig.json with strict mode and Angular compiler options
-- [ ] T016 [P] Create frontend/src/environments/environment.ts and environment.prod.ts
-- [ ] T017 [P] Setup Angular standalone app structure in frontend/src/app/app.config.ts
+- [X] T010 Create frontend/ directory and initialize Angular 19 project with standalone components
+- [X] T011 [P] Install frontend dependencies: NgRx 18+, TailwindCSS 3.4+, RxJS 7+, Chart.js, Jest 29+
+- [X] T012 [P] Configure TailwindCSS in frontend/tailwind.config.js with custom theme (profit/loss colors)
+- [X] T013 [P] Configure ESLint in frontend/.eslintrc.json for Angular best practices
+- [X] T014 [P] Setup Jest for Angular in frontend/jest.config.js
+- [X] T015 [P] Configure frontend/tsconfig.json with strict mode and Angular compiler options
+- [X] T016 [P] Create frontend/src/environments/environment.ts and environment.prod.ts
+- [X] T017 [P] Setup Angular standalone app structure in frontend/src/app/app.config.ts
 
 ### Docker & Infrastructure
 
-- [ ] T018 Verify docker-compose.yml exists at project root with PostgreSQL and Redis services
-- [ ] T019 [P] Create backend/prisma/schema.prisma from specs/001-crypto-portfolio-dashboard/data-model.md
-- [ ] T020 Test Docker services with: docker-compose up -d && docker-compose ps (verify healthy status)
+- [X] T018 Verify docker-compose.yml exists at project root with PostgreSQL and Redis services
+- [X] T019 [P] Create backend/prisma/schema.prisma from specs/001-crypto-portfolio-dashboard/data-model.md
+- [X] T020 Test Docker services with: docker-compose up -d && docker-compose ps (verify healthy status)
 
 ---
 
@@ -63,30 +63,30 @@
 
 ### Database & ORM
 
-- [ ] T021 Generate Prisma client: npx prisma generate
-- [ ] T022 Create initial Prisma migration: npx prisma migrate dev --name init
-- [ ] T023 [P] Create backend/src/prisma/seed.ts for sample cryptocurrency data (BTC, ETH, ADA)
-- [ ] T024 Test database connection in backend/src/config/database.config.ts
+- [X] T021 Generate Prisma client: npx prisma generate
+- [X] T022 Create initial Prisma migration: npx prisma migrate dev --name init
+- [X] T023 [P] Create backend/src/prisma/seed.ts for sample cryptocurrency data (BTC, ETH, ADA)
+- [X] T024 Test database connection in backend/src/config/database.config.ts
 
 ### Backend Core Infrastructure
 
-- [ ] T025 Create backend/src/shared/types/api-response.ts with ApiSuccess, ApiError, PaginatedResponse types
-- [ ] T026 [P] Create backend/src/shared/types/error.types.ts with custom error classes (ValidationError, NotFoundError)
-- [ ] T027 [P] Create backend/src/shared/services/logger.service.ts using Winston with file and console transports
-- [ ] T028 [P] Create backend/src/shared/services/cache.service.ts with Redis client and in-memory fallback
-- [ ] T029 [P] Create backend/src/shared/utils/decimal.util.ts with Decimal.js wrapper functions
-- [ ] T030 [P] Create backend/src/shared/utils/retry.util.ts with exponential backoff retry logic
-- [ ] T031 Create backend/src/shared/middleware/error-handler.ts for centralized error handling
-- [ ] T032 [P] Create backend/src/shared/middleware/rate-limiter.ts using express-rate-limit (100 req/15min)
-- [ ] T033 [P] Create backend/src/shared/middleware/security.ts with Helmet configuration
-- [ ] T034 [P] Create backend/src/shared/middleware/validator.ts for Zod schema validation
-- [ ] T035 Create backend/src/config/env.config.ts to load and validate environment variables with Zod
+- [X] T025 Create backend/src/shared/types/api-response.ts with ApiSuccess, ApiError, PaginatedResponse types
+- [X] T026 [P] Create backend/src/shared/types/error.types.ts with custom error classes (ValidationError, NotFoundError)
+- [X] T027 [P] Create backend/src/shared/services/logger.service.ts using Winston with file and console transports
+- [X] T028 [P] Create backend/src/shared/services/cache.service.ts with Redis client and in-memory fallback
+- [X] T029 [P] Create backend/src/shared/utils/decimal.util.ts with Decimal.js wrapper functions
+- [X] T030 [P] Create backend/src/shared/utils/retry.util.ts with exponential backoff retry logic
+- [X] T031 Create backend/src/shared/middleware/error-handler.ts for centralized error handling
+- [X] T032 [P] Create backend/src/shared/middleware/rate-limiter.ts using express-rate-limit (100 req/15min)
+- [X] T033 [P] Create backend/src/shared/middleware/security.ts with Helmet configuration
+- [X] T034 [P] Create backend/src/shared/middleware/validator.ts for Zod schema validation
+- [X] T035 Create backend/src/config/env.config.ts to load and validate environment variables with Zod
 
 ### Express App Setup
 
-- [ ] T036 Create backend/src/app.ts with Express app initialization, middleware stack, and error handlers
-- [ ] T037 [P] Create backend/src/server.ts as entry point with graceful shutdown handling
-- [ ] T038 [P] Add health check endpoint GET /health in backend/src/app.ts
+- [X] T036 Create backend/src/app.ts with Express app initialization, middleware stack, and error handlers
+- [X] T037 [P] Create backend/src/server.ts as entry point with graceful shutdown handling
+- [X] T038 [P] Add health check endpoint GET /health in backend/src/app.ts
 
 ### Frontend Core Infrastructure
 
