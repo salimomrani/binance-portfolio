@@ -481,14 +481,14 @@
 
 ### Frontend: Crypto Detail Component
 
-- [ ] T148 [US4] Create frontend/src/app/features/market-trends/components/crypto-detail/ component:
+- [X] T148 [US4] Create frontend/src/app/features/market-trends/components/crypto-detail/ component:
   - Display crypto name and symbol prominently
   - Show current price (large, bold)
   - Display all percentage changes (1h, 24h, 7d, 30d) with color coding
   - Show volume and market cap
   - Display 24h high/low range
   - Include price chart (reuse line-chart component)
-- [ ] T149 [US4] Add route /market/:symbol to market-trends.routes.ts
+- [X] T149 [US4] Add route /market/:symbol to market-trends.routes.ts
 
 ### Frontend: Trend Indicator Component
 
@@ -517,12 +517,12 @@
 
 ### Frontend: Price Update Service
 
-- [ ] T155 [US4] Create frontend/src/app/core/services/price-update.service.ts:
+- [X] T155 [US4] Create frontend/src/app/core/services/price-update.service.ts:
   - Interval-based polling (60s) using RxJS interval + switchMap
   - Fetch current prices for all portfolio + watchlist symbols
   - Dispatch updatePrices action to store
   - Auto-start on app init, stop on destroy
-- [ ] T156 [US4] Integrate price-update.service in portfolio-dashboard component lifecycle
+- [X] T156 [US4] Integrate price-update.service in portfolio-dashboard component lifecycle
 
 ### Frontend: Real-time Price Display
 
@@ -530,7 +530,7 @@
   - Green flash when price increases
   - Red flash when price decreases
   - Use Angular animations or TailwindCSS transitions
-- [ ] T158 [US4] Show "Last updated: X seconds ago" timestamp in portfolio-summary
+- [X] T158 [US4] Show "Last updated: X seconds ago" timestamp in portfolio-summary
 
 ### Frontend: Component Tests
 
