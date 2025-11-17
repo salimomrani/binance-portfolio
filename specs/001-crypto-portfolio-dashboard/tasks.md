@@ -282,16 +282,16 @@
 
 ### Backend: Gain/Loss Calculation Enhancement
 
-- [ ] T097 [US2] Enhance backend/src/shared/services/calculations.service.ts:
+- [X] T097 [US2] Enhance backend/src/shared/services/calculations.service.ts:
   - Add calculatePortfolioGainLoss(holdings, prices): {total, percentage}
   - Add formatGainLoss(value): {formatted, color, arrow}
-- [ ] T098 [US2] Update backend/src/modules/portfolio/portfolio.service.ts:
+- [X] T098 [US2] Update backend/src/modules/portfolio/portfolio.service.ts:
   - Include gain/loss in getPortfolioById response
   - Add getPortfolioStatistics endpoint for best/worst performers
 
 ### Backend: Portfolio Statistics Endpoint
 
-- [ ] T099 [US2] Add GET /api/portfolios/:id/statistics endpoint in portfolio.controller.ts returning:
+- [X] T099 [US2] Add GET /api/portfolios/:id/statistics endpoint in portfolio.controller.ts returning:
   - Total gain/loss ($ and %)
   - Best performer (symbol, %)
   - Worst performer (symbol, %)
@@ -299,11 +299,11 @@
 
 ### Backend: Integration Tests
 
-- [ ] T100 [P] [US2] Write test in backend/tests/unit/calculations.service.test.ts:
+- [X] T100 [P] [US2] Write test in backend/tests/unit/calculations.service.test.ts:
   - Test calculateAverageCost with multiple transactions
   - Test calculateGainLoss with profit and loss scenarios
   - Test edge cases (zero cost basis, very small values)
-- [ ] T101 [P] [US2] Write test in backend/tests/integration/transactions.test.ts:
+- [X] T101 [P] [US2] Write test in backend/tests/integration/transactions.test.ts:
   - Test adding transaction updates average cost
   - Test multiple transactions calculate correct weighted average
 
