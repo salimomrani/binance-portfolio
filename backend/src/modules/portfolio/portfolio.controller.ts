@@ -31,6 +31,10 @@ export class PortfolioController {
 
     // GET /api/portfolios/:id/statistics - Get portfolio statistics
     this.router.get('/:id/statistics', this.getPortfolioStatistics.bind(this));
+
+    // GET /api/portfolios/:id/allocation - Get portfolio allocation data
+    // T123: Portfolio allocation endpoint for charts
+    this.router.get('/:id/allocation', this.getPortfolioAllocation.bind(this));
   }
 
   /**
@@ -138,6 +142,26 @@ export class PortfolioController {
       res.json({
         success: true,
         data: statistics,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/portfolios/:id/allocation - Get portfolio allocation data
+   * T123: Returns AllocationData[] with symbol, name, value, percentage, color
+   */
+  private async getPortfolioAllocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const allocation = await this.portfolioService.getPortfolioAllocation(id);
+
+      res.json({
+        success: true,
+        data: allocation,
         timestamp: new Date(),
       });
     } catch (error) {

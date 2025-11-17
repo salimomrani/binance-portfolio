@@ -1,0 +1,12 @@
+<!-- T129: Line chart component template -->
+<div class="line-chart-container">
+  @if (historyData.length > 0) {
+    <div class="chart-wrapper">
+      <canvas #chartCanvas></canvas>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p class="text-gray-500 text-center">No historical data available</p>
+    </div>
+  }
+</div>

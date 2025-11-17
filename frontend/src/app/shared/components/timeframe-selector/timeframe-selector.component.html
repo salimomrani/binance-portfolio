@@ -1,0 +1,13 @@
+<!-- T134: Timeframe selector template -->
+<div class="timeframe-selector">
+  @for (timeframe of timeframes; track timeframe) {
+    <button
+      type="button"
+      class="timeframe-button"
+      [class.active]="selectedTimeframe === timeframe"
+      (click)="selectTimeframe(timeframe)"
+    >
+      {{ timeframe }}
+    </button>
+  }
+</div>

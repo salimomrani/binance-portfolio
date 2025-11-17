@@ -1,7 +1,8 @@
 // T054: Market data caching using Redis with in-memory fallback
+// T122: Enhanced with historical data caching (5 min TTL)
 
 import { PrismaClient } from '@prisma/client';
-import { CryptoPrice } from './market-data.types';
+import { CryptoPrice, PriceHistory, Timeframe } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
 import Decimal from 'decimal.js';
@@ -9,7 +10,8 @@ import Decimal from 'decimal.js';
 export class MarketDataCache {
   private readonly prisma: PrismaClient;
   private readonly cache: CacheService;
-  private readonly CACHE_TTL = 60; // 60 seconds
+  private readonly CACHE_TTL = 60; // 60 seconds for current prices
+  private readonly HISTORY_CACHE_TTL = 300; // 5 minutes for historical data
   private readonly DB_TTL = 120; // 2 minutes
 
   constructor(prisma: PrismaClient, cache: CacheService) {
@@ -168,11 +170,111 @@ export class MarketDataCache {
   }
 
   /**
+   * Get cached historical prices for a symbol and timeframe
+   * T122: Historical data caching with 5 min TTL
+   */
+  async getHistoricalPrices(symbol: string, timeframe: Timeframe): Promise<PriceHistory[] | null> {
+    try {
+      // Try Redis cache first
+      const cacheKey = `history:${symbol}:${timeframe}`;
+      const cached = await this.cache.get<PriceHistory[]>(cacheKey);
+
+      if (cached) {
+        logger.debug(`Cache hit for historical data ${symbol} ${timeframe}`);
+        return cached;
+      }
+
+      // Try database cache
+      const dbCached = await this.prisma.priceHistory.findMany({
+        where: {
+          symbol,
+          timeframe,
+        },
+        orderBy: {
+          timestamp: 'asc',
+        },
+      });
+
+      if (dbCached.length > 0) {
+        const history = dbCached.map(record => ({
+          timestamp: record.timestamp,
+          price: record.price.toNumber(),
+          volume: record.volume.toNumber(),
+        }));
+
+        // Check if data is fresh (within last 5 minutes)
+        const latestTimestamp = dbCached[dbCached.length - 1].timestamp;
+        if (this.isHistoryFresh(latestTimestamp)) {
+          // Restore to Redis cache
+          await this.cache.set(cacheKey, history, this.HISTORY_CACHE_TTL);
+          return history;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      logger.error(`Error getting cached historical data for ${symbol}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Set cached historical prices for a symbol and timeframe
+   * T122: Historical data caching with 5 min TTL
+   */
+  async setHistoricalPrices(
+    symbol: string,
+    timeframe: Timeframe,
+    history: PriceHistory[]
+  ): Promise<void> {
+    try {
+      const cacheKey = `history:${symbol}:${timeframe}`;
+
+      // Set in Redis cache
+      await this.cache.set(cacheKey, history, this.HISTORY_CACHE_TTL);
+
+      // Store in database for persistence
+      // First, delete old records for this symbol/timeframe
+      await this.prisma.priceHistory.deleteMany({
+        where: {
+          symbol,
+          timeframe,
+        },
+      });
+
+      // Insert new records
+      await this.prisma.priceHistory.createMany({
+        data: history.map(record => ({
+          symbol,
+          timeframe,
+          timestamp: record.timestamp,
+          price: new Decimal(record.price),
+          volume: new Decimal(record.volume),
+        })),
+      });
+
+      logger.debug(`Cached historical data for ${symbol} ${timeframe}`);
+    } catch (error) {
+      logger.error(`Error caching historical data for ${symbol}:`, error);
+    }
+  }
+
+  /**
+   * Check if historical data is fresh (within 5 minutes)
+   */
+  private isHistoryFresh(latestTimestamp: Date): boolean {
+    const now = new Date();
+    const age = now.getTime() - latestTimestamp.getTime();
+    return age < this.HISTORY_CACHE_TTL * 1000;
+  }
+
+  /**
    * Clear all cached prices
    */
   async clearAll(): Promise<void> {
     try {
       await this.cache.clear('price:*');
+      await this.cache.clear('history:*');
       logger.info('Cleared all price caches');
     } catch (error) {
       logger.error('Error clearing price caches:', error);
