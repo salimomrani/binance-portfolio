@@ -358,9 +358,9 @@
 
 ### Frontend: Component Tests
 
-- [ ] T116 [P] [US2] Write test for gain-loss-badge.component.spec.ts verifying color coding
-- [ ] T117 [P] [US2] Write test for holding-detail.component.spec.ts verifying transaction display
-- [ ] T118 [P] [US2] Write test for portfolio-stats.component.spec.ts verifying statistics rendering
+- [X] T116 [P] [US2] Write test for gain-loss-badge.component.spec.ts verifying color coding
+- [X] T117 [P] [US2] Write test for holding-detail.component.spec.ts verifying transaction display
+- [X] T118 [P] [US2] Write test for portfolio-stats.component.spec.ts verifying statistics rendering
 
 **Checkpoint**: User Story 2 complete - Users can track gains and losses for all holdings
 
