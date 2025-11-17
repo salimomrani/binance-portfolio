@@ -156,6 +156,56 @@
               </div>
             </th>
 
+            <!-- T153: Volume 24h Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('volume24h')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Volume 24h</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('volume24h')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('volume24h') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('volume24h') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- T153: Market Cap Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('marketCap')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Market Cap</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('marketCap')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('marketCap') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('marketCap') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
             <!-- Actions Column -->
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -214,6 +264,16 @@
                   size="small"
                   [showArrow]="true"
                 ></app-trend-indicator>
+              </td>
+
+              <!-- T153: Volume 24h -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm text-gray-900">{{ formatLargeNumber(holding.volume24h) }}</div>
+              </td>
+
+              <!-- T153: Market Cap -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm text-gray-900">{{ formatLargeNumber(holding.marketCap) }}</div>
               </td>
 
               <!-- Actions -->

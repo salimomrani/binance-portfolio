@@ -99,6 +99,8 @@ export class HoldingsService {
           ? currentValue.dividedBy(totalValue).times(100).toDecimalPlaces(2).toNumber()
           : 0;
 
+        const priceData = prices.get(holding.symbol);
+
         return {
           id: holding.id,
           symbol: holding.symbol,
@@ -111,7 +113,9 @@ export class HoldingsService {
           gainLoss: gainLoss.amount.toNumber(),
           gainLossPercentage: gainLoss.percentage.toNumber(),
           allocationPercentage,
-          priceChange24h: prices.get(holding.symbol)?.change24h || 0,
+          priceChange24h: priceData?.change24h || 0,
+          volume24h: priceData?.volume24h || 0,
+          marketCap: priceData?.marketCap || 0,
           notes: holding.notes,
           lastUpdated: new Date(),
         };
@@ -235,6 +239,8 @@ export class HoldingsService {
         gainLossPercentage: gainLoss.percentage.toNumber(),
         allocationPercentage: 0, // Will be calculated in context of full portfolio
         priceChange24h: priceData.change24h,
+        volume24h: priceData.volume24h,
+        marketCap: priceData.marketCap,
         notes: holding.notes,
         lastUpdated: new Date(),
       };

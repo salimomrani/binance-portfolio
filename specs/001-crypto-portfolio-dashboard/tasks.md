@@ -509,7 +509,7 @@
 
 ### Frontend: Enhanced Portfolio Table
 
-- [ ] T153 [US4] Update portfolio-table component to include new columns:
+- [X] T153 [US4] Update portfolio-table component to include new columns:
   - 24h Change % (with trend-indicator)
   - Volume 24h
   - Market Cap
