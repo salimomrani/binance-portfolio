@@ -6,6 +6,7 @@ import Decimal from 'decimal.js';
 import { BinanceAdapter } from '../market-data/binance.adapter';
 import { MarketDataService } from '../market-data/market-data.service';
 import { logger } from '../../shared/services/logger.service';
+import { filterValidSymbols, getSymbolFilterReason } from '../../shared/utils/crypto-symbol.util';
 
 export interface SyncResult {
   portfolioId: string;
@@ -79,12 +80,17 @@ export class BinanceSyncService {
       }
 
       // Get all symbols from balances
-      const symbols = balances.map(b => b.asset);
-      // Note: Could filter out stable coins and non-tradeable assets if needed
+      const allSymbols = balances.map(b => b.asset);
 
-      // Fetch current prices for all symbols
-      logger.info(`Fetching prices for ${symbols.length} symbols`);
-      const prices = await this.marketData.getMultiplePrices(symbols);
+      // Filter out invalid symbols (Binance-specific tokens, stablecoins, etc.)
+      const validSymbols = filterValidSymbols(allSymbols);
+
+      logger.info(`Found ${allSymbols.length} total symbols, ${validSymbols.length} valid for price fetching`);
+
+      // Fetch current prices for valid symbols only
+      const prices = validSymbols.length > 0
+        ? await this.marketData.getMultiplePrices(validSymbols)
+        : new Map();
 
       // Process each balance
       for (const balance of balances) {
@@ -97,6 +103,14 @@ export class BinanceSyncService {
         }
 
         try {
+          // Check if symbol was filtered out
+          if (!validSymbols.includes(symbol)) {
+            const reason = getSymbolFilterReason(symbol);
+            logger.info(`Skipping ${symbol} (${totalQuantity}): ${reason}`);
+            errors.push(`${symbol}: ${reason}`);
+            continue;
+          }
+
           // Get current price
           const priceData = prices.get(symbol);
           if (!priceData) {
@@ -153,7 +167,7 @@ export class BinanceSyncService {
         }
       }
 
-      // Delete holdings that no longer exist in Binance (optional)
+      // Delete holdings that no longer exist in Binance
       // This will remove holdings that were sold or transferred out
       const currentSymbols = balances.map(b => b.asset);
       const holdingsToDelete = portfolio.holdings.filter((h: { symbol: string }) => !currentSymbols.includes(h.symbol));
