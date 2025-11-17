@@ -1,2 +1,29 @@
 
-<router-outlet />
+<div class="min-h-screen bg-gray-50">
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <a routerLink="/portfolio" class="flex items-center space-x-2 text-xl font-semibold text-primary">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">CP</span>
+          <span>{{ title }}</span>
+        </a>
+
+        <div class="flex flex-wrap items-center gap-1 justify-end">
+          <a
+            *ngFor="let item of navItems"
+            [routerLink]="item.path"
+            routerLinkActive="bg-primary text-white shadow-sm"
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-neutral transition hover:bg-primary/10 hover:text-primary"
+          >
+            {{ item.label }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <router-outlet />
+  </main>
+</div>
