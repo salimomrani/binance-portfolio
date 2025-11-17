@@ -27,6 +27,9 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   selectedTimeframe = signal<Timeframe>('7d');
 
+  // Available timeframes for the chart
+  timeframes: Timeframe[] = ['24h', '7d', '30d', '1y'];
+
   // Computed values
   symbol = computed(() => this.cryptoData()?.symbol || '');
   name = computed(() => this.cryptoData()?.name || '');
