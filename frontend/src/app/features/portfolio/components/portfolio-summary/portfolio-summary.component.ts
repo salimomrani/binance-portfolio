@@ -1,13 +1,14 @@
-// T085-T086: Portfolio summary component (signal-based inputs)
+// T085-T086, T111: Portfolio summary component with gain/loss badge
 
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Portfolio } from '../../../../shared/models/portfolio.model';
+import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-badge/gain-loss-badge.component';
 
 @Component({
   selector: 'app-portfolio-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GainLossBadgeComponent],
   templateUrl: './portfolio-summary.component.html',
   styleUrl: './portfolio-summary.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

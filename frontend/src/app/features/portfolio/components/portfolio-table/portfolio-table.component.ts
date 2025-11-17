@@ -1,8 +1,9 @@
-// T082-T084: Portfolio table component with sortable columns (signal-based inputs)
+// T082-T084, T110: Portfolio table component with sortable columns and gain/loss badge
 
 import { Component, input, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Holding } from '../../../../shared/models/portfolio.model';
+import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-badge/gain-loss-badge.component';
 
 type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage';
 type SortOrder = 'asc' | 'desc';
@@ -10,7 +11,7 @@ type SortOrder = 'asc' | 'desc';
 @Component({
   selector: 'app-portfolio-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GainLossBadgeComponent],
   templateUrl: './portfolio-table.component.html',
   styleUrl: './portfolio-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

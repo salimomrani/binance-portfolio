@@ -309,40 +309,40 @@
 
 ### Frontend: Transaction Models
 
-- [ ] T102 [P] [US2] Add Transaction interfaces to frontend/src/app/shared/models/holding.model.ts
-- [ ] T103 [P] [US2] Update HoldingDetails model to include gainLoss, gainLossPercentage fields
+- [X] T102 [P] [US2] Add Transaction interfaces to frontend/src/app/shared/models/holding.model.ts
+- [X] T103 [P] [US2] Update HoldingDetails model to include gainLoss, gainLossPercentage fields
 
 ### Frontend: Holdings Store Enhancement
 
-- [ ] T104 [US2] Create frontend/src/app/features/holdings/store/holdings.state.ts
-- [ ] T105 [P] [US2] Create holdings actions in frontend/src/app/features/holdings/store/holdings.actions.ts
-- [ ] T106 [P] [US2] Create holdings reducer in frontend/src/app/features/holdings/store/holdings.reducer.ts
-- [ ] T107 [US2] Create holdings effects in frontend/src/app/features/holdings/store/holdings.effects.ts
-- [ ] T108 [P] [US2] Create holdings selectors in frontend/src/app/features/holdings/store/holdings.selectors.ts
+- [X] T104 [US2] Create frontend/src/app/features/holdings/store/holdings.state.ts
+- [X] T105 [P] [US2] Create holdings actions in frontend/src/app/features/holdings/store/holdings.actions.ts
+- [X] T106 [P] [US2] Create holdings reducer in frontend/src/app/features/holdings/store/holdings.reducer.ts
+- [X] T107 [US2] Create holdings effects in frontend/src/app/features/holdings/store/holdings.effects.ts
+- [X] T108 [P] [US2] Create holdings selectors in frontend/src/app/features/holdings/store/holdings.selectors.ts
 
 ### Frontend: Gain/Loss Display Component
 
-- [ ] T109 [US2] Create frontend/src/app/shared/components/gain-loss-badge/ component:
+- [X] T109 [US2] Create frontend/src/app/shared/components/gain-loss-badge/ component:
   - Display gain/loss value with $ formatting
   - Show percentage in parentheses
   - Apply green color for gains (text-profit)
   - Apply red color for losses (text-loss)
   - Add up/down arrow icons
-- [ ] T110 [US2] Integrate gain-loss-badge into portfolio-table for each holding
-- [ ] T111 [US2] Add total portfolio gain/loss to portfolio-summary component
+- [X] T110 [US2] Integrate gain-loss-badge into portfolio-table for each holding
+- [X] T111 [US2] Add total portfolio gain/loss to portfolio-summary component
 
 ### Frontend: Holdings Detail Component
 
-- [ ] T112 [US2] Create frontend/src/app/features/holdings/components/holding-detail/ component:
+- [X] T112 [US2] Create frontend/src/app/features/holdings/components/holding-detail/ component:
   - Display holding overview (symbol, quantity, average cost)
   - Show current value and gain/loss prominently
   - Include transaction history table
   - Add button to add new transaction
-- [ ] T113 [US2] Add route /portfolio/:portfolioId/holding/:holdingId to holdings.routes.ts
+- [X] T113 [US2] Add route /portfolio/:portfolioId/holding/:holdingId to holdings.routes.ts
 
 ### Frontend: Add Transaction Dialog
 
-- [ ] T114 [US2] Create frontend/src/app/features/holdings/components/add-transaction-dialog/ component:
+- [X] T114 [US2] Create frontend/src/app/features/holdings/components/add-transaction-dialog/ component:
   - Form fields: type (BUY/SELL), quantity, price per unit, fee, date, notes
   - Validation for SELL (quantity ≤ current holding)
   - Auto-calculate total cost
@@ -350,7 +350,7 @@
 
 ### Frontend: Portfolio Statistics Display
 
-- [ ] T115 [US2] Create frontend/src/app/features/portfolio/components/portfolio-stats/ component:
+- [X] T115 [US2] Create frontend/src/app/features/portfolio/components/portfolio-stats/ component:
   - Cards showing best/worst performers
   - Total gain/loss with visual prominence
   - Largest holding allocation

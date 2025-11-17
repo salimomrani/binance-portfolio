@@ -162,25 +162,24 @@
                 <div class="text-xs text-gray-500">{{ formatCurrency(holding.currentPrice) }}/unit</div>
               </td>
 
-              <!-- Gain/Loss $ -->
+              <!-- Gain/Loss $ - T110: Integrated gain-loss-badge -->
               <td class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="text-sm font-medium" [ngClass]="getGainLossClass(holding.gainLoss)">
-                  {{ formatCurrency(holding.gainLoss) }}
-                </div>
+                <app-gain-loss-badge
+                  [value]="holding.gainLoss"
+                  [percentage]="holding.gainLossPercentage"
+                  [showPercentage]="false"
+                  size="small"
+                ></app-gain-loss-badge>
               </td>
 
-              <!-- Gain/Loss % -->
+              <!-- Gain/Loss % - T110: Integrated gain-loss-badge -->
               <td class="px-6 py-4 whitespace-nowrap text-right">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  [ngClass]="{
-                    'bg-green-100 text-green-800': holding.gainLoss > 0,
-                    'bg-red-100 text-red-800': holding.gainLoss < 0,
-                    'bg-gray-100 text-gray-800': holding.gainLoss === 0
-                  }"
-                >
-                  {{ formatPercentage(holding.gainLossPercentage) }}
-                </span>
+                <app-gain-loss-badge
+                  [value]="holding.gainLoss"
+                  [percentage]="holding.gainLossPercentage"
+                  [showPercentage]="true"
+                  size="small"
+                ></app-gain-loss-badge>
               </td>
 
               <!-- Actions -->

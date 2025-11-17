@@ -1,0 +1,103 @@
+<!-- T115: Portfolio Statistics Template -->
+
+@if (statistics()) {
+  <div class="portfolio-stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <!-- Best Performer Card -->
+    @if (statistics()!.bestPerformer) {
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Best Performer</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.bestPerformer.symbol }}</p>
+            <p class="mt-2 text-lg font-semibold text-green-600">
+              {{ formatPercentage(statistics()!.bestPerformer.gainLossPercentage) }}
+            </p>
+          </div>
+          <div class="ml-4">
+            <div class="p-3 bg-green-100 rounded-full">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Worst Performer Card -->
+    @if (statistics()!.worstPerformer) {
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Worst Performer</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.worstPerformer.symbol }}</p>
+            <p class="mt-2 text-lg font-semibold text-red-600">
+              {{ formatPercentage(statistics()!.worstPerformer.gainLossPercentage) }}
+            </p>
+          </div>
+          <div class="ml-4">
+            <div class="p-3 bg-red-100 rounded-full">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Largest Holding Card -->
+    @if (statistics()!.largestHolding) {
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Largest Holding</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.largestHolding.symbol }}</p>
+            <p class="mt-2 text-lg font-semibold text-blue-600">
+              {{ formatPercentage(statistics()!.largestHolding.percentage) }} of portfolio
+            </p>
+          </div>
+          <div class="ml-4">
+            <div class="p-3 bg-blue-100 rounded-full">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Total Gain/Loss Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Gain/Loss</p>
+          <div class="mt-2">
+            <app-gain-loss-badge
+              [value]="statistics()!.totalGainLoss"
+              [percentage]="statistics()!.totalGainLossPercentage"
+              [showPercentage]="true"
+              size="medium"
+            ></app-gain-loss-badge>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Value Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
+          <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatCurrency(statistics()!.totalValue) }}</p>
+          <p class="mt-1 text-sm text-gray-500">Cost basis: {{ formatCurrency(statistics()!.totalCostBasis) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <p class="text-gray-500 text-center">No statistics available</p>
+  </div>
+}

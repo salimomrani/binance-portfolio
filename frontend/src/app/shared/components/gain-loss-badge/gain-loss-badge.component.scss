@@ -1,0 +1,44 @@
+// T109: Gain/Loss Badge Styles
+
+:host {
+  display: inline-block;
+}
+
+.arrow-icon {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.percentage {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+// Color classes (defined in TailwindCSS but added here for specificity)
+.text-profit {
+  color: #10b981; // green-500
+}
+
+.text-loss {
+  color: #ef4444; // red-500
+}
+
+.text-neutral {
+  color: #6b7280; // gray-500
+}
+
+.bg-profit-light {
+  background-color: #d1fae5; // green-100
+}
+
+.bg-loss-light {
+  background-color: #fee2e2; // red-100
+}
+
+.bg-neutral-light {
+  background-color: #f3f4f6; // gray-100
+}
