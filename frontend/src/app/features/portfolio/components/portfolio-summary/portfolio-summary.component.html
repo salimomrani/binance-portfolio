@@ -1,14 +1,14 @@
 <!-- T085-T086: Portfolio summary template -->
 
-@if (portfolio) {
+@if (portfolio()) {
   <div class="portfolio-summary grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <!-- Total Value Card -->
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
-          <p class="mt-2 text-3xl font-bold text-gray-900">{{ formatCurrency(portfolio.totalValue) }}</p>
-          <p class="mt-2 text-sm text-gray-500">{{ portfolio.holdingsCount }} holding{{ portfolio.holdingsCount !== 1 ? 's' : '' }}</p>
+          <p class="mt-2 text-3xl font-bold text-gray-900">{{ formatCurrency(portfolio()!.totalValue) }}</p>
+          <p class="mt-2 text-sm text-gray-500">{{ portfolio()!.holdingsCount }} holding{{ portfolio()!.holdingsCount !== 1 ? 's' : '' }}</p>
         </div>
         <div class="ml-4">
           <div class="p-3 bg-blue-100 rounded-full">
@@ -26,10 +26,10 @@
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Gain/Loss</p>
           <p class="mt-2 text-3xl font-bold" [ngClass]="getGainLossClass()">
-            {{ formatCurrency(portfolio.totalGainLoss) }}
+            {{ formatCurrency(portfolio()!.totalGainLoss) }}
           </p>
           <p class="mt-2 text-sm font-medium" [ngClass]="getGainLossClass()">
-            {{ formatPercentage(portfolio.totalGainLossPercentage) }}
+            {{ formatPercentage(portfolio()!.totalGainLossPercentage) }}
           </p>
         </div>
         <div class="ml-4">
@@ -62,8 +62,8 @@
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Last Updated</p>
           <p class="mt-2 text-lg font-medium text-gray-900">{{ getRelativeTime() }}</p>
-          @if (lastUpdated) {
-            <p class="mt-2 text-sm text-gray-500">{{ lastUpdated | date:'short' }}</p>
+          @if (lastUpdated()) {
+            <p class="mt-2 text-sm text-gray-500">{{ lastUpdated() | date:'short' }}</p>
           }
         </div>
         <div class="ml-4">
