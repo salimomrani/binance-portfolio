@@ -526,7 +526,7 @@
 
 ### Frontend: Real-time Price Display
 
-- [ ] T157 [US4] Add animated price change indicators:
+- [X] T157 [US4] Add animated price change indicators:
   - Green flash when price increases
   - Red flash when price decreases
   - Use Angular animations or TailwindCSS transitions
@@ -534,9 +534,9 @@
 
 ### Frontend: Component Tests
 
-- [ ] T159 [P] [US4] Write test for trend-indicator.component.spec.ts verifying color coding
-- [ ] T160 [P] [US4] Write test for crypto-detail.component.spec.ts verifying data display
-- [ ] T161 [P] [US4] Write test for price-update.service.spec.ts verifying polling logic
+- [X] T159 [P] [US4] Write test for trend-indicator.component.spec.ts verifying color coding
+- [X] T160 [P] [US4] Write test for crypto-detail.component.spec.ts verifying data display
+- [X] T161 [P] [US4] Write test for price-update.service.spec.ts verifying polling logic
 
 **Checkpoint**: User Story 4 complete - Users can monitor cryptocurrency trends
 

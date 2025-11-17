@@ -52,3 +52,36 @@ body {
 .table tr:hover {
   @apply bg-gray-50;
 }
+
+/* T157: Price flash animations */
+@keyframes flash-green {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.3); /* green-500 with opacity */
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-red {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.3); /* red-500 with opacity */
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.price-flash-green {
+  animation: flash-green 1s ease-in-out;
+}
+
+.price-flash-red {
+  animation: flash-red 1s ease-in-out;
+}
