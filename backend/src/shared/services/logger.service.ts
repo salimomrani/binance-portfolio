@@ -9,6 +9,20 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
+// Helper function to safely stringify objects with circular references
+function safeStringify(obj: unknown, indent = 2): string {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+      seen.add(value);
+    }
+    return value;
+  }, indent);
+}
+
 // Winston logger configuration
 const loggerInstance = winston.createLogger({
   level: env.logging.level,
@@ -48,7 +62,7 @@ if (env.node.isDevelopment) {
         winston.format.colorize(),
         winston.format.simple(),
         winston.format.printf(({ level, message, timestamp, ...meta }) => {
-          const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+          const metaStr = Object.keys(meta).length ? safeStringify(meta, 2) : '';
           return `${timestamp} [${level}]: ${message} ${metaStr}`;
         })
       ),

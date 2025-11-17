@@ -20,6 +20,27 @@ export class CoinGeckoAdapter implements MarketDataAdapter {
     LINK: 'chainlink',
     UNI: 'uniswap',
     ATOM: 'cosmos',
+    // Stablecoins
+    USDC: 'usd-coin',
+    USDT: 'tether',
+    BUSD: 'binance-usd',
+    DAI: 'dai',
+    // Major cryptocurrencies
+    BNB: 'binancecoin',
+    XRP: 'ripple',
+    DOGE: 'dogecoin',
+    LTC: 'litecoin',
+    TRX: 'tron',
+    ETC: 'ethereum-classic',
+    XLM: 'stellar',
+    ALGO: 'algorand',
+    VET: 'vechain',
+    FIL: 'filecoin',
+    AAVE: 'aave',
+    SAND: 'the-sandbox',
+    MANA: 'decentraland',
+    AXS: 'axie-infinity',
+    SHIB: 'shiba-inu',
   };
 
   constructor(config: AdapterConfig) {
