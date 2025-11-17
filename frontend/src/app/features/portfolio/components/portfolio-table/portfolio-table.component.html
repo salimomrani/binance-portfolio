@@ -1,0 +1,202 @@
+<!-- T082-T084: Portfolio table template with sortable columns -->
+
+<div class="portfolio-table bg-white rounded-lg shadow overflow-hidden">
+  @if (!isEmpty()) {
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <!-- Symbol Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('symbol')"
+            >
+              <div class="flex items-center gap-2">
+                <span>Cryptocurrency</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('symbol')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('symbol') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('symbol') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- Quantity Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('quantity')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Quantity</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('quantity')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('quantity') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('quantity') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- Current Value Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('currentValue')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Current Value</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('currentValue')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('currentValue') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('currentValue') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- Gain/Loss Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('gainLoss')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Gain/Loss ($)</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('gainLoss')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('gainLoss') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('gainLoss') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- Gain/Loss Percentage Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('gainLossPercentage')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>Gain/Loss (%)</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('gainLossPercentage')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('gainLossPercentage') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('gainLossPercentage') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
+            <!-- Actions Column -->
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (holding of sortedHoldings(); track holding.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <!-- Symbol & Name -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">{{ holding.symbol }}</div>
+                    <div class="text-sm text-gray-500">{{ holding.name }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Quantity -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm text-gray-900">{{ formatQuantity(holding.quantity) }}</div>
+                <div class="text-xs text-gray-500">{{ formatCurrency(holding.averageCost) }} avg</div>
+              </td>
+
+              <!-- Current Value -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm font-medium text-gray-900">{{ formatCurrency(holding.currentValue) }}</div>
+                <div class="text-xs text-gray-500">{{ formatCurrency(holding.currentPrice) }}/unit</div>
+              </td>
+
+              <!-- Gain/Loss $ -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm font-medium" [ngClass]="getGainLossClass(holding.gainLoss)">
+                  {{ formatCurrency(holding.gainLoss) }}
+                </div>
+              </td>
+
+              <!-- Gain/Loss % -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': holding.gainLoss > 0,
+                    'bg-red-100 text-red-800': holding.gainLoss < 0,
+                    'bg-gray-100 text-gray-800': holding.gainLoss === 0
+                  }"
+                >
+                  {{ formatPercentage(holding.gainLossPercentage) }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                <button class="text-gray-600 hover:text-gray-900">Edit</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <!-- Empty state -->
+    <div class="text-center py-8 px-4">
+      <p class="text-gray-500 text-sm">No holdings to display</p>
+    </div>
+  }
+</div>
