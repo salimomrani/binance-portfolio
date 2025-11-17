@@ -3,6 +3,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { CryptoMarketData, CryptoPrice } from '../../../shared/models/crypto-market-data.model';
 
@@ -29,7 +30,9 @@ export class MarketDataApiService {
   }
 
   getMultiplePrices(symbols: string[]): Observable<CryptoPrice[]> {
-    return this.api.get<CryptoPrice[]>('/market/prices', { symbols: symbols.join(',') });
+    return this.api
+      .get<Record<string, CryptoPrice>>('/market/prices', { symbols: symbols.join(',') })
+      .pipe(map(pricesMap => Object.values(pricesMap)));
   }
 
   getAdapterStatus(): Observable<{
