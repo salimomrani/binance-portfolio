@@ -240,7 +240,7 @@
 
 ### Frontend: Add Holding Dialog Component
 
-- [ ] T087 [US1] Create frontend/src/app/features/holdings/components/add-holding-dialog/ component with:
+- [X] T087 [US1] Create frontend/src/app/features/holdings/components/add-holding-dialog/ component with:
   - Form with fields: symbol, name, quantity, average cost, notes
   - Zod validation matching backend schema
   - Submit handler dispatching add holding action

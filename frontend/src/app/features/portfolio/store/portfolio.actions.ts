@@ -1,7 +1,7 @@
 // T074: Portfolio actions
 
 import { createAction, props } from '@ngrx/store';
-import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest } from '../../../shared/models/portfolio.model';
+import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest, Holding, AddHoldingRequest, UpdateHoldingRequest } from '../../../shared/models/portfolio.model';
 
 // Load portfolios
 export const loadPortfolios = createAction('[Portfolio] Load Portfolios');
@@ -93,3 +93,51 @@ export const updatePrices = createAction(
 
 // Clear error
 export const clearError = createAction('[Portfolio] Clear Error');
+
+// Add holding
+export const addHolding = createAction(
+  '[Portfolio] Add Holding',
+  props<{ portfolioId: string; request: AddHoldingRequest }>()
+);
+
+export const addHoldingSuccess = createAction(
+  '[Portfolio] Add Holding Success',
+  props<{ holding: Holding }>()
+);
+
+export const addHoldingFailure = createAction(
+  '[Portfolio] Add Holding Failure',
+  props<{ error: string }>()
+);
+
+// Update holding
+export const updateHolding = createAction(
+  '[Portfolio] Update Holding',
+  props<{ portfolioId: string; holdingId: string; request: UpdateHoldingRequest }>()
+);
+
+export const updateHoldingSuccess = createAction(
+  '[Portfolio] Update Holding Success',
+  props<{ holding: Holding }>()
+);
+
+export const updateHoldingFailure = createAction(
+  '[Portfolio] Update Holding Failure',
+  props<{ error: string }>()
+);
+
+// Delete holding
+export const deleteHolding = createAction(
+  '[Portfolio] Delete Holding',
+  props<{ portfolioId: string; holdingId: string }>()
+);
+
+export const deleteHoldingSuccess = createAction(
+  '[Portfolio] Delete Holding Success',
+  props<{ portfolioId: string; holdingId: string }>()
+);
+
+export const deleteHoldingFailure = createAction(
+  '[Portfolio] Delete Holding Failure',
+  props<{ error: string }>()
+);

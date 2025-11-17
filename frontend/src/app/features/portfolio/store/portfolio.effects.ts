@@ -160,4 +160,99 @@ export class PortfolioEffects {
       )
     )
   );
+
+  /**
+   * Effect: Add holding
+   */
+  addHolding$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PortfolioActions.addHolding),
+      switchMap(({ portfolioId, request }) =>
+        this.portfolioApi.addHolding(portfolioId, request).pipe(
+          map(holding =>
+            PortfolioActions.addHoldingSuccess({ holding })
+          ),
+          catchError(error =>
+            of(
+              PortfolioActions.addHoldingFailure({
+                error: error.message || 'Failed to add holding',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  /**
+   * Effect: Reload portfolio after adding holding
+   */
+  addHoldingSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PortfolioActions.addHoldingSuccess),
+      switchMap(() => {
+        // Get the current selected portfolio ID from the store
+        // For now, we'll trigger a reload of all portfolios
+        return of(PortfolioActions.loadPortfolios());
+      })
+    )
+  );
+
+  /**
+   * Effect: Update holding
+   */
+  updateHolding$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PortfolioActions.updateHolding),
+      switchMap(({ portfolioId, holdingId, request }) =>
+        this.portfolioApi.updateHolding(portfolioId, holdingId, request).pipe(
+          map(holding =>
+            PortfolioActions.updateHoldingSuccess({ holding })
+          ),
+          catchError(error =>
+            of(
+              PortfolioActions.updateHoldingFailure({
+                error: error.message || 'Failed to update holding',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  /**
+   * Effect: Delete holding
+   */
+  deleteHolding$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PortfolioActions.deleteHolding),
+      switchMap(({ portfolioId, holdingId }) =>
+        this.portfolioApi.deleteHolding(portfolioId, holdingId).pipe(
+          map(() =>
+            PortfolioActions.deleteHoldingSuccess({ portfolioId, holdingId })
+          ),
+          catchError(error =>
+            of(
+              PortfolioActions.deleteHoldingFailure({
+                error: error.message || 'Failed to delete holding',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  /**
+   * Effect: Reload portfolio after deleting holding
+   */
+  deleteHoldingSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PortfolioActions.deleteHoldingSuccess),
+      map(({ portfolioId }) =>
+        PortfolioActions.loadPortfolioDetails({ portfolioId })
+      )
+    )
+  );
 }

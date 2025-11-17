@@ -3,7 +3,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest } from '../../../shared/models/portfolio.model';
+import { Portfolio, CreatePortfolioRequest, UpdatePortfolioRequest, AddHoldingRequest, UpdateHoldingRequest } from '../../../shared/models/portfolio.model';
 import * as PortfolioActions from '../store/portfolio.actions';
 import * as PortfolioSelectors from '../store/portfolio.selectors';
 
@@ -126,5 +126,26 @@ export class PortfolioFacadeService {
    */
   getPortfolioById(portfolioId: string): Observable<Portfolio | undefined> {
     return this.store.select(PortfolioSelectors.selectPortfolioById(portfolioId));
+  }
+
+  /**
+   * Add a holding to a portfolio
+   */
+  addHolding(portfolioId: string, request: AddHoldingRequest): void {
+    this.store.dispatch(PortfolioActions.addHolding({ portfolioId, request }));
+  }
+
+  /**
+   * Update a holding
+   */
+  updateHolding(portfolioId: string, holdingId: string, request: UpdateHoldingRequest): void {
+    this.store.dispatch(PortfolioActions.updateHolding({ portfolioId, holdingId, request }));
+  }
+
+  /**
+   * Delete a holding
+   */
+  deleteHolding(portfolioId: string, holdingId: string): void {
+    this.store.dispatch(PortfolioActions.deleteHolding({ portfolioId, holdingId }));
   }
 }
