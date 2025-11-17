@@ -1,0 +1,67 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+  @apply bg-gray-50 text-gray-900;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Profit/Loss text colors */
+.text-profit {
+  @apply text-profit;
+}
+
+.text-loss {
+  @apply text-loss;
+}
+
+.text-neutral {
+  @apply text-neutral;
+}
+
+/* Card component styles */
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary text-white hover:bg-primary-dark;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.btn-danger {
+  @apply bg-loss text-white hover:bg-loss-dark;
+}
+
+/* Input styles */
+.input {
+  @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+/* Table styles */
+.table {
+  @apply w-full border-collapse;
+}
+
+.table th {
+  @apply bg-gray-100 font-semibold text-left px-4 py-3 border-b border-gray-200;
+}
+
+.table td {
+  @apply px-4 py-3 border-b border-gray-200;
+}
+
+.table tr:hover {
+  @apply bg-gray-50;
+}
