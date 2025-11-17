@@ -12,6 +12,7 @@ import { PortfolioService } from './modules/portfolio/portfolio.service';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
 import { HoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
+import { TransactionService } from './modules/holdings/transaction.service';
 
 /**
  * Create and configure Express application
@@ -91,6 +92,7 @@ function initializePortfolioController(prisma: PrismaClient, cacheService: Cache
 
 /**
  * Initialize holdings controller with dependencies
+ * T096: Added TransactionService initialization
  */
 function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheService) {
   const calculations = new CalculationsService();
@@ -104,6 +106,7 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
     cacheService
   );
   const holdingsService = new HoldingsService(prisma, marketData, calculations);
+  const transactionService = new TransactionService(prisma);
 
-  return new HoldingsController(holdingsService);
+  return new HoldingsController(holdingsService, transactionService);
 }

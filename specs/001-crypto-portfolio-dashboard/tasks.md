@@ -187,11 +187,11 @@
 
 ### Backend: Integration Tests
 
-- [ ] T069 [P] [US1] Write integration test in backend/tests/integration/portfolio.test.ts:
+- [X] T069 [P] [US1] Write integration test in backend/tests/integration/portfolio.test.ts:
   - Test GET /api/portfolios returns user portfolios
   - Test POST /api/portfolios creates new portfolio
   - Test GET /api/portfolios/:id returns portfolio with holdings
-- [ ] T070 [P] [US1] Write integration test in backend/tests/integration/holdings.test.ts:
+- [X] T070 [P] [US1] Write integration test in backend/tests/integration/holdings.test.ts:
   - Test GET /holdings returns holdings with current prices
   - Test POST /holdings adds new holding
   - Test holding values calculated correctly
@@ -254,9 +254,9 @@
 
 ### Frontend: Component Tests
 
-- [ ] T090 [P] [US1] Write component test in portfolio-dashboard.component.spec.ts verifying portfolio display
-- [ ] T091 [P] [US1] Write component test in portfolio-table.component.spec.ts verifying table rendering and sorting
-- [ ] T092 [P] [US1] Write component test in add-holding-dialog.component.spec.ts verifying form validation
+- [X] T090 [P] [US1] Write component test in portfolio-dashboard.component.spec.ts verifying portfolio display
+- [X] T091 [P] [US1] Write component test in portfolio-table.component.spec.ts verifying table rendering and sorting
+- [X] T092 [P] [US1] Write component test in add-holding-dialog.component.spec.ts verifying form validation
 
 **Checkpoint**: User Story 1 complete - Users can view portfolio holdings in table format
 
@@ -270,28 +270,28 @@
 
 ### Backend: Transaction Model & Service
 
-- [ ] T093 [P] [US2] Verify Transaction model in backend/src/prisma/schema.prisma
-- [ ] T094 [P] [US2] Create backend/src/modules/holdings/transaction.validation.ts with AddTransactionSchema
-- [ ] T095 [US2] Create backend/src/modules/holdings/transaction.service.ts with methods:
+- [X] T093 [P] [US2] Verify Transaction model in backend/src/prisma/schema.prisma
+- [X] T094 [P] [US2] Create backend/src/modules/holdings/transaction.validation.ts with AddTransactionSchema
+- [X] T095 [US2] Create backend/src/modules/holdings/transaction.service.ts with methods:
   - addTransaction(holdingId, data): Promise<Transaction>
   - getTransactions(holdingId, pagination): Promise<PaginatedResponse<Transaction>>
   - updateHoldingAverageCost(holdingId): Promise<void> (recalculate on new transaction)
-- [ ] T096 [US2] Add transaction endpoints to backend/src/modules/holdings/holdings.controller.ts:
+- [X] T096 [US2] Add transaction endpoints to backend/src/modules/holdings/holdings.controller.ts:
   - GET /api/holdings/:holdingId/transactions
   - POST /api/holdings/:holdingId/transactions
 
 ### Backend: Gain/Loss Calculation Enhancement
 
-- [ ] T097 [US2] Enhance backend/src/shared/services/calculations.service.ts:
+- [X] T097 [US2] Enhance backend/src/shared/services/calculations.service.ts:
   - Add calculatePortfolioGainLoss(holdings, prices): {total, percentage}
   - Add formatGainLoss(value): {formatted, color, arrow}
-- [ ] T098 [US2] Update backend/src/modules/portfolio/portfolio.service.ts:
+- [X] T098 [US2] Update backend/src/modules/portfolio/portfolio.service.ts:
   - Include gain/loss in getPortfolioById response
   - Add getPortfolioStatistics endpoint for best/worst performers
 
 ### Backend: Portfolio Statistics Endpoint
 
-- [ ] T099 [US2] Add GET /api/portfolios/:id/statistics endpoint in portfolio.controller.ts returning:
+- [X] T099 [US2] Add GET /api/portfolios/:id/statistics endpoint in portfolio.controller.ts returning:
   - Total gain/loss ($ and %)
   - Best performer (symbol, %)
   - Worst performer (symbol, %)
@@ -299,11 +299,11 @@
 
 ### Backend: Integration Tests
 
-- [ ] T100 [P] [US2] Write test in backend/tests/unit/calculations.service.test.ts:
+- [X] T100 [P] [US2] Write test in backend/tests/unit/calculations.service.test.ts:
   - Test calculateAverageCost with multiple transactions
   - Test calculateGainLoss with profit and loss scenarios
   - Test edge cases (zero cost basis, very small values)
-- [ ] T101 [P] [US2] Write test in backend/tests/integration/transactions.test.ts:
+- [X] T101 [P] [US2] Write test in backend/tests/integration/transactions.test.ts:
   - Test adding transaction updates average cost
   - Test multiple transactions calculate correct weighted average
 
