@@ -90,29 +90,29 @@
 
 ### Frontend Core Infrastructure
 
-- [ ] T039 Create frontend/src/app/core/services/api.service.ts as HTTP client wrapper with interceptors
-- [ ] T040 [P] Create frontend/src/app/core/services/error.service.ts for global error handling
-- [ ] T041 [P] Create frontend/src/app/core/services/notification.service.ts for toast notifications
-- [ ] T042 [P] Create frontend/src/app/core/interceptors/error.interceptor.ts to catch HTTP errors
-- [ ] T043 [P] Create frontend/src/app/core/interceptors/loading.interceptor.ts to track loading state
-- [ ] T044 Create frontend/src/app/shared/models/api-response.model.ts matching backend types
-- [ ] T045 [P] Create frontend/src/app/shared/components/loading-spinner/ standalone component
-- [ ] T046 [P] Create frontend/src/app/shared/components/error-message/ standalone component
-- [ ] T047 [P] Create frontend/src/app/shared/pipes/currency-format.pipe.ts for USD formatting
-- [ ] T048 [P] Create frontend/src/app/shared/pipes/percentage-format.pipe.ts for gain/loss percentages
-- [ ] T049 Setup Angular routing in frontend/src/app/app.routes.ts with lazy loading for features
+- [X] T039 Create frontend/src/app/core/services/api.service.ts as HTTP client wrapper with interceptors
+- [X] T040 [P] Create frontend/src/app/core/services/error.service.ts for global error handling
+- [X] T041 [P] Create frontend/src/app/core/services/notification.service.ts for toast notifications
+- [X] T042 [P] Create frontend/src/app/core/interceptors/error.interceptor.ts to catch HTTP errors
+- [X] T043 [P] Create frontend/src/app/core/interceptors/loading.interceptor.ts to track loading state
+- [X] T044 Create frontend/src/app/shared/models/api-response.model.ts matching backend types
+- [X] T045 [P] Create frontend/src/app/shared/components/loading-spinner/ standalone component
+- [X] T046 [P] Create frontend/src/app/shared/components/error-message/ standalone component
+- [X] T047 [P] Create frontend/src/app/shared/pipes/currency-format.pipe.ts for USD formatting
+- [X] T048 [P] Create frontend/src/app/shared/pipes/percentage-format.pipe.ts for gain/loss percentages
+- [X] T049 Setup Angular routing in frontend/src/app/app.routes.ts with lazy loading for features
 
 ### Market Data Integration Foundation
 
-- [ ] T050 Create backend/src/modules/market-data/market-data.types.ts with CryptoPrice, PriceHistory interfaces
-- [ ] T051 [P] Create backend/src/modules/market-data/binance.adapter.ts implementing MarketDataAdapter interface
-- [ ] T052 [P] Create backend/src/modules/market-data/coingecko.adapter.ts as fallback adapter
-- [ ] T053 Create backend/src/modules/market-data/market-data.service.ts with adapter pattern and caching (60s TTL)
-- [ ] T054 [P] Create backend/src/modules/market-data/market-data.cache.ts using Redis for price caching
+- [X] T050 Create backend/src/modules/market-data/market-data.types.ts with CryptoPrice, PriceHistory interfaces
+- [X] T051 [P] Create backend/src/modules/market-data/binance.adapter.ts implementing MarketDataAdapter interface
+- [X] T052 [P] Create backend/src/modules/market-data/coingecko.adapter.ts as fallback adapter
+- [X] T053 Create backend/src/modules/market-data/market-data.service.ts with adapter pattern and caching (60s TTL)
+- [X] T054 [P] Create backend/src/modules/market-data/market-data.cache.ts using Redis for price caching
 
 ### Shared Calculations Service
 
-- [ ] T055 Create backend/src/shared/services/calculations.service.ts with methods:
+- [X] T055 Create backend/src/shared/services/calculations.service.ts with methods:
   - calculateAverageCost(transactions): Decimal
   - calculateGainLoss(quantity, avgCost, currentPrice): {amount, percentage, isProfit}
   - calculateAllocation(holdings, prices): AllocationData[]
@@ -129,24 +129,24 @@
 
 ### Backend: Portfolio & Holdings Models
 
-- [ ] T056 [P] [US1] Create User model verification in backend/src/prisma/schema.prisma (already exists from Phase 2)
-- [ ] T057 [P] [US1] Create Portfolio model verification in backend/src/prisma/schema.prisma
-- [ ] T058 [P] [US1] Create Holding model verification in backend/src/prisma/schema.prisma
-- [ ] T059 [P] [US1] Create Transaction model verification in backend/src/prisma/schema.prisma
+- [X] T056 [P] [US1] Create User model verification in backend/src/prisma/schema.prisma (already exists from Phase 2)
+- [X] T057 [P] [US1] Create Portfolio model verification in backend/src/prisma/schema.prisma
+- [X] T058 [P] [US1] Create Holding model verification in backend/src/prisma/schema.prisma
+- [X] T059 [P] [US1] Create Transaction model verification in backend/src/prisma/schema.prisma
 - [ ] T060 Run migration for User Story 1 models: npx prisma migrate dev --name add-portfolio-holdings
 
 ### Backend: Validation Schemas
 
-- [ ] T061 [P] [US1] Create backend/src/modules/portfolio/portfolio.validation.ts with Zod schemas:
+- [X] T061 [P] [US1] Create backend/src/modules/portfolio/portfolio.validation.ts with Zod schemas:
   - CreatePortfolioSchema
   - UpdatePortfolioSchema
-- [ ] T062 [P] [US1] Create backend/src/modules/holdings/holdings.validation.ts with Zod schemas:
+- [X] T062 [P] [US1] Create backend/src/modules/holdings/holdings.validation.ts with Zod schemas:
   - AddHoldingSchema
   - UpdateHoldingSchema
 
 ### Backend: Portfolio Service
 
-- [ ] T063 [US1] Create backend/src/modules/portfolio/portfolio.service.ts with methods:
+- [X] T063 [US1] Create backend/src/modules/portfolio/portfolio.service.ts with methods:
   - createPortfolio(userId, data): Promise<Portfolio>
   - getPortfolios(userId): Promise<PortfolioSummary[]>
   - getPortfolioById(portfolioId): Promise<PortfolioDetails>
@@ -156,7 +156,7 @@
 
 ### Backend: Holdings Service
 
-- [ ] T064 [US1] Create backend/src/modules/holdings/holdings.service.ts with methods:
+- [X] T064 [US1] Create backend/src/modules/holdings/holdings.service.ts with methods:
   - addHolding(portfolioId, data): Promise<Holding>
   - getHoldings(portfolioId, sortBy, order): Promise<HoldingDetails[]>
   - getHoldingById(holdingId): Promise<HoldingDetails>
@@ -166,14 +166,14 @@
 
 ### Backend: API Controllers
 
-- [ ] T065 [US1] Create backend/src/modules/portfolio/portfolio.controller.ts with endpoints:
+- [X] T065 [US1] Create backend/src/modules/portfolio/portfolio.controller.ts with endpoints:
   - GET /api/portfolios (list user portfolios)
   - POST /api/portfolios (create portfolio)
   - GET /api/portfolios/:id (get portfolio details with holdings)
   - PATCH /api/portfolios/:id (update portfolio)
   - DELETE /api/portfolios/:id (delete portfolio)
 
-- [ ] T066 [US1] Create backend/src/modules/holdings/holdings.controller.ts with endpoints:
+- [X] T066 [US1] Create backend/src/modules/holdings/holdings.controller.ts with endpoints:
   - GET /api/portfolios/:portfolioId/holdings (list holdings with current prices)
   - POST /api/portfolios/:portfolioId/holdings (add holding)
   - GET /api/portfolios/:portfolioId/holdings/:id (get holding details)
@@ -182,8 +182,8 @@
 
 ### Backend: Route Registration
 
-- [ ] T067 [US1] Register portfolio routes in backend/src/app.ts under /api/portfolios
-- [ ] T068 [US1] Register holdings routes in backend/src/app.ts under /api/portfolios/:portfolioId/holdings
+- [X] T067 [US1] Register portfolio routes in backend/src/app.ts under /api/portfolios
+- [X] T068 [US1] Register holdings routes in backend/src/app.ts under /api/portfolios/:portfolioId/holdings
 
 ### Backend: Integration Tests
 
@@ -198,14 +198,14 @@
 
 ### Frontend: Portfolio Models & Types
 
-- [ ] T071 [P] [US1] Create frontend/src/app/shared/models/portfolio.model.ts with Portfolio, Holding interfaces
-- [ ] T072 [P] [US1] Create frontend/src/app/features/portfolio/services/portfolio-api.service.ts for API calls
+- [X] T071 [P] [US1] Create frontend/src/app/shared/models/portfolio.model.ts with Portfolio, Holding interfaces
+- [X] T072 [P] [US1] Create frontend/src/app/features/portfolio/services/portfolio-api.service.ts for API calls
 
 ### Frontend: NgRx Store for Portfolio
 
-- [ ] T073 [US1] Create frontend/src/app/features/portfolio/store/portfolio.state.ts with PortfolioState interface
-- [ ] T074 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.actions.ts with load, create, update actions
-- [ ] T075 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.reducer.ts
+- [X] T073 [US1] Create frontend/src/app/features/portfolio/store/portfolio.state.ts with PortfolioState interface
+- [X] T074 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.actions.ts with load, create, update actions
+- [X] T075 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.reducer.ts
 - [ ] T076 [US1] Create frontend/src/app/features/portfolio/store/portfolio.effects.ts for API integration
 - [ ] T077 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.selectors.ts with memoized selectors
 - [ ] T078 [US1] Create frontend/src/app/features/portfolio/services/portfolio-facade.service.ts to abstract store complexity
