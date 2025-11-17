@@ -98,8 +98,8 @@
       <!-- Timeframe Selector -->
       <div class="flex space-x-2 mb-6">
         <button
-          *ngFor="let timeframe of ['24h', '7d', '30d', '1y']"
-          (click)="selectTimeframe(timeframe as any)"
+          *ngFor="let timeframe of timeframes"
+          (click)="selectTimeframe(timeframe)"
           [class.bg-blue-600]="selectedTimeframe() === timeframe"
           [class.text-white]="selectedTimeframe() === timeframe"
           [class.bg-gray-200]="selectedTimeframe() !== timeframe"

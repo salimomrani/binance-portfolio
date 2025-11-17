@@ -21,9 +21,7 @@ export class MarketDataApiService {
   private readonly api = inject(ApiService);
 
   getHistoricalPrices(symbol: string, timeframe: Timeframe): Observable<PriceHistory[]> {
-    return this.api.get<PriceHistory[]>(`/market/history/${symbol}`, {
-      params: { timeframe },
-    });
+    return this.api.get<PriceHistory[]>(`/market/history/${symbol}`, { timeframe });
   }
 
   getCryptoMarketData(symbol: string): Observable<CryptoMarketData> {
@@ -31,9 +29,7 @@ export class MarketDataApiService {
   }
 
   getMultiplePrices(symbols: string[]): Observable<CryptoPrice[]> {
-    return this.api.get<CryptoPrice[]>('/market/prices', {
-      params: { symbols: symbols.join(',') },
-    });
+    return this.api.get<CryptoPrice[]>('/market/prices', { symbols: symbols.join(',') });
   }
 
   getAdapterStatus(): Observable<{
