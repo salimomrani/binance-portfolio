@@ -9,19 +9,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Profit/Loss text colors */
-.text-profit {
-  @apply text-profit;
-}
-
-.text-loss {
-  @apply text-loss;
-}
-
-.text-neutral {
-  @apply text-neutral;
-}
-
 /* Card component styles */
 .card {
   @apply bg-white rounded-lg shadow-md p-6;

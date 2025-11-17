@@ -6,7 +6,6 @@ import { logger } from '../../shared/services/logger.service';
 
 export class CoinGeckoAdapter implements MarketDataAdapter {
   private readonly client: AxiosInstance;
-  private readonly config: AdapterConfig;
   private readonly BASE_URL = 'https://api.coingecko.com/api/v3';
 
   // Map crypto symbols to CoinGecko IDs
@@ -24,7 +23,6 @@ export class CoinGeckoAdapter implements MarketDataAdapter {
   };
 
   constructor(config: AdapterConfig) {
-    this.config = config;
     this.client = axios.create({
       baseURL: this.BASE_URL,
       timeout: 10000,

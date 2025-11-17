@@ -4,7 +4,6 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { PortfolioService } from './portfolio.service';
 import { CreatePortfolioSchema, UpdatePortfolioSchema } from './portfolio.validation';
 import { validate } from '../../shared/middleware/validator';
-import { logger } from '../../shared/services/logger.service';
 
 export class PortfolioController {
   public router: Router;

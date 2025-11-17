@@ -57,6 +57,13 @@ export function validateParams<T extends ZodSchema>(schema: T) {
 }
 
 /**
+ * Backwards-compatible validator helper (defaults to body validation)
+ */
+export function validate<T extends ZodSchema>(schema: T) {
+  return validateBody(schema);
+}
+
+/**
  * Common validation schemas
  */
 export const commonSchemas = {

@@ -1,7 +1,5 @@
 // Portfolio types and interfaces
 
-import Decimal from 'decimal.js';
-
 export interface PortfolioSummary {
   id: string;
   name: string;

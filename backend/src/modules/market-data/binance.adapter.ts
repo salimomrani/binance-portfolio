@@ -2,21 +2,19 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { MarketDataAdapter, CryptoPrice, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
-import { retry } from '../../shared/utils/retry.util';
 import { logger } from '../../shared/services/logger.service';
 
 export class BinanceAdapter implements MarketDataAdapter {
   private readonly client: AxiosInstance;
-  private readonly config: AdapterConfig;
   private readonly BASE_URL = 'https://api.binance.com/api/v3';
 
   constructor(config: AdapterConfig) {
-    this.config = config;
     this.client = axios.create({
       baseURL: this.BASE_URL,
-      timeout: 10000,
+      timeout: config.retryDelay || 10000,
       headers: {
         'Content-Type': 'application/json',
+        ...(config.binanceApiKey ? { 'X-MBX-APIKEY': config.binanceApiKey } : {}),
       },
     });
   }
