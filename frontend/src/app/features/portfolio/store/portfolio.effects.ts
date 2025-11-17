@@ -1,9 +1,9 @@
 // T076: Portfolio effects for API integration
 
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/store';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { PortfolioApiService } from '../services/portfolio-api.service';
 import * as PortfolioActions from './portfolio.actions';
 
