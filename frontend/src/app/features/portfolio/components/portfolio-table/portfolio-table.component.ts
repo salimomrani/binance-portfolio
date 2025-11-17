@@ -4,14 +4,15 @@ import { Component, input, ChangeDetectionStrategy, signal, computed } from '@an
 import { CommonModule } from '@angular/common';
 import { Holding } from '../../../../shared/models/portfolio.model';
 import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-badge/gain-loss-badge.component';
+import { TrendIndicatorComponent } from '../../../../shared/components/trend-indicator/trend-indicator.component';
 
-type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage';
+type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage' | 'priceChange24h';
 type SortOrder = 'asc' | 'desc';
 
 @Component({
   selector: 'app-portfolio-table',
   standalone: true,
-  imports: [CommonModule, GainLossBadgeComponent],
+  imports: [CommonModule, GainLossBadgeComponent, TrendIndicatorComponent],
   templateUrl: './portfolio-table.component.html',
   styleUrl: './portfolio-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
