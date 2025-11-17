@@ -81,4 +81,19 @@ export class PortfolioApiService {
   deleteHolding(portfolioId: string, holdingId: string): Observable<void> {
     return this.api.delete<void>(`/portfolios/${portfolioId}/holdings/${holdingId}`);
   }
+
+  /**
+   * Sync portfolio from Binance account
+   * Fetches current balances and creates/updates a "Binance Portfolio"
+   */
+  syncFromBinance(): Observable<{
+    portfolioId: string;
+    portfolioName: string;
+    holdingsAdded: number;
+    holdingsUpdated: number;
+    totalHoldings: number;
+    errors: string[];
+  }> {
+    return this.api.post('/portfolios/sync-binance', {});
+  }
 }

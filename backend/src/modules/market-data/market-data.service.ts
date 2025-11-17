@@ -232,4 +232,14 @@ export class MarketDataService {
   async clearCache(): Promise<void> {
     await this.cache.clearAll();
   }
+
+  /**
+   * Get the Binance adapter instance (for authenticated operations like account sync)
+   */
+  getBinanceAdapter(): BinanceAdapter {
+    if (!(this.primaryAdapter instanceof BinanceAdapter)) {
+      throw new Error('Primary adapter is not BinanceAdapter');
+    }
+    return this.primaryAdapter;
+  }
 }

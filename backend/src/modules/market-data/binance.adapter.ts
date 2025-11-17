@@ -2,14 +2,26 @@
 // T143: Enhanced to support full market data with all trend indicators
 
 import axios, { AxiosInstance } from 'axios';
+import crypto from 'crypto';
 import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
+
+export interface BinanceBalance {
+  asset: string;
+  free: string;
+  locked: string;
+}
 
 export class BinanceAdapter implements MarketDataAdapter {
   private readonly client: AxiosInstance;
   private readonly BASE_URL = 'https://api.binance.com/api/v3';
+  private readonly apiKey?: string;
+  private readonly apiSecret?: string;
 
   constructor(config: AdapterConfig) {
+    this.apiKey = config.binanceApiKey;
+    this.apiSecret = config.binanceSecretKey;
+
     this.client = axios.create({
       baseURL: this.BASE_URL,
       timeout: config.retryDelay || 10000,
@@ -221,5 +233,57 @@ export class BinanceAdapter implements MarketDataAdapter {
     };
 
     return names[symbol] || symbol;
+  }
+
+  /**
+   * Create HMAC SHA256 signature for authenticated requests
+   */
+  private createSignature(queryString: string): string {
+    if (!this.apiSecret) {
+      throw new Error('Binance API secret is required for authenticated requests');
+    }
+    return crypto.createHmac('sha256', this.apiSecret).update(queryString).digest('hex');
+  }
+
+  /**
+   * Fetch account balances from Binance
+   * Requires API key and secret to be configured
+   */
+  async getAccountBalances(): Promise<BinanceBalance[]> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        throw new Error('Binance API key and secret are required to fetch account balances');
+      }
+
+      const timestamp = Date.now();
+      const queryString = `timestamp=${timestamp}`;
+      const signature = this.createSignature(queryString);
+
+      const response = await this.client.get('/account', {
+        params: {
+          timestamp,
+          signature,
+        },
+      });
+
+      // Filter out balances with 0 quantity
+      const balances: BinanceBalance[] = response.data.balances.filter(
+        (balance: BinanceBalance) => parseFloat(balance.free) > 0 || parseFloat(balance.locked) > 0
+      );
+
+      logger.info(`Successfully fetched ${balances.length} non-zero balances from Binance`);
+      return balances;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Binance account balances fetch error:', {
+          message: error.message,
+          code: error.response?.data?.code,
+          msg: error.response?.data?.msg,
+        });
+      } else {
+        logger.error('Binance account balances fetch error:', error);
+      }
+      throw error;
+    }
   }
 }

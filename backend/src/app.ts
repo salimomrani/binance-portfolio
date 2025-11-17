@@ -11,6 +11,7 @@ import { MarketDataService } from './modules/market-data/market-data.service';
 import { MarketDataController } from './modules/market-data/market-data.controller';
 import { PortfolioService } from './modules/portfolio/portfolio.service';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
+import { BinanceSyncService } from './modules/portfolio/binance-sync.service';
 import { HoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
 import { TransactionService } from './modules/holdings/transaction.service';
@@ -81,6 +82,8 @@ function initializeServices() {
 function initializeMarketDataController(prisma: PrismaClient, cacheService: CacheService) {
   const marketData = new MarketDataService(
     {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
       cacheTTL: 60,
       retryAttempts: 3,
       retryDelay: 1000,
@@ -99,6 +102,8 @@ function initializePortfolioController(prisma: PrismaClient, cacheService: Cache
   const calculations = new CalculationsService();
   const marketData = new MarketDataService(
     {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
       cacheTTL: 60,
       retryAttempts: 3,
       retryDelay: 1000,
@@ -108,7 +113,11 @@ function initializePortfolioController(prisma: PrismaClient, cacheService: Cache
   );
   const portfolioService = new PortfolioService(prisma, marketData, calculations);
 
-  return new PortfolioController(portfolioService);
+  // Initialize Binance sync service
+  const binanceAdapter = marketData.getBinanceAdapter();
+  const binanceSyncService = new BinanceSyncService(prisma, binanceAdapter, marketData);
+
+  return new PortfolioController(portfolioService, binanceSyncService);
 }
 
 /**
@@ -119,6 +128,8 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
   const calculations = new CalculationsService();
   const marketData = new MarketDataService(
     {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
       cacheTTL: 60,
       retryAttempts: 3,
       retryDelay: 1000,
