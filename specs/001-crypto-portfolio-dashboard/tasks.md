@@ -133,7 +133,7 @@
 - [X] T057 [P] [US1] Create Portfolio model verification in backend/src/prisma/schema.prisma
 - [X] T058 [P] [US1] Create Holding model verification in backend/src/prisma/schema.prisma
 - [X] T059 [P] [US1] Create Transaction model verification in backend/src/prisma/schema.prisma
-- [ ] T060 Run migration for User Story 1 models: npx prisma migrate dev --name add-portfolio-holdings
+- [X] T060 Run migration for User Story 1 models: npx prisma migrate dev --name add-portfolio-holdings
 
 ### Backend: Validation Schemas
 
@@ -206,37 +206,37 @@
 - [X] T073 [US1] Create frontend/src/app/features/portfolio/store/portfolio.state.ts with PortfolioState interface
 - [X] T074 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.actions.ts with load, create, update actions
 - [X] T075 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.reducer.ts
-- [ ] T076 [US1] Create frontend/src/app/features/portfolio/store/portfolio.effects.ts for API integration
-- [ ] T077 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.selectors.ts with memoized selectors
-- [ ] T078 [US1] Create frontend/src/app/features/portfolio/services/portfolio-facade.service.ts to abstract store complexity
+- [X] T076 [US1] Create frontend/src/app/features/portfolio/store/portfolio.effects.ts for API integration
+- [X] T077 [P] [US1] Create frontend/src/app/features/portfolio/store/portfolio.selectors.ts with memoized selectors
+- [X] T078 [US1] Create frontend/src/app/features/portfolio/services/portfolio-facade.service.ts to abstract store complexity
 
 ### Frontend: Portfolio Dashboard Component
 
-- [ ] T079 [US1] Create frontend/src/app/features/portfolio/components/portfolio-dashboard/ component with:
+- [X] T079 [US1] Create frontend/src/app/features/portfolio/components/portfolio-dashboard/ component with:
   - portfolio-dashboard.component.ts (with signals for reactive state)
   - portfolio-dashboard.component.html
   - portfolio-dashboard.component.scss
   - portfolio-dashboard.component.spec.ts
-- [ ] T080 [US1] Implement portfolio selection logic in portfolio-dashboard component
-- [ ] T081 [US1] Add loading and error states handling in portfolio-dashboard component
+- [X] T080 [US1] Implement portfolio selection logic in portfolio-dashboard component
+- [X] T081 [US1] Add loading and error states handling in portfolio-dashboard component
 
 ### Frontend: Portfolio Table Component
 
-- [ ] T082 [US1] Create frontend/src/app/features/portfolio/components/portfolio-table/ component with:
+- [X] T082 [US1] Create frontend/src/app/features/portfolio/components/portfolio-table/ component with:
   - portfolio-table.component.ts (OnPush change detection)
   - portfolio-table.component.html (sortable table with TailwindCSS)
   - portfolio-table.component.scss
   - portfolio-table.component.spec.ts
-- [ ] T083 [US1] Implement column sorting (by symbol, quantity, value) in portfolio-table component
-- [ ] T084 [US1] Add empty state message when no holdings exist
+- [X] T083 [US1] Implement column sorting (by symbol, quantity, value) in portfolio-table component
+- [X] T084 [US1] Add empty state message when no holdings exist
 
 ### Frontend: Portfolio Summary Component
 
-- [ ] T085 [US1] Create frontend/src/app/features/portfolio/components/portfolio-summary/ component showing:
+- [X] T085 [US1] Create frontend/src/app/features/portfolio/components/portfolio-summary/ component showing:
   - Total portfolio value
   - Number of holdings
   - Last updated timestamp
-- [ ] T086 [US1] Style portfolio-summary with TailwindCSS cards and responsive grid
+- [X] T086 [US1] Style portfolio-summary with TailwindCSS cards and responsive grid
 
 ### Frontend: Add Holding Dialog Component
 
@@ -247,10 +247,10 @@
 
 ### Frontend: Routing
 
-- [ ] T088 [US1] Add portfolio routes in frontend/src/app/features/portfolio/portfolio.routes.ts:
+- [X] T088 [US1] Add portfolio routes in frontend/src/app/features/portfolio/portfolio.routes.ts:
   - /portfolio (dashboard)
   - /portfolio/:id (portfolio details)
-- [ ] T089 [US1] Lazy load portfolio feature module in frontend/src/app/app.routes.ts
+- [X] T089 [US1] Lazy load portfolio feature module in frontend/src/app/app.routes.ts
 
 ### Frontend: Component Tests
 

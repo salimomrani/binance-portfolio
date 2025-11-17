@@ -1,0 +1,32 @@
+// T082-T084: Portfolio table styles
+
+.portfolio-table {
+  // Custom colors for profit/loss (via TailwindCSS)
+  .text-profit {
+    @apply text-green-600 dark:text-green-400;
+  }
+
+  .text-loss {
+    @apply text-red-600 dark:text-red-400;
+  }
+
+  // Smooth transitions for interactive elements
+  table {
+    th {
+      user-select: none;
+
+      &:hover {
+        transition: background-color 0.2s ease;
+      }
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease;
+    }
+  }
+
+  // Responsive table scrolling
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
