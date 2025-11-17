@@ -2,13 +2,17 @@
 
 import { Request, Response, NextFunction, Router } from 'express';
 import { PortfolioService } from './portfolio.service';
+import { BinanceSyncService } from './binance-sync.service';
 import { CreatePortfolioSchema, UpdatePortfolioSchema } from './portfolio.validation';
 import { validate } from '../../shared/middleware/validator';
 
 export class PortfolioController {
   public router: Router;
 
-  constructor(private readonly portfolioService: PortfolioService) {
+  constructor(
+    private readonly portfolioService: PortfolioService,
+    private readonly binanceSyncService?: BinanceSyncService
+  ) {
     this.router = Router();
     this.initializeRoutes();
   }
@@ -19,6 +23,9 @@ export class PortfolioController {
 
     // POST /api/portfolios - Create portfolio
     this.router.post('/', validate(CreatePortfolioSchema), this.createPortfolio.bind(this));
+
+    // POST /api/portfolios/sync-binance - Sync portfolio from Binance
+    this.router.post('/sync-binance', this.syncFromBinance.bind(this));
 
     // GET /api/portfolios/:id - Get portfolio details
     this.router.get('/:id', this.getPortfolioById.bind(this));
@@ -162,6 +169,38 @@ export class PortfolioController {
       res.json({
         success: true,
         data: allocation,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/portfolios/sync-binance - Sync portfolio from Binance account
+   * Fetches current balances from Binance and creates/updates a portfolio
+   */
+  private async syncFromBinance(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!this.binanceSyncService) {
+        res.status(501).json({
+          success: false,
+          error: 'Binance sync service is not configured',
+          message: 'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
+          timestamp: new Date(),
+        });
+        return;
+      }
+
+      // TODO: Get userId from auth middleware
+      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+
+      const result = await this.binanceSyncService.syncFromBinance(userId);
+
+      res.json({
+        success: true,
+        data: result,
+        message: `Successfully synced ${result.totalHoldings} holdings from Binance`,
         timestamp: new Date(),
       });
     } catch (error) {

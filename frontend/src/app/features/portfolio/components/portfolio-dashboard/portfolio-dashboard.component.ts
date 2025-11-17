@@ -5,6 +5,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PortfolioFacadeService } from '../../services/portfolio-facade.service';
+import { PortfolioApiService } from '../../services/portfolio-api.service';
 import { Portfolio, AddHoldingRequest } from '../../../../shared/models/portfolio.model';
 import { PortfolioSummaryComponent } from '../portfolio-summary/portfolio-summary.component';
 import { PortfolioTableComponent } from '../portfolio-table/portfolio-table.component';
@@ -20,6 +21,7 @@ import { PriceUpdateService } from '../../../../core/services/price-update.servi
 })
 export class PortfolioDashboardComponent implements OnInit, OnDestroy {
   private readonly portfolioFacade = inject(PortfolioFacadeService);
+  private readonly portfolioApi = inject(PortfolioApiService);
   private readonly router = inject(Router);
   private readonly priceUpdateService = inject(PriceUpdateService);
 
@@ -65,8 +67,8 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load portfolios on init
-    this.portfolioFacade.loadPortfolios();
+    // Sync from Binance first, then load portfolios
+    this.syncFromBinanceAndLoad();
 
     // Subscribe to portfolio facade observables
     this.portfolioFacade.portfolios$.subscribe(portfolios => {
@@ -87,6 +89,27 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
 
     this.portfolioFacade.lastUpdated$.subscribe(lastUpdated => {
       this.lastUpdated.set(lastUpdated);
+    });
+  }
+
+  /**
+   * Sync portfolio from Binance and then load all portfolios
+   * Silently fails if Binance API keys are not configured
+   */
+  private syncFromBinanceAndLoad(): void {
+    this.loading.set(true);
+
+    this.portfolioApi.syncFromBinance().subscribe({
+      next: (result) => {
+        console.log('Successfully synced from Binance:', result);
+        // Load all portfolios after sync
+        this.portfolioFacade.loadPortfolios();
+      },
+      error: (error) => {
+        console.warn('Failed to sync from Binance (API keys may not be configured):', error);
+        // Still load portfolios even if sync fails
+        this.portfolioFacade.loadPortfolios();
+      }
     });
   }
 
