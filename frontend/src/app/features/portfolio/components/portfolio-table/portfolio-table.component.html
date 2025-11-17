@@ -131,6 +131,31 @@
               </div>
             </th>
 
+            <!-- T151: 24h Change Column -->
+            <th
+              scope="col"
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              (click)="onSort('priceChange24h')"
+            >
+              <div class="flex items-center justify-end gap-2">
+                <span>24h Change</span>
+                <svg
+                  class="w-4 h-4"
+                  [class.text-blue-600]="isSorted('priceChange24h')"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  @if (getSortIcon('priceChange24h') === 'sort-asc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  } @else if (getSortIcon('priceChange24h') === 'sort-desc') {
+                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+                  } @else {
+                    <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
+                  }
+                </svg>
+              </div>
+            </th>
+
             <!-- Actions Column -->
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -180,6 +205,15 @@
                   [showPercentage]="true"
                   size="small"
                 ></app-gain-loss-badge>
+              </td>
+
+              <!-- T151: 24h Change with Trend Indicator -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <app-trend-indicator
+                  [change]="holding.priceChange24h"
+                  size="small"
+                  [showArrow]="true"
+                ></app-trend-indicator>
               </td>
 
               <!-- Actions -->

@@ -497,11 +497,11 @@
   - Red down arrow + percentage for downtrend
   - Gray neutral indicator for stable
   - Configurable size (small, medium, large)
-- [ ] T151 [US4] Integrate trend-indicator into portfolio-table for priceChange24h column
+- [X] T151 [US4] Integrate trend-indicator into portfolio-table for priceChange24h column
 
 ### Frontend: Market Overview Component
 
-- [ ] T152 [US4] Create frontend/src/app/features/market-trends/components/market-overview/ component:
+- [X] T152 [US4] Create frontend/src/app/features/market-trends/components/market-overview/ component:
   - List top gainers (sorted by change24h desc, limit 10)
   - List top losers (sorted by change24h asc, limit 10)
   - Use data-table component for consistent styling
