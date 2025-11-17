@@ -1,0 +1,11 @@
+// T112: Holding detail styles
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.holding-detail {
+  max-width: 1200px;
+}

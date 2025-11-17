@@ -20,17 +20,19 @@
       </div>
     </div>
 
-    <!-- Total Gain/Loss Card -->
+    <!-- Total Gain/Loss Card - T111: Integrated gain-loss-badge -->
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Gain/Loss</p>
-          <p class="mt-2 text-3xl font-bold" [ngClass]="getGainLossClass()">
-            {{ formatCurrency(portfolio()!.totalGainLoss) }}
-          </p>
-          <p class="mt-2 text-sm font-medium" [ngClass]="getGainLossClass()">
-            {{ formatPercentage(portfolio()!.totalGainLossPercentage) }}
-          </p>
+          <div class="mt-2">
+            <app-gain-loss-badge
+              [value]="portfolio()!.totalGainLoss"
+              [percentage]="portfolio()!.totalGainLossPercentage"
+              [showPercentage]="true"
+              size="large"
+            ></app-gain-loss-badge>
+          </div>
         </div>
         <div class="ml-4">
           @if (getGainLossIcon() === 'trending-up') {
