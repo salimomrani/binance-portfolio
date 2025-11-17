@@ -7,6 +7,37 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seed...');
 
+  // Create a mock user with fixed ID for development
+  const mockPasswordHash = await bcrypt.hash('mock123', 10);
+  const mockUser = await prisma.user.upsert({
+    where: { id: 'mock-user-id' },
+    update: {},
+    create: {
+      id: 'mock-user-id',
+      email: 'mock@cryptoportfolio.com',
+      passwordHash: mockPasswordHash,
+      firstName: 'Mock',
+      lastName: 'User',
+    },
+  });
+
+  console.log(`Created mock user: ${mockUser.email} (ID: ${mockUser.id})`);
+
+  // Create mock user preferences
+  await prisma.userPreferences.upsert({
+    where: { userId: mockUser.id },
+    update: {},
+    create: {
+      userId: mockUser.id,
+      currency: 'USD',
+      theme: 'light',
+      defaultView: 'table',
+      priceAlerts: false,
+    },
+  });
+
+  console.log('Created mock user preferences');
+
   // Create a demo user
   const passwordHash = await bcrypt.hash('demo123', 10);
   const user = await prisma.user.upsert({
@@ -20,7 +51,7 @@ async function main() {
     },
   });
 
-  console.log(`Created user: ${user.email}`);
+  console.log(`Created demo user: ${user.email}`);
 
   // Create user preferences
   await prisma.userPreferences.upsert({
