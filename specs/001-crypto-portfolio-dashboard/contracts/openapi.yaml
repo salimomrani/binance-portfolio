@@ -1,0 +1,1109 @@
+openapi: 3.0.3
+info:
+  title: Crypto Portfolio Dashboard API
+  description: |
+    RESTful API for managing cryptocurrency portfolios, tracking holdings,
+    monitoring market prices, and maintaining watchlists.
+
+    ## Security
+    - All API keys for external services (Binance, CoinGecko) are server-side only
+    - User authentication via JWT (future implementation)
+    - Rate limiting: 100 requests per 15 minutes per IP
+
+    ## Data Precision
+    - Cryptocurrency quantities: 8 decimal places
+    - Prices: 8 decimal places
+    - Percentages: 4 decimal places
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@cryptoportfolio.app
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.cryptoportfolio.app/api
+    description: Production server
+
+tags:
+  - name: Portfolio
+    description: Portfolio management operations
+  - name: Holdings
+    description: Cryptocurrency holdings management
+  - name: Transactions
+    description: Transaction history and management
+  - name: Watchlist
+    description: Cryptocurrency watchlist operations
+  - name: Market Data
+    description: Real-time and historical market data
+
+paths:
+  # ============================================================================
+  # PORTFOLIO ENDPOINTS
+  # ============================================================================
+
+  /portfolios:
+    get:
+      tags: [Portfolio]
+      summary: Get all user portfolios
+      description: Retrieve all portfolios belonging to the authenticated user
+      operationId: getPortfolios
+      responses:
+        '200':
+          description: Successfully retrieved portfolios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Portfolio]
+      summary: Create new portfolio
+      description: Create a new cryptocurrency portfolio
+      operationId: createPortfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePortfolioRequest'
+      responses:
+        '201':
+          description: Portfolio created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /portfolios/{portfolioId}:
+    parameters:
+      - $ref: '#/components/parameters/PortfolioId'
+
+    get:
+      tags: [Portfolio]
+      summary: Get portfolio details
+      description: Get detailed information about a specific portfolio including all holdings
+      operationId: getPortfolioById
+      responses:
+        '200':
+          description: Successfully retrieved portfolio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDetailsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Portfolio]
+      summary: Update portfolio
+      description: Update portfolio name, description, or default status
+      operationId: updatePortfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePortfolioRequest'
+      responses:
+        '200':
+          description: Portfolio updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Portfolio]
+      summary: Delete portfolio
+      description: Permanently delete a portfolio and all its holdings
+      operationId: deletePortfolio
+      responses:
+        '204':
+          description: Portfolio deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /portfolios/{portfolioId}/statistics:
+    parameters:
+      - $ref: '#/components/parameters/PortfolioId'
+
+    get:
+      tags: [Portfolio]
+      summary: Get portfolio statistics
+      description: Get calculated statistics including total value, gains/losses, best/worst performers
+      operationId: getPortfolioStatistics
+      responses:
+        '200':
+          description: Successfully retrieved statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioStatisticsResponse'
+
+  # ============================================================================
+  # HOLDINGS ENDPOINTS
+  # ============================================================================
+
+  /portfolios/{portfolioId}/holdings:
+    parameters:
+      - $ref: '#/components/parameters/PortfolioId'
+
+    get:
+      tags: [Holdings]
+      summary: Get portfolio holdings
+      description: Retrieve all cryptocurrency holdings in a portfolio
+      operationId: getHoldings
+      parameters:
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [symbol, value, gainLoss, allocation]
+            default: symbol
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Successfully retrieved holdings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingsListResponse'
+
+    post:
+      tags: [Holdings]
+      summary: Add holding
+      description: Add a new cryptocurrency holding to the portfolio
+      operationId: addHolding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddHoldingRequest'
+      responses:
+        '201':
+          description: Holding added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Holding already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /portfolios/{portfolioId}/holdings/{holdingId}:
+    parameters:
+      - $ref: '#/components/parameters/PortfolioId'
+      - $ref: '#/components/parameters/HoldingId'
+
+    get:
+      tags: [Holdings]
+      summary: Get holding details
+      description: Get detailed information about a specific holding
+      operationId: getHoldingById
+      responses:
+        '200':
+          description: Successfully retrieved holding
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingDetailsResponse'
+
+    patch:
+      tags: [Holdings]
+      summary: Update holding
+      description: Update holding quantity, average cost, or notes
+      operationId: updateHolding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHoldingRequest'
+      responses:
+        '200':
+          description: Holding updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+
+    delete:
+      tags: [Holdings]
+      summary: Delete holding
+      description: Remove a holding from the portfolio
+      operationId: deleteHolding
+      responses:
+        '204':
+          description: Holding deleted successfully
+
+  # ============================================================================
+  # TRANSACTIONS ENDPOINTS
+  # ============================================================================
+
+  /holdings/{holdingId}/transactions:
+    parameters:
+      - $ref: '#/components/parameters/HoldingId'
+
+    get:
+      tags: [Transactions]
+      summary: Get transaction history
+      description: Retrieve all transactions for a specific holding
+      operationId: getTransactions
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Successfully retrieved transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionListResponse'
+
+    post:
+      tags: [Transactions]
+      summary: Add transaction
+      description: Record a new buy or sell transaction
+      operationId: addTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTransactionRequest'
+      responses:
+        '201':
+          description: Transaction added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # ============================================================================
+  # WATCHLIST ENDPOINTS
+  # ============================================================================
+
+  /watchlist:
+    get:
+      tags: [Watchlist]
+      summary: Get watchlist
+      description: Retrieve all cryptocurrencies in user's watchlist
+      operationId: getWatchlist
+      responses:
+        '200':
+          description: Successfully retrieved watchlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistResponse'
+
+    post:
+      tags: [Watchlist]
+      summary: Add to watchlist
+      description: Add a cryptocurrency to the watchlist
+      operationId: addToWatchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToWatchlistRequest'
+      responses:
+        '201':
+          description: Added to watchlist successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistItemResponse'
+        '409':
+          description: Already in watchlist
+
+  /watchlist/{watchlistItemId}:
+    parameters:
+      - $ref: '#/components/parameters/WatchlistItemId'
+
+    delete:
+      tags: [Watchlist]
+      summary: Remove from watchlist
+      description: Remove a cryptocurrency from the watchlist
+      operationId: removeFromWatchlist
+      responses:
+        '204':
+          description: Removed from watchlist successfully
+
+  # ============================================================================
+  # MARKET DATA ENDPOINTS
+  # ============================================================================
+
+  /market/prices:
+    get:
+      tags: [Market Data]
+      summary: Get current prices
+      description: Get current market prices for multiple cryptocurrencies
+      operationId: getCurrentPrices
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated list of cryptocurrency symbols
+          schema:
+            type: string
+            example: "BTC,ETH,ADA"
+      responses:
+        '200':
+          description: Successfully retrieved prices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+
+  /market/prices/{symbol}:
+    parameters:
+      - $ref: '#/components/parameters/Symbol'
+
+    get:
+      tags: [Market Data]
+      summary: Get crypto price data
+      description: Get detailed market data for a specific cryptocurrency
+      operationId: getCryptoPrice
+      responses:
+        '200':
+          description: Successfully retrieved price data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoMarketDataResponse'
+
+  /market/history/{symbol}:
+    parameters:
+      - $ref: '#/components/parameters/Symbol'
+
+    get:
+      tags: [Market Data]
+      summary: Get price history
+      description: Get historical price data for charting
+      operationId: getPriceHistory
+      parameters:
+        - name: timeframe
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['1h', '24h', '7d', '30d', '1y']
+      responses:
+        '200':
+          description: Successfully retrieved price history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceHistoryResponse'
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+
+components:
+  # PARAMETERS
+  parameters:
+    PortfolioId:
+      name: portfolioId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    HoldingId:
+      name: holdingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    WatchlistItemId:
+      name: watchlistItemId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    Symbol:
+      name: symbol
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Z]+$'
+        example: "BTC"
+
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+
+  # SCHEMAS
+  schemas:
+    # PORTFOLIO
+    CreatePortfolioRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "My Crypto Portfolio"
+        description:
+          type: string
+          maxLength: 500
+          example: "Long-term investment portfolio"
+
+    UpdatePortfolioRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        isDefault:
+          type: boolean
+
+    PortfolioSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        isDefault:
+          type: boolean
+        totalValue:
+          type: number
+          format: double
+          description: Total portfolio value in USD
+        totalGainLoss:
+          type: number
+          format: double
+          description: Total gain/loss in USD
+        totalGainLossPercentage:
+          type: number
+          format: double
+          description: Total gain/loss percentage
+        holdingsCount:
+          type: integer
+        lastUpdated:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    PortfolioDetails:
+      allOf:
+        - $ref: '#/components/schemas/PortfolioSummary'
+        - type: object
+          properties:
+            holdings:
+              type: array
+              items:
+                $ref: '#/components/schemas/HoldingDetails'
+            allocationChart:
+              type: array
+              items:
+                $ref: '#/components/schemas/AllocationData'
+
+    # HOLDINGS
+    AddHoldingRequest:
+      type: object
+      required: [symbol, name, quantity, averageCost]
+      properties:
+        symbol:
+          type: string
+          pattern: '^[A-Z]+$'
+          example: "BTC"
+        name:
+          type: string
+          example: "Bitcoin"
+        quantity:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          example: 1.5
+        averageCost:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          example: 45000.00
+        notes:
+          type: string
+          maxLength: 1000
+
+    UpdateHoldingRequest:
+      type: object
+      properties:
+        quantity:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+        averageCost:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+        notes:
+          type: string
+          maxLength: 1000
+
+    HoldingDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: number
+          format: double
+        averageCost:
+          type: number
+          format: double
+        currentPrice:
+          type: number
+          format: double
+        currentValue:
+          type: number
+          format: double
+        costBasis:
+          type: number
+          format: double
+        gainLoss:
+          type: number
+          format: double
+        gainLossPercentage:
+          type: number
+          format: double
+        allocationPercentage:
+          type: number
+          format: double
+        priceChange24h:
+          type: number
+          format: double
+        notes:
+          type: string
+          nullable: true
+        lastUpdated:
+          type: string
+          format: date-time
+
+    AllocationData:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        value:
+          type: number
+          format: double
+        percentage:
+          type: number
+          format: double
+        color:
+          type: string
+          description: Hex color code
+          example: "#F7931A"
+
+    # TRANSACTIONS
+    AddTransactionRequest:
+      type: object
+      required: [type, quantity, pricePerUnit, date]
+      properties:
+        type:
+          type: string
+          enum: [BUY, SELL]
+        quantity:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+        pricePerUnit:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+        fee:
+          type: number
+          format: double
+          minimum: 0
+        date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          maxLength: 1000
+
+    TransactionHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [BUY, SELL]
+        symbol:
+          type: string
+        quantity:
+          type: number
+          format: double
+        pricePerUnit:
+          type: number
+          format: double
+        totalCost:
+          type: number
+          format: double
+        fee:
+          type: number
+          format: double
+          nullable: true
+        date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+
+    # WATCHLIST
+    AddToWatchlistRequest:
+      type: object
+      required: [symbol, name]
+      properties:
+        symbol:
+          type: string
+          pattern: '^[A-Z]+$'
+          example: "ETH"
+        name:
+          type: string
+          example: "Ethereum"
+        notes:
+          type: string
+          maxLength: 1000
+
+    WatchlistItemDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+        name:
+          type: string
+        currentPrice:
+          type: number
+          format: double
+        change1h:
+          type: number
+          format: double
+        change24h:
+          type: number
+          format: double
+        change7d:
+          type: number
+          format: double
+        volume24h:
+          type: number
+          format: double
+        marketCap:
+          type: number
+          format: double
+        trend:
+          type: string
+          enum: [up, down, neutral]
+        notes:
+          type: string
+          nullable: true
+        addedAt:
+          type: string
+          format: date-time
+
+    # MARKET DATA
+    CryptoMarketData:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+        change1h:
+          type: number
+          format: double
+        change24h:
+          type: number
+          format: double
+        change7d:
+          type: number
+          format: double
+        change30d:
+          type: number
+          format: double
+        volume24h:
+          type: number
+          format: double
+        marketCap:
+          type: number
+          format: double
+        high24h:
+          type: number
+          format: double
+          nullable: true
+        low24h:
+          type: number
+          format: double
+          nullable: true
+        lastUpdated:
+          type: string
+          format: date-time
+
+    PriceHistoryData:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        price:
+          type: number
+          format: double
+        volume:
+          type: number
+          format: double
+
+    # STATISTICS
+    PortfolioStatistics:
+      type: object
+      properties:
+        totalValue:
+          type: number
+          format: double
+        totalCostBasis:
+          type: number
+          format: double
+        totalGainLoss:
+          type: number
+          format: double
+        totalGainLossPercentage:
+          type: number
+          format: double
+        bestPerformer:
+          type: object
+          nullable: true
+          properties:
+            symbol:
+              type: string
+            gainLossPercentage:
+              type: number
+              format: double
+        worstPerformer:
+          type: object
+          nullable: true
+          properties:
+            symbol:
+              type: string
+            gainLossPercentage:
+              type: number
+              format: double
+        largestHolding:
+          type: object
+          nullable: true
+          properties:
+            symbol:
+              type: string
+            percentage:
+              type: number
+              format: double
+
+    # RESPONSES
+    PortfolioListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PortfolioSummary'
+
+    PortfolioResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PortfolioSummary'
+
+    PortfolioDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PortfolioDetails'
+
+    PortfolioStatisticsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PortfolioStatistics'
+
+    HoldingsListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/HoldingDetails'
+
+    HoldingResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/HoldingDetails'
+
+    HoldingDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/HoldingDetails'
+
+    TransactionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionHistory'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    TransactionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TransactionHistory'
+
+    WatchlistResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/WatchlistItemDetails'
+
+    WatchlistItemResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/WatchlistItemDetails'
+
+    PricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties:
+                type: number
+                format: double
+              example:
+                BTC: 45000.50
+                ETH: 3200.75
+
+    CryptoMarketDataResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoMarketData'
+
+    PriceHistoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                symbol:
+                  type: string
+                timeframe:
+                  type: string
+                  enum: ['1h', '24h', '7d', '30d', '1y']
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PriceHistoryData'
+
+    # BASE RESPONSES
+    SuccessResponse:
+      type: object
+      required: [success, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [success, error, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Invalid input data"
+            details:
+              type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+  # RESPONSES
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  # SECURITY SCHEMES
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT authentication token (future implementation)
+
+# Global security (commented out until auth is implemented)
+# security:
+#   - bearerAuth: []
