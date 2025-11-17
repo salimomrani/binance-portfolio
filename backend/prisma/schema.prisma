@@ -1,0 +1,164 @@
+// Prisma schema for Crypto Portfolio Dashboard
+// Generated from: specs/001-crypto-portfolio-dashboard/data-model.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String    // For future authentication
+  firstName     String?
+  lastName      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  portfolios    Portfolio[]
+  watchlists    WatchlistItem[]
+  preferences   UserPreferences?
+
+  @@index([email])
+}
+
+model UserPreferences {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  currency          String   @default("USD")  // USD, EUR, GBP
+  theme             String   @default("light") // light, dark
+  defaultView       String   @default("table") // table, chart
+  priceAlerts       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// PORTFOLIO & HOLDINGS
+// ============================================================================
+
+model Portfolio {
+  id            String    @id @default(uuid())
+  userId        String
+  name          String    @default("My Portfolio")
+  description   String?
+  isDefault     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings      Holding[]
+
+  @@index([userId])
+  @@index([userId, isDefault])
+}
+
+model Holding {
+  id            String    @id @default(uuid())
+  portfolioId   String
+  symbol        String    // BTC, ETH, ADA (uppercase)
+  name          String    // Bitcoin, Ethereum, Cardano
+  quantity      Decimal   @db.Decimal(20, 8)  // Up to 8 decimal places
+  averageCost   Decimal   @db.Decimal(20, 8)  // Average cost in USD per unit
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  portfolio     Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+
+  @@unique([portfolioId, symbol])
+  @@index([portfolioId])
+  @@index([symbol])
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  holdingId     String
+  type          TransactionType
+  quantity      Decimal           @db.Decimal(20, 8)
+  pricePerUnit  Decimal           @db.Decimal(20, 8)  // Price in USD
+  totalCost     Decimal           @db.Decimal(20, 8)  // quantity * pricePerUnit
+  fee           Decimal?          @db.Decimal(20, 8)  // Transaction fee
+  notes         String?
+  date          DateTime          // Transaction date
+  createdAt     DateTime          @default(now())
+
+  holding       Holding           @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+
+  @@index([holdingId])
+  @@index([date])
+  @@index([type])
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
+
+// ============================================================================
+// WATCHLIST
+// ============================================================================
+
+model WatchlistItem {
+  id            String    @id @default(uuid())
+  userId        String
+  symbol        String    // BTC, ETH, ADA
+  name          String    // Bitcoin, Ethereum, Cardano
+  notes         String?
+  addedAt       DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId])
+  @@index([symbol])
+}
+
+// ============================================================================
+// MARKET DATA & CACHE
+// ============================================================================
+
+model PriceCache {
+  id            String    @id @default(uuid())
+  symbol        String    @unique
+  name          String
+  price         Decimal   @db.Decimal(20, 8)  // Current price in USD
+  change1h      Decimal   @db.Decimal(10, 4)  // % change (e.g., 2.5 for +2.5%)
+  change24h     Decimal   @db.Decimal(10, 4)  // % change
+  change7d      Decimal   @db.Decimal(10, 4)  // % change
+  change30d     Decimal   @db.Decimal(10, 4)  // % change
+  volume24h     Decimal   @db.Decimal(20, 2)  // Trading volume in USD
+  marketCap     Decimal   @db.Decimal(20, 2)  // Market cap in USD
+  high24h       Decimal?  @db.Decimal(20, 8)  // 24h high
+  low24h        Decimal?  @db.Decimal(20, 8)  // 24h low
+  lastUpdated   DateTime
+  source        String    @default("binance")  // binance, coingecko
+
+  @@index([symbol])
+  @@index([lastUpdated])
+}
+
+model PriceHistory {
+  id            String    @id @default(uuid())
+  symbol        String
+  price         Decimal   @db.Decimal(20, 8)
+  volume        Decimal   @db.Decimal(20, 2)
+  timestamp     DateTime
+  timeframe     String    // 1h, 24h, 7d, 30d, 1y
+
+  @@unique([symbol, timestamp, timeframe])
+  @@index([symbol, timeframe, timestamp])
+  @@index([timestamp])
+}
