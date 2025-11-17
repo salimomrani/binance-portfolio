@@ -6,7 +6,7 @@ import { Holding } from '../../../../shared/models/portfolio.model';
 import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-badge/gain-loss-badge.component';
 import { TrendIndicatorComponent } from '../../../../shared/components/trend-indicator/trend-indicator.component';
 
-type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage' | 'priceChange24h';
+type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage' | 'priceChange24h' | 'volume24h' | 'marketCap';
 type SortOrder = 'asc' | 'desc';
 
 @Component({
@@ -120,5 +120,26 @@ export class PortfolioTableComponent {
       minimumFractionDigits: 2,
       maximumFractionDigits: 8,
     }).format(value);
+  }
+
+  /**
+   * Format large numbers (volume, market cap) with K, M, B, T suffixes
+   */
+  formatLargeNumber(value: number): string {
+    if (value === 0) return '$0';
+
+    const absValue = Math.abs(value);
+
+    if (absValue >= 1_000_000_000_000) {
+      return '$' + (value / 1_000_000_000_000).toFixed(2) + 'T';
+    } else if (absValue >= 1_000_000_000) {
+      return '$' + (value / 1_000_000_000).toFixed(2) + 'B';
+    } else if (absValue >= 1_000_000) {
+      return '$' + (value / 1_000_000).toFixed(2) + 'M';
+    } else if (absValue >= 1_000) {
+      return '$' + (value / 1_000).toFixed(2) + 'K';
+    } else {
+      return this.formatCurrency(value);
+    }
   }
 }

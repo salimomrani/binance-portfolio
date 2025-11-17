@@ -26,6 +26,8 @@ export interface HoldingDetails {
   gainLossPercentage: number;
   allocationPercentage: number;
   priceChange24h: number;
+  volume24h: number;
+  marketCap: number;
   notes: string | null;
   lastUpdated: Date;
 }
