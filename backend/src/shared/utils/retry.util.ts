@@ -8,6 +8,10 @@ export interface RetryOptions {
   retryableErrors?: string[];
 }
 
+export interface LegacyRetryOptions extends RetryOptions {
+  retries?: number;
+  delay?: number;
+}
 const DEFAULT_OPTIONS: Required<RetryOptions> = {
   maxAttempts: 3,
   initialDelay: 1000, // 1 second
@@ -56,6 +60,27 @@ export async function withRetry<T>(
 }
 
 /**
+ * Backwards-compatible helper that supports { retries, delay } signature
+ */
+export async function retry<T>(
+  fn: () => Promise<T>,
+  options: LegacyRetryOptions = {}
+): Promise<T> {
+  const { retries, delay, ...rest } = options;
+
+  const normalized: RetryOptions = {
+    ...rest,
+    maxAttempts: rest.maxAttempts ?? retries ?? DEFAULT_OPTIONS.maxAttempts,
+    initialDelay: rest.initialDelay ?? delay ?? DEFAULT_OPTIONS.initialDelay,
+    maxDelay: rest.maxDelay ?? DEFAULT_OPTIONS.maxDelay,
+    backoffMultiplier: rest.backoffMultiplier ?? DEFAULT_OPTIONS.backoffMultiplier,
+    retryableErrors: rest.retryableErrors ?? DEFAULT_OPTIONS.retryableErrors,
+  };
+
+  return withRetry(fn, normalized);
+}
+
+/**
  * Check if error should be retried
  */
 function shouldRetry(error: unknown, retryableErrors: string[]): boolean {
@@ -85,8 +110,8 @@ function sleep(ms: number): Promise<void> {
  */
 export function Retry(options: RetryOptions = {}) {
   return function (
-    target: unknown,
-    propertyKey: string,
+    _target: unknown,
+    _propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;

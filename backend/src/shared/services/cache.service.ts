@@ -1,17 +1,22 @@
 import Redis from 'ioredis';
-import { env } from '../../config/env.config';
+import { env } from '@/config/env.config';
 import { loggerService } from './logger.service';
 
 /**
  * Cache Service with Redis and in-memory fallback
  */
-class CacheService {
+export class CacheService {
   private redis: Redis | null = null;
   private memoryCache: Map<string, { value: string; expiry: number }> = new Map();
   private isRedisAvailable = false;
+  private cleanupInterval: NodeJS.Timeout;
 
   constructor() {
     this.initializeRedis();
+    this.cleanupInterval = setInterval(() => this.cleanupMemoryCache(), 5 * 60 * 1000);
+    if (typeof this.cleanupInterval.unref === 'function') {
+      this.cleanupInterval.unref();
+    }
   }
 
   private initializeRedis(): void {
@@ -150,17 +155,28 @@ class CacheService {
   /**
    * Clear all cache (use with caution!)
    */
-  async clear(): Promise<void> {
+  async clear(pattern?: string): Promise<void> {
     if (this.isRedisAvailable && this.redis) {
       try {
-        await this.redis.flushdb();
+        if (pattern) {
+          const keys = await this.redis.keys(pattern);
+          if (keys.length > 0) {
+            await this.redis.del(keys);
+          }
+        } else {
+          await this.redis.flushdb();
+        }
         return;
       } catch (error) {
         loggerService.error('Redis clear error', error);
       }
     }
 
-    this.memoryCache.clear();
+    if (pattern) {
+      this.clearMemoryByPattern(pattern);
+    } else {
+      this.memoryCache.clear();
+    }
   }
 
   /**
@@ -170,6 +186,23 @@ class CacheService {
     const now = Date.now();
     for (const [key, value] of this.memoryCache.entries()) {
       if (now > value.expiry) {
+        this.memoryCache.delete(key);
+      }
+    }
+  }
+
+  private clearMemoryByPattern(pattern: string): void {
+    const regex = new RegExp(
+      '^' +
+        pattern
+          .split('*')
+          .map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .join('.*') +
+        '$'
+    );
+
+    for (const key of this.memoryCache.keys()) {
+      if (regex.test(key)) {
         this.memoryCache.delete(key);
       }
     }
@@ -188,8 +221,3 @@ class CacheService {
 
 // Singleton instance
 export const cacheService = new CacheService();
-
-// Cleanup memory cache every 5 minutes
-setInterval(() => {
-  (cacheService as any).cleanupMemoryCache();
-}, 5 * 60 * 1000);

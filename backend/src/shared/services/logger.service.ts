@@ -10,7 +10,7 @@ if (!fs.existsSync(logDir)) {
 }
 
 // Winston logger configuration
-const logger = winston.createLogger({
+const loggerInstance = winston.createLogger({
   level: env.logging.level,
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -42,7 +42,7 @@ const logger = winston.createLogger({
 
 // Add console transport in development
 if (env.node.isDevelopment) {
-  logger.add(
+  loggerInstance.add(
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
@@ -57,10 +57,11 @@ if (env.node.isDevelopment) {
 }
 
 export const loggerService = {
-  error: (message: string, meta?: unknown) => logger.error(message, meta),
-  warn: (message: string, meta?: unknown) => logger.warn(message, meta),
-  info: (message: string, meta?: unknown) => logger.info(message, meta),
-  debug: (message: string, meta?: unknown) => logger.debug(message, meta),
+  error: (message: string, meta?: unknown) => loggerInstance.error(message, meta),
+  warn: (message: string, meta?: unknown) => loggerInstance.warn(message, meta),
+  info: (message: string, meta?: unknown) => loggerInstance.info(message, meta),
+  debug: (message: string, meta?: unknown) => loggerInstance.debug(message, meta),
 };
 
-export default logger;
+export const logger = loggerInstance;
+export default loggerInstance;

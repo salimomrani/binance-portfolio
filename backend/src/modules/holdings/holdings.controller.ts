@@ -4,7 +4,6 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { HoldingsService } from './holdings.service';
 import { AddHoldingSchema, UpdateHoldingSchema } from './holdings.validation';
 import { validate } from '../../shared/middleware/validator';
-import { logger } from '../../shared/services/logger.service';
 
 export class HoldingsController {
   public router: Router;
