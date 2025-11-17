@@ -15,6 +15,25 @@ export interface CryptoPrice {
   lastUpdated: Date;
 }
 
+/**
+ * T143: Complete market data with all trend indicators
+ * Used for detailed cryptocurrency information display
+ */
+export interface CryptoMarketData {
+  symbol: string;
+  name: string;
+  price: number;
+  change1h: number;
+  change24h: number;
+  change7d: number;
+  change30d: number;
+  volume24h: number;
+  marketCap: number;
+  high24h: number | null;
+  low24h: number | null;
+  lastUpdated: Date;
+}
+
 export interface PriceHistory {
   timestamp: Date;
   price: number;

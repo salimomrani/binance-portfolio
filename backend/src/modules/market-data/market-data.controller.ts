@@ -1,4 +1,5 @@
 // T120: Market data controller with historical data endpoints
+// T144-T145: Enhanced with price endpoints for market data
 
 import { Request, Response, NextFunction, Router } from 'express';
 import { MarketDataService } from './market-data.service';
@@ -18,6 +19,18 @@ const GetHistoryQuerySchema = z.object({
   timeframe: TimeframeSchema,
 });
 
+// T144: Symbol validation schema
+const GetPriceParamsSchema = z.object({
+  symbol: z.string().min(1).max(10).toUpperCase(),
+});
+
+// T145: Batch symbols validation schema
+const GetBatchPricesQuerySchema = z.object({
+  symbols: z.string()
+    .transform(s => s.split(',').map(sym => sym.trim().toUpperCase()))
+    .pipe(z.array(z.string().min(1).max(10)).min(1).max(50)),
+});
+
 export class MarketDataController {
   private readonly router: Router;
   private readonly marketDataService: MarketDataService;
@@ -29,11 +42,118 @@ export class MarketDataController {
   }
 
   private setupRoutes(): void {
+    // T144: GET /api/market/prices/:symbol - Get full market data for single symbol
+    this.router.get('/prices/:symbol', this.getMarketData.bind(this));
+
+    // T145: GET /api/market/prices?symbols=BTC,ETH,ADA - Get prices for multiple symbols
+    this.router.get('/prices', this.getBatchPrices.bind(this));
+
     // GET /api/market/history/:symbol?timeframe=1h|24h|7d|30d|1y
     this.router.get('/history/:symbol', this.getHistoricalPrices.bind(this));
 
     // GET /api/market/status - Adapter health status
     this.router.get('/status', this.getAdapterStatus.bind(this));
+  }
+
+  /**
+   * T144: GET /api/market/prices/:symbol
+   * Returns full market data with all trend indicators (1h, 24h, 7d, 30d)
+   */
+  private async getMarketData(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      // Validate params
+      const paramsResult = GetPriceParamsSchema.safeParse({
+        symbol: req.params.symbol?.toUpperCase(),
+      });
+
+      if (!paramsResult.success) {
+        const error: ApiError = {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid symbol parameter',
+            details: paramsResult.error.errors,
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(400).json(error);
+        return;
+      }
+
+      const { symbol } = paramsResult.data;
+
+      logger.info(`Fetching full market data for ${symbol}`);
+
+      // Get market data from service
+      const marketData = await this.marketDataService.getFullMarketData(symbol);
+
+      const response: ApiSuccess<typeof marketData> = {
+        success: true,
+        data: marketData,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      logger.error('Error fetching market data:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * T145: GET /api/market/prices?symbols=BTC,ETH,ADA
+   * Returns batch prices for multiple symbols
+   */
+  private async getBatchPrices(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      // Validate query
+      const queryResult = GetBatchPricesQuerySchema.safeParse({
+        symbols: req.query.symbols,
+      });
+
+      if (!queryResult.success) {
+        const error: ApiError = {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid or missing symbols parameter. Provide comma-separated symbols (max 50)',
+            details: queryResult.error.errors,
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(400).json(error);
+        return;
+      }
+
+      const { symbols } = queryResult.data;
+
+      logger.info(`Fetching batch prices for ${symbols.length} symbols`);
+
+      // Get prices from service
+      const prices = await this.marketDataService.getMultiplePrices(symbols);
+
+      // Convert Map to object for JSON serialization
+      const pricesObject = Object.fromEntries(prices.entries());
+
+      const response: ApiSuccess<typeof pricesObject> = {
+        success: true,
+        data: pricesObject,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      logger.error('Error fetching batch prices:', error);
+      next(error);
+    }
   }
 
   /**

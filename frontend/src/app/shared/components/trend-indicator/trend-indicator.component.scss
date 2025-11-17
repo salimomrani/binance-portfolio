@@ -1,0 +1,14 @@
+// T150: Trend Indicator Component Styles
+
+:host {
+  display: inline-block;
+}
+
+// Ensure consistent spacing and alignment
+span[data-trend] {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
