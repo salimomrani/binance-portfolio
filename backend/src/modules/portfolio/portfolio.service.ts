@@ -3,7 +3,7 @@
 import { PrismaClient, Portfolio } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './portfolio.validation';
-import { PortfolioSummary, PortfolioDetails, PortfolioStatistics } from './portfolio.types';
+import { PortfolioSummary, PortfolioDetails, PortfolioStatistics, AllocationData } from './portfolio.types';
 import { MarketDataService } from '../market-data/market-data.service';
 import { CalculationsService } from '../../shared/services/calculations.service';
 import { logger } from '../../shared/services/logger.service';
@@ -247,6 +247,52 @@ export class PortfolioService {
       };
     } catch (error) {
       logger.error(`Error calculating portfolio statistics ${portfolioId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get portfolio allocation data for charts
+   * T124: Calculate allocation with unique colors per cryptocurrency
+   */
+  async getPortfolioAllocation(portfolioId: string): Promise<AllocationData[]> {
+    try {
+      const portfolio = await this.getPortfolioById(portfolioId);
+
+      if (portfolio.holdings.length === 0) {
+        return [];
+      }
+
+      // Predefined color palette for cryptocurrencies
+      const colorPalette = [
+        '#F7931A', // Bitcoin Orange
+        '#627EEA', // Ethereum Blue
+        '#0033AD', // Cardano Blue
+        '#26A17B', // Tether Green
+        '#F3BA2F', // Binance Coin Yellow
+        '#2775CA', // XRP Blue
+        '#8247E5', // Solana Purple
+        '#00D395', // USD Coin Green
+        '#E84142', // Polkadot Pink
+        '#14151A', // Polygon Purple
+        '#3C3C3D', // Dogecoin Gold
+        '#FF6B6B', // Generic Red
+        '#4ECDC4', // Generic Teal
+        '#95E1D3', // Generic Mint
+        '#FFD93D', // Generic Yellow
+      ];
+
+      const allocationData: AllocationData[] = portfolio.holdings.map((holding, index) => ({
+        symbol: holding.symbol,
+        name: holding.name,
+        value: holding.currentValue,
+        percentage: holding.allocationPercentage,
+        color: colorPalette[index % colorPalette.length], // Cycle through colors
+      }));
+
+      return allocationData;
+    } catch (error) {
+      logger.error(`Error getting portfolio allocation ${portfolioId}:`, error);
       throw error;
     }
   }

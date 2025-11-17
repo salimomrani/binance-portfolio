@@ -8,6 +8,7 @@ import { createSuccessResponse } from './shared/types/api-response';
 import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
+import { MarketDataController } from './modules/market-data/market-data.controller';
 import { PortfolioService } from './modules/portfolio/portfolio.service';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
 import { HoldingsService } from './modules/holdings/holdings.service';
@@ -43,12 +44,14 @@ export function createApp(): Application {
     );
   });
 
-  // Initialize services and controllers (T067-T068)
+  // Initialize services and controllers (T067-T068, T120)
   const { prisma, cacheService } = initializeServices();
+  const marketDataController = initializeMarketDataController(prisma, cacheService);
   const portfolioController = initializePortfolioController(prisma, cacheService);
   const holdingsController = initializeHoldingsController(prisma, cacheService);
 
   // API routes
+  app.use('/api/market', marketDataController.getRouter());
   app.use('/api/portfolios', portfolioController.router);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
 
@@ -69,6 +72,24 @@ function initializeServices() {
   const cacheService = new CacheService();
 
   return { prisma, cacheService };
+}
+
+/**
+ * Initialize market data controller with dependencies
+ * T120: Market data controller with historical endpoints
+ */
+function initializeMarketDataController(prisma: PrismaClient, cacheService: CacheService) {
+  const marketData = new MarketDataService(
+    {
+      cacheTTL: 60,
+      retryAttempts: 3,
+      retryDelay: 1000,
+    },
+    prisma,
+    cacheService
+  );
+
+  return new MarketDataController(marketData);
 }
 
 /**

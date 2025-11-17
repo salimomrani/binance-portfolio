@@ -121,23 +121,38 @@ export class MarketDataService {
 
   /**
    * Get historical prices for a symbol
+   * T121: Enhanced with caching (5 min TTL)
    */
   async getHistoricalPrices(symbol: string, timeframe: Timeframe): Promise<PriceHistory[]> {
     try {
+      // Check cache first
+      const cached = await this.cache.getHistoricalPrices(symbol, timeframe);
+      if (cached) {
+        return cached;
+      }
+
       // Try primary adapter
       try {
-        return await retry(() => this.primaryAdapter.getHistoricalPrices(symbol, timeframe), {
+        const history = await retry(() => this.primaryAdapter.getHistoricalPrices(symbol, timeframe), {
           retries: 3,
           delay: 1000,
         });
+
+        // Cache the result
+        await this.cache.setHistoricalPrices(symbol, timeframe, history);
+        return history;
       } catch (primaryError) {
         logger.warn(`Primary adapter failed for historical data ${symbol}, trying fallback`, primaryError);
 
         // Try fallback adapter
-        return await retry(() => this.fallbackAdapter.getHistoricalPrices(symbol, timeframe), {
+        const history = await retry(() => this.fallbackAdapter.getHistoricalPrices(symbol, timeframe), {
           retries: 2,
           delay: 1500,
         });
+
+        // Cache the result
+        await this.cache.setHistoricalPrices(symbol, timeframe, history);
+        return history;
       }
     } catch (error) {
       logger.error(`Failed to get historical prices for ${symbol}:`, error);

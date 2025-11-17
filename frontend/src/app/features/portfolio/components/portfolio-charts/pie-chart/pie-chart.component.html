@@ -1,0 +1,12 @@
+<!-- T127: Pie chart component template -->
+<div class="pie-chart-container">
+  @if (allocationData.length > 0) {
+    <div class="chart-wrapper">
+      <canvas #chartCanvas></canvas>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p class="text-gray-500 text-center">No allocation data available</p>
+    </div>
+  }
+</div>

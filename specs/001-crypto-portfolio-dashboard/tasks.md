@@ -374,32 +374,32 @@
 
 ### Backend: Historical Data Support
 
-- [ ] T119 [P] [US3] Verify PriceHistory model in backend/src/prisma/schema.prisma
-- [ ] T120 [US3] Create backend/src/modules/market-data/market-data.controller.ts with endpoints:
+- [X] T119 [P] [US3] Verify PriceHistory model in backend/src/prisma/schema.prisma
+- [X] T120 [US3] Create backend/src/modules/market-data/market-data.controller.ts with endpoints:
   - GET /api/market/history/:symbol?timeframe=1h|24h|7d|30d|1y
   - Returns array of {timestamp, price, volume}
-- [ ] T121 [US3] Enhance market-data.service.ts with getHistoricalPrices(symbol, timeframe) method
-- [ ] T122 [US3] Implement caching for historical data (5 min TTL) in market-data.cache.ts
+- [X] T121 [US3] Enhance market-data.service.ts with getHistoricalPrices(symbol, timeframe) method
+- [X] T122 [US3] Implement caching for historical data (5 min TTL) in market-data.cache.ts
 
 ### Backend: Portfolio Allocation Endpoint
 
-- [ ] T123 [US3] Add GET /api/portfolios/:id/allocation endpoint returning AllocationData[] with:
+- [X] T123 [US3] Add GET /api/portfolios/:id/allocation endpoint returning AllocationData[] with:
   - symbol, name, value, percentage, color (unique color per crypto)
-- [ ] T124 [US3] Implement allocation calculation in portfolio.service.ts using calculations.service
+- [X] T124 [US3] Implement allocation calculation in portfolio.service.ts using calculations.service
 
 ### Frontend: Chart.js Integration
 
-- [ ] T125 [P] [US3] Install ng-chartjs or chart.js wrapper in frontend/
-- [ ] T126 [P] [US3] Create frontend/src/app/shared/utils/chart-colors.util.ts with predefined color palette for cryptocurrencies
+- [X] T125 [P] [US3] Install ng-chartjs or chart.js wrapper in frontend/
+- [X] T126 [P] [US3] Create frontend/src/app/shared/utils/chart-colors.util.ts with predefined color palette for cryptocurrencies
 
 ### Frontend: Pie Chart Component
 
-- [ ] T127 [US3] Create frontend/src/app/features/portfolio/components/portfolio-charts/pie-chart/ component:
+- [X] T127 [US3] Create frontend/src/app/features/portfolio/components/portfolio-charts/pie-chart/ component:
   - pie-chart.component.ts (receives allocation data as input)
   - pie-chart.component.html (Canvas element for Chart.js)
   - pie-chart.component.scss
   - pie-chart.component.spec.ts
-- [ ] T128 [US3] Configure Chart.js doughnut chart with:
+- [X] T128 [US3] Configure Chart.js doughnut chart with:
   - Legend at bottom
   - Tooltips showing symbol, value, percentage
   - Responsive sizing
@@ -407,12 +407,12 @@
 
 ### Frontend: Line Chart Component
 
-- [ ] T129 [US3] Create frontend/src/app/features/portfolio/components/portfolio-charts/line-chart/ component:
+- [X] T129 [US3] Create frontend/src/app/features/portfolio/components/portfolio-charts/line-chart/ component:
   - line-chart.component.ts
   - line-chart.component.html
   - line-chart.component.scss
   - line-chart.component.spec.ts
-- [ ] T130 [US3] Configure Chart.js line chart with:
+- [X] T130 [US3] Configure Chart.js line chart with:
   - Time-series data on X-axis
   - Portfolio value on Y-axis
   - Smooth curves (tension: 0.4)
@@ -421,37 +421,37 @@
 
 ### Frontend: View Toggle Component
 
-- [ ] T131 [US3] Create frontend/src/app/features/portfolio/components/view-toggle/ component:
+- [X] T131 [US3] Create frontend/src/app/features/portfolio/components/view-toggle/ component:
   - Toggle button: Table view | Chart view
   - Icons for each view type
   - Active state styling
   - Emits view change event
-- [ ] T132 [US3] Integrate view-toggle into portfolio-dashboard component
-- [ ] T133 [US3] Implement conditional rendering in portfolio-dashboard:
+- [X] T132 [US3] Integrate view-toggle into portfolio-dashboard component
+- [X] T133 [US3] Implement conditional rendering in portfolio-dashboard:
   - Show portfolio-table when table view active
   - Show pie-chart when chart view active
   - Animate transition with TailwindCSS transitions
 
 ### Frontend: Timeframe Selector Component
 
-- [ ] T134 [US3] Create frontend/src/app/shared/components/timeframe-selector/ component:
+- [X] T134 [US3] Create frontend/src/app/shared/components/timeframe-selector/ component:
   - Buttons for: 24h, 7d, 30d, 1y
   - Active state highlighting
   - Emits selected timeframe
-- [ ] T135 [US3] Integrate timeframe-selector with line-chart component
-- [ ] T136 [US3] Fetch historical data on timeframe change
+- [X] T135 [US3] Integrate timeframe-selector with line-chart component
+- [X] T136 [US3] Fetch historical data on timeframe change
 
 ### Frontend: Market Trends Store
 
-- [ ] T137 [US3] Create frontend/src/app/features/market-trends/store/market-trends.state.ts
-- [ ] T138 [P] [US3] Create market-trends actions, reducer, effects, selectors
-- [ ] T139 [US3] Create frontend/src/app/features/market-trends/services/market-data-api.service.ts
+- [X] T137 [US3] Create frontend/src/app/features/market-trends/store/market-trends.state.ts
+- [X] T138 [P] [US3] Create market-trends actions, reducer, effects, selectors
+- [X] T139 [US3] Create frontend/src/app/features/market-trends/services/market-data-api.service.ts
 
 ### Frontend: Component Tests
 
-- [ ] T140 [P] [US3] Write test for pie-chart.component.spec.ts verifying chart renders with data
-- [ ] T141 [P] [US3] Write test for line-chart.component.spec.ts verifying timeframe changes
-- [ ] T142 [P] [US3] Write test for view-toggle.component.spec.ts verifying toggle behavior
+- [X] T140 [P] [US3] Write test for pie-chart.component.spec.ts verifying chart renders with data
+- [X] T141 [P] [US3] Write test for line-chart.component.spec.ts verifying timeframe changes
+- [X] T142 [P] [US3] Write test for view-toggle.component.spec.ts verifying toggle behavior
 
 **Checkpoint**: User Story 3 complete - Users can visualize portfolio with charts
 
