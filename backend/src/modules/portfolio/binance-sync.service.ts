@@ -33,6 +33,15 @@ export class BinanceSyncService {
     let holdingsUpdated = 0;
 
     try {
+      // Validate user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found. Please ensure the user exists in the database.`);
+      }
+
       // Fetch balances from Binance
       logger.info(`Fetching Binance balances for user ${userId}`);
       const balances = await this.binanceAdapter.getAccountBalances();
