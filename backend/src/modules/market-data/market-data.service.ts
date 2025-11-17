@@ -1,10 +1,11 @@
 // T053: Market data service with adapter pattern and caching
+// T143: Enhanced to support full market data with all trend indicators
 
 import { PrismaClient } from '@prisma/client';
 import { BinanceAdapter } from './binance.adapter';
 import { CoinGeckoAdapter } from './coingecko.adapter';
 import { MarketDataCache } from './market-data.cache';
-import { MarketDataAdapter, CryptoPrice, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
+import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
 import { retry } from '../../shared/utils/retry.util';
@@ -63,6 +64,51 @@ export class MarketDataService {
     } catch (error) {
       logger.error(`Failed to get price for ${symbol}:`, error);
       throw new Error(`Unable to fetch price for ${symbol}`);
+    }
+  }
+
+  /**
+   * T143: Get full market data with all trend indicators
+   * Returns complete CryptoMarketData including 1h, 24h, 7d, 30d changes
+   */
+  async getFullMarketData(symbol: string): Promise<CryptoMarketData> {
+    try {
+      // Check cache first for full market data
+      const cached = await this.cache.getFullMarketData(symbol);
+      if (cached) {
+        return cached;
+      }
+
+      // Try primary adapter
+      try {
+        const data = await retry(() => (this.primaryAdapter as BinanceAdapter).getFullMarketData(symbol), {
+          retries: 3,
+          delay: 1000,
+        });
+
+        // Cache the result
+        await this.cache.setFullMarketData(symbol, data);
+        return data;
+      } catch (primaryError) {
+        logger.warn(`Primary adapter failed for full market data ${symbol}, trying fallback`, primaryError);
+
+        // Try fallback adapter
+        const data = await retry(() => (this.fallbackAdapter as CoinGeckoAdapter).getFullMarketData?.(symbol), {
+          retries: 2,
+          delay: 1500,
+        });
+
+        if (!data) {
+          throw new Error('Fallback adapter does not support full market data');
+        }
+
+        // Cache the result
+        await this.cache.setFullMarketData(symbol, data);
+        return data;
+      }
+    } catch (error) {
+      logger.error(`Failed to get full market data for ${symbol}:`, error);
+      throw new Error(`Unable to fetch full market data for ${symbol}`);
     }
   }
 

@@ -465,16 +465,16 @@
 
 ### Backend: Enhanced Market Data
 
-- [ ] T143 [US4] Update backend/src/modules/market-data/market-data.service.ts:
+- [X] T143 [US4] Update backend/src/modules/market-data/market-data.service.ts:
   - getCurrentPrice(symbol) returns full CryptoMarketData (not just price)
   - Include change1h, change24h, change7d, volume24h, marketCap, high24h, low24h
-- [ ] T144 [US4] Add GET /api/market/prices/:symbol endpoint in market-data.controller.ts
-- [ ] T145 [US4] Add GET /api/market/prices?symbols=BTC,ETH,ADA (batch endpoint)
-- [ ] T146 [US4] Implement PriceCache model updates in market-data.service.ts (store all trend fields)
+- [X] T144 [US4] Add GET /api/market/prices/:symbol endpoint in market-data.controller.ts
+- [X] T145 [US4] Add GET /api/market/prices?symbols=BTC,ETH,ADA (batch endpoint)
+- [X] T146 [US4] Implement PriceCache model updates in market-data.service.ts (store all trend fields)
 
 ### Backend: Trend Calculation
 
-- [ ] T147 [US4] Create backend/src/shared/utils/trend.util.ts with:
+- [X] T147 [US4] Create backend/src/shared/utils/trend.util.ts with:
   - calculateTrend(change24h): 'up' | 'down' | 'neutral' (threshold ±0.5%)
   - formatMarketCap(value): string (e.g., "$1.2T")
   - formatVolume(value): string (e.g., "$45.3B")
@@ -492,7 +492,7 @@
 
 ### Frontend: Trend Indicator Component
 
-- [ ] T150 [US4] Create frontend/src/app/shared/components/trend-indicator/ component:
+- [X] T150 [US4] Create frontend/src/app/shared/components/trend-indicator/ component:
   - Green up arrow + percentage for uptrend
   - Red down arrow + percentage for downtrend
   - Gray neutral indicator for stable

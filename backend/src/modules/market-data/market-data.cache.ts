@@ -1,8 +1,9 @@
 // T054: Market data caching using Redis with in-memory fallback
 // T122: Enhanced with historical data caching (5 min TTL)
+// T146: Enhanced to support full market data caching
 
 import { PrismaClient } from '@prisma/client';
-import { CryptoPrice, PriceHistory, Timeframe } from './market-data.types';
+import { CryptoPrice, CryptoMarketData, PriceHistory, Timeframe } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
 import Decimal from 'decimal.js';
@@ -101,6 +102,87 @@ export class MarketDataCache {
   }
 
   /**
+   * T146: Get cached full market data for a symbol
+   */
+  async getFullMarketData(symbol: string): Promise<CryptoMarketData | null> {
+    try {
+      // Try Redis cache first
+      const cacheKey = `market-data:${symbol}`;
+      const cached = await this.cache.get<CryptoMarketData>(cacheKey);
+
+      if (cached) {
+        logger.debug(`Cache hit for full market data ${symbol}`);
+        return cached;
+      }
+
+      // Try database cache
+      const dbCached = await this.prisma.priceCache.findUnique({
+        where: { symbol },
+      });
+
+      if (dbCached && this.isFresh(dbCached.lastUpdated)) {
+        const marketData = this.dbToCryptoMarketData(dbCached);
+        // Restore to Redis cache
+        await this.cache.set(cacheKey, marketData, this.CACHE_TTL);
+        return marketData;
+      }
+
+      return null;
+    } catch (error) {
+      logger.error(`Error getting cached full market data for ${symbol}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * T146: Set cached full market data for a symbol
+   */
+  async setFullMarketData(symbol: string, data: CryptoMarketData): Promise<void> {
+    try {
+      const cacheKey = `market-data:${symbol}`;
+
+      // Set in Redis cache
+      await this.cache.set(cacheKey, data, this.CACHE_TTL);
+
+      // Update database cache
+      await this.prisma.priceCache.upsert({
+        where: { symbol },
+        create: {
+          symbol,
+          name: data.name,
+          price: new Decimal(data.price),
+          change1h: new Decimal(data.change1h),
+          change24h: new Decimal(data.change24h),
+          change7d: new Decimal(data.change7d),
+          change30d: new Decimal(data.change30d),
+          volume24h: new Decimal(data.volume24h),
+          marketCap: new Decimal(data.marketCap),
+          high24h: data.high24h ? new Decimal(data.high24h) : null,
+          low24h: data.low24h ? new Decimal(data.low24h) : null,
+          lastUpdated: data.lastUpdated,
+        },
+        update: {
+          name: data.name,
+          price: new Decimal(data.price),
+          change1h: new Decimal(data.change1h),
+          change24h: new Decimal(data.change24h),
+          change7d: new Decimal(data.change7d),
+          change30d: new Decimal(data.change30d),
+          volume24h: new Decimal(data.volume24h),
+          marketCap: new Decimal(data.marketCap),
+          high24h: data.high24h ? new Decimal(data.high24h) : null,
+          low24h: data.low24h ? new Decimal(data.low24h) : null,
+          lastUpdated: data.lastUpdated,
+        },
+      });
+
+      logger.debug(`Cached full market data for ${symbol}`);
+    } catch (error) {
+      logger.error(`Error caching full market data for ${symbol}:`, error);
+    }
+  }
+
+  /**
    * Get cached prices for multiple symbols
    */
   async getPrices(symbols: string[]): Promise<Map<string, CryptoPrice>> {
@@ -165,6 +247,39 @@ export class MarketDataCache {
       marketCap: dbPrice.marketCap.toNumber(),
       high24h: dbPrice.high24h?.toNumber() || undefined,
       low24h: dbPrice.low24h?.toNumber() || undefined,
+      lastUpdated: dbPrice.lastUpdated,
+    };
+  }
+
+  /**
+   * T146: Convert database PriceCache to CryptoMarketData
+   */
+  private dbToCryptoMarketData(dbPrice: {
+    symbol: string;
+    name: string;
+    price: Decimal;
+    change1h: Decimal;
+    change24h: Decimal;
+    change7d: Decimal;
+    change30d: Decimal;
+    volume24h: Decimal;
+    marketCap: Decimal;
+    high24h: Decimal | null;
+    low24h: Decimal | null;
+    lastUpdated: Date;
+  }): CryptoMarketData {
+    return {
+      symbol: dbPrice.symbol,
+      name: dbPrice.name,
+      price: dbPrice.price.toNumber(),
+      change1h: dbPrice.change1h.toNumber(),
+      change24h: dbPrice.change24h.toNumber(),
+      change7d: dbPrice.change7d.toNumber(),
+      change30d: dbPrice.change30d.toNumber(),
+      volume24h: dbPrice.volume24h.toNumber(),
+      marketCap: dbPrice.marketCap.toNumber(),
+      high24h: dbPrice.high24h?.toNumber() || null,
+      low24h: dbPrice.low24h?.toNumber() || null,
       lastUpdated: dbPrice.lastUpdated,
     };
   }

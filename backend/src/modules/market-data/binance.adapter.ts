@@ -1,7 +1,8 @@
 // T051: Binance API adapter implementation
+// T143: Enhanced to support full market data with all trend indicators
 
 import axios, { AxiosInstance } from 'axios';
-import { MarketDataAdapter, CryptoPrice, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
+import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 
 export class BinanceAdapter implements MarketDataAdapter {
@@ -45,6 +46,82 @@ export class BinanceAdapter implements MarketDataAdapter {
     } catch (error) {
       logger.error(`Binance adapter error for ${symbol}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * T143: Get full market data with all trend indicators (1h, 24h, 7d, 30d)
+   */
+  async getFullMarketData(symbol: string): Promise<CryptoMarketData> {
+    try {
+      const binanceSymbol = `${symbol}USDT`;
+
+      // Fetch current price and 24h stats
+      const [ticker, currentPrice] = await Promise.all([
+        this.client.get(`/ticker/24hr`, { params: { symbol: binanceSymbol } }),
+        this.client.get(`/ticker/price`, { params: { symbol: binanceSymbol } }),
+      ]);
+
+      const tickerData = ticker.data;
+      const price = parseFloat(currentPrice.data.price);
+
+      // Calculate percentage changes from historical data
+      const now = Date.now();
+      const changes = await Promise.all([
+        this.calculatePercentageChange(binanceSymbol, price, now - 60 * 60 * 1000), // 1h ago
+        this.calculatePercentageChange(binanceSymbol, price, now - 7 * 24 * 60 * 60 * 1000), // 7d ago
+        this.calculatePercentageChange(binanceSymbol, price, now - 30 * 24 * 60 * 60 * 1000), // 30d ago
+      ]);
+
+      return {
+        symbol,
+        name: this.getFullName(symbol),
+        price,
+        change1h: changes[0],
+        change24h: parseFloat(tickerData.priceChangePercent),
+        change7d: changes[1],
+        change30d: changes[2],
+        volume24h: parseFloat(tickerData.volume) * price,
+        marketCap: 0, // Binance doesn't provide market cap - would need CoinGecko
+        high24h: parseFloat(tickerData.highPrice),
+        low24h: parseFloat(tickerData.lowPrice),
+        lastUpdated: new Date(),
+      };
+    } catch (error) {
+      logger.error(`Binance adapter error for full market data ${symbol}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate percentage change between current price and historical price
+   */
+  private async calculatePercentageChange(
+    binanceSymbol: string,
+    currentPrice: number,
+    timestamp: number
+  ): Promise<number> {
+    try {
+      const response = await this.client.get('/klines', {
+        params: {
+          symbol: binanceSymbol,
+          interval: '1h',
+          startTime: timestamp - 60 * 60 * 1000, // 1 hour before timestamp
+          endTime: timestamp + 60 * 60 * 1000, // 1 hour after timestamp
+          limit: 1,
+        },
+      });
+
+      if (response.data.length === 0) {
+        return 0; // No data available
+      }
+
+      const historicalPrice = parseFloat(response.data[0][4]); // Close price
+      const change = ((currentPrice - historicalPrice) / historicalPrice) * 100;
+      return parseFloat(change.toFixed(4));
+    } catch (error) {
+      logger.warn(`Failed to calculate percentage change for ${binanceSymbol}:`, error);
+      return 0; // Return 0 on error
     }
   }
 
