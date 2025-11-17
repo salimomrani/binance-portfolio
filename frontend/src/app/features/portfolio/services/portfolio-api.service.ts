@@ -8,6 +8,9 @@ import {
   CreatePortfolioRequest,
   UpdatePortfolioRequest,
   PortfolioStatistics,
+  Holding,
+  AddHoldingRequest,
+  UpdateHoldingRequest,
 } from '../../../shared/models/portfolio.model';
 
 @Injectable({
@@ -56,5 +59,26 @@ export class PortfolioApiService {
    */
   getPortfolioStatistics(portfolioId: string): Observable<PortfolioStatistics> {
     return this.api.get<PortfolioStatistics>(`/portfolios/${portfolioId}/statistics`);
+  }
+
+  /**
+   * Add a holding to a portfolio
+   */
+  addHolding(portfolioId: string, request: AddHoldingRequest): Observable<Holding> {
+    return this.api.post<Holding>(`/portfolios/${portfolioId}/holdings`, request);
+  }
+
+  /**
+   * Update a holding
+   */
+  updateHolding(portfolioId: string, holdingId: string, request: UpdateHoldingRequest): Observable<Holding> {
+    return this.api.patch<Holding>(`/portfolios/${portfolioId}/holdings/${holdingId}`, request);
+  }
+
+  /**
+   * Delete a holding
+   */
+  deleteHolding(portfolioId: string, holdingId: string): Observable<void> {
+    return this.api.delete<void>(`/portfolios/${portfolioId}/holdings/${holdingId}`);
   }
 }

@@ -4,14 +4,15 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PortfolioFacadeService } from '../../services/portfolio-facade.service';
-import { Portfolio } from '../../../../shared/models/portfolio.model';
+import { Portfolio, AddHoldingRequest } from '../../../../shared/models/portfolio.model';
 import { PortfolioSummaryComponent } from '../portfolio-summary/portfolio-summary.component';
 import { PortfolioTableComponent } from '../portfolio-table/portfolio-table.component';
+import { AddHoldingDialogComponent } from '../../../holdings/components/add-holding-dialog/add-holding-dialog.component';
 
 @Component({
   selector: 'app-portfolio-dashboard',
   standalone: true,
-  imports: [CommonModule, PortfolioSummaryComponent, PortfolioTableComponent],
+  imports: [CommonModule, PortfolioSummaryComponent, PortfolioTableComponent, AddHoldingDialogComponent],
   templateUrl: './portfolio-dashboard.component.html',
   styleUrl: './portfolio-dashboard.component.scss',
 })
@@ -25,6 +26,7 @@ export class PortfolioDashboardComponent implements OnInit {
   protected readonly loading = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
   protected readonly lastUpdated = signal<Date | null>(null);
+  protected readonly isAddHoldingDialogOpen = signal<boolean>(false);
 
   // Computed signals
   protected readonly hasPortfolios = computed(() => this.portfolios().length > 0);
@@ -90,5 +92,32 @@ export class PortfolioDashboardComponent implements OnInit {
     } else {
       this.portfolioFacade.loadPortfolios();
     }
+  }
+
+  /**
+   * Open add holding dialog
+   */
+  onOpenAddHoldingDialog(): void {
+    this.isAddHoldingDialogOpen.set(true);
+  }
+
+  /**
+   * Close add holding dialog
+   */
+  onCloseAddHoldingDialog(): void {
+    this.isAddHoldingDialogOpen.set(false);
+  }
+
+  /**
+   * Handle adding a holding
+   */
+  onAddHolding(request: AddHoldingRequest): void {
+    const portfolioId = this.selectedPortfolio()?.id;
+    if (!portfolioId) {
+      return;
+    }
+
+    this.portfolioFacade.addHolding(portfolioId, request);
+    this.isAddHoldingDialogOpen.set(false);
   }
 }
