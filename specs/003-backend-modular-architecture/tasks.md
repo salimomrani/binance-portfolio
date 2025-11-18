@@ -20,10 +20,10 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Tasks
 
-- [ ] T001 Verify backend directory structure matches plan.md expectations
-- [ ] T002 Create test infrastructure directory `backend/tests/` with `setup.ts` for test database configuration
-- [ ] T003 [P] Create test helper file `backend/tests/helpers.ts` with common test utilities
-- [ ] T004 Verify all existing modules compile and current tests pass
+- [X] T001 Verify backend directory structure matches plan.md expectations
+- [X] T002 Create test infrastructure directory `tests/` with `setup.ts` for test database configuration
+- [X] T003 [P] Create test helper file `tests/helpers.ts` with common test utilities
+- [X] T004 Verify all existing modules compile and current tests pass
 
 **Exit Criteria**: Test infrastructure ready, baseline established, all existing tests passing
 
