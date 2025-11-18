@@ -32,17 +32,30 @@ export interface EarningsSummary {
   }[];
 }
 
-export class EarningsService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly binanceAdapter: BinanceAdapter
-  ) {}
+/**
+ * Earnings Service Type
+ */
+export type EarningsService = {
+  syncEarnPositions: (userId: string) => Promise<EarnSyncResult>;
+  syncRewardsHistory: (userId: string, startTime?: number, endTime?: number) => Promise<number>;
+  getEarningsSummary: (userId: string) => Promise<EarningsSummary>;
+  getEarnPositions: (userId: string) => Promise<any[]>;
+  getRewardsHistory: (userId: string, startDate?: Date, endDate?: Date, asset?: string) => Promise<any[]>;
+};
 
+/**
+ * Create Earnings Service
+ * Factory function for creating earnings service instance
+ */
+export const createEarningsService = (
+  prisma: PrismaClient,
+  binanceAdapter: BinanceAdapter
+): EarningsService => ({
   /**
    * Sync earn positions from Binance
    * Fetches all flexible and locked positions and stores them in the database
    */
-  async syncEarnPositions(userId: string): Promise<EarnSyncResult> {
+  syncEarnPositions: async (userId: string) => {
     const errors: string[] = [];
     let positionsAdded = 0;
     let positionsUpdated = 0;
@@ -50,7 +63,7 @@ export class EarningsService {
 
     try {
       // Validate user exists
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: userId },
       });
 
@@ -60,7 +73,7 @@ export class EarningsService {
 
       // Fetch all earn positions from Binance
       logger.info(`Fetching Binance Earn positions for user ${userId}`);
-      const positions = await this.binanceAdapter.getAllEarnPositions();
+      const positions = await binanceAdapter.getAllEarnPositions();
 
       if (positions.length === 0) {
         logger.info('No earn positions found in Binance account');
@@ -79,7 +92,7 @@ export class EarningsService {
       for (const position of positions) {
         try {
           // Check if position already exists
-          const existingPosition = await this.prisma.earnPosition.findUnique({
+          const existingPosition = await prisma.earnPosition.findUnique({
             where: {
               userId_productId_asset: {
                 userId,
@@ -91,7 +104,7 @@ export class EarningsService {
 
           if (existingPosition) {
             // Update existing position
-            await this.prisma.earnPosition.update({
+            await prisma.earnPosition.update({
               where: { id: existingPosition.id },
               data: {
                 amount: new Decimal(position.amount),
@@ -112,7 +125,7 @@ export class EarningsService {
             );
           } else {
             // Create new position
-            await this.prisma.earnPosition.create({
+            await prisma.earnPosition.create({
               data: {
                 userId,
                 asset: position.asset,
@@ -148,14 +161,14 @@ export class EarningsService {
       const currentPositionKeys = positions.map(
         p => `${p.productId}-${p.asset}`
       );
-      const existingPositions = await this.prisma.earnPosition.findMany({
+      const existingPositions = await prisma.earnPosition.findMany({
         where: { userId },
       });
 
       for (const existing of existingPositions) {
         const key = `${existing.productId}-${existing.asset}`;
         if (!currentPositionKeys.includes(key)) {
-          await this.prisma.earnPosition.delete({
+          await prisma.earnPosition.delete({
             where: { id: existing.id },
           });
           logger.info(
@@ -179,20 +192,16 @@ export class EarningsService {
       logger.error('Binance Earn sync failed:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Sync rewards history from Binance
    * Fetches rewards for the specified time period
    */
-  async syncRewardsHistory(
-    userId: string,
-    startTime?: number,
-    endTime?: number
-  ): Promise<number> {
+  syncRewardsHistory: async (userId: string, startTime?: number, endTime?: number) => {
     try {
       // Validate user exists
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: userId },
       });
 
@@ -202,7 +211,7 @@ export class EarningsService {
 
       // Fetch all rewards history from Binance
       logger.info(`Fetching Binance Earn rewards history for user ${userId}`);
-      const rewards = await this.binanceAdapter.getAllRewardsHistory(
+      const rewards = await binanceAdapter.getAllRewardsHistory(
         undefined,
         startTime,
         endTime
@@ -221,7 +230,7 @@ export class EarningsService {
       for (const reward of rewards) {
         try {
           // Find matching position if available
-          const position = await this.prisma.earnPosition.findFirst({
+          const position = await prisma.earnPosition.findFirst({
             where: {
               userId,
               asset: reward.asset,
@@ -230,7 +239,7 @@ export class EarningsService {
           });
 
           // Check if reward already exists (to avoid duplicates)
-          const existingReward = await this.prisma.earnReward.findFirst({
+          const existingReward = await prisma.earnReward.findFirst({
             where: {
               userId,
               asset: reward.asset,
@@ -241,7 +250,7 @@ export class EarningsService {
           });
 
           if (!existingReward) {
-            await this.prisma.earnReward.create({
+            await prisma.earnReward.create({
               data: {
                 userId,
                 positionId: position?.id,
@@ -267,15 +276,15 @@ export class EarningsService {
       logger.error('Binance rewards sync failed:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get earnings summary for a user
    */
-  async getEarningsSummary(userId: string): Promise<EarningsSummary> {
+  getEarningsSummary: async (userId: string) => {
     try {
       // Get all positions
-      const positions = await this.prisma.earnPosition.findMany({
+      const positions = await prisma.earnPosition.findMany({
         where: { userId },
       });
 
@@ -283,7 +292,7 @@ export class EarningsService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const rewardsLast30Days = await this.prisma.earnReward.findMany({
+      const rewardsLast30Days = await prisma.earnReward.findMany({
         where: {
           userId,
           rewardDate: {
@@ -293,7 +302,7 @@ export class EarningsService {
       });
 
       // Get all-time rewards
-      const allRewards = await this.prisma.earnReward.findMany({
+      const allRewards = await prisma.earnReward.findMany({
         where: { userId },
       });
 
@@ -338,28 +347,28 @@ export class EarningsService {
       logger.error('Failed to get earnings summary:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get all earn positions for a user
    */
-  async getEarnPositions(userId: string) {
-    return this.prisma.earnPosition.findMany({
+  getEarnPositions: async (userId: string) => {
+    return prisma.earnPosition.findMany({
       where: { userId },
       orderBy: [{ type: 'asc' }, { asset: 'asc' }],
     });
-  }
+  },
 
   /**
    * Get rewards history for a user
    */
-  async getRewardsHistory(
+  getRewardsHistory: async (
     userId: string,
     startDate?: Date,
     endDate?: Date,
     asset?: string
-  ) {
-    return this.prisma.earnReward.findMany({
+  ) => {
+    return prisma.earnReward.findMany({
       where: {
         userId,
         ...(startDate && { rewardDate: { gte: startDate } }),
@@ -368,5 +377,5 @@ export class EarningsService {
       },
       orderBy: { rewardDate: 'desc' },
     });
-  }
-}
+  },
+});

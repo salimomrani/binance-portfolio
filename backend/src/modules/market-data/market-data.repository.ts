@@ -5,46 +5,14 @@ import { PrismaClient, PriceCache, PriceHistory, Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { CryptoPrice, CryptoMarketData, PriceHistory as PriceHistoryType, Timeframe } from './market-data.types';
 
-export class MarketDataRepository {
-  constructor(private readonly prisma: PrismaClient) {}
-
-  // ============================================================
-  // Price Cache Operations
-  // ============================================================
-
-  /**
-   * Find cached price by symbol
-   */
-  async findBySymbol(symbol: string): Promise<PriceCache | null> {
-    return this.prisma.priceCache.findUnique({
-      where: { symbol },
-    });
-  }
-
-  /**
-   * Find multiple cached prices by symbols
-   */
-  async findBySymbols(symbols: string[]): Promise<PriceCache[]> {
-    return this.prisma.priceCache.findMany({
-      where: {
-        symbol: {
-          in: symbols,
-        },
-      },
-    });
-  }
-
-  /**
-   * Get all cached prices
-   */
-  async findAll(): Promise<PriceCache[]> {
-    return this.prisma.priceCache.findMany();
-  }
-
-  /**
-   * Upsert price cache for a single symbol
-   */
-  async upsert(data: {
+/**
+ * Market Data Repository Type
+ */
+export type MarketDataRepository = {
+  findBySymbol: (symbol: string) => Promise<PriceCache | null>;
+  findBySymbols: (symbols: string[]) => Promise<PriceCache[]>;
+  findAll: () => Promise<PriceCache[]>;
+  upsert: (data: {
     symbol: string;
     name: string;
     price: number;
@@ -57,8 +25,100 @@ export class MarketDataRepository {
     high24h?: number | null;
     low24h?: number | null;
     lastUpdated: Date;
-  }): Promise<PriceCache> {
-    return this.prisma.priceCache.upsert({
+  }) => Promise<PriceCache>;
+  upsertMany: (prices: Array<{
+    symbol: string;
+    name: string;
+    price: number;
+    change1h: number;
+    change24h: number;
+    change7d: number;
+    change30d: number;
+    volume24h: number;
+    marketCap: number;
+    high24h?: number | null;
+    low24h?: number | null;
+    lastUpdated: Date;
+  }>) => Promise<void>;
+  deleteStale: (olderThan: Date) => Promise<number>;
+  findHistoricalPrices: (symbol: string, timeframe: Timeframe) => Promise<PriceHistory[]>;
+  findHistoricalPricesByDateRange: (
+    symbol: string,
+    timeframe: Timeframe,
+    startDate: Date,
+    endDate: Date
+  ) => Promise<PriceHistory[]>;
+  createHistoricalPrices: (
+    symbol: string,
+    timeframe: Timeframe,
+    history: Array<{ timestamp: Date; price: number; volume: number }>
+  ) => Promise<void>;
+  deleteHistoricalPrices: (symbol: string, timeframe: Timeframe) => Promise<number>;
+  deleteHistoricalPricesOlderThan: (olderThan: Date) => Promise<number>;
+  replaceHistoricalPrices: (
+    symbol: string,
+    timeframe: Timeframe,
+    history: Array<{ timestamp: Date; price: number; volume: number }>
+  ) => Promise<void>;
+};
+
+/**
+ * Create Market Data Repository
+ * Factory function for creating market data repository instance
+ */
+export const createMarketDataRepository = (prisma: PrismaClient): MarketDataRepository => ({
+
+  // ============================================================
+  // Price Cache Operations
+  // ============================================================
+
+  /**
+   * Find cached price by symbol
+   */
+  findBySymbol: async (symbol: string) => {
+    return prisma.priceCache.findUnique({
+      where: { symbol },
+    });
+  },
+
+  /**
+   * Find multiple cached prices by symbols
+   */
+  findBySymbols: async (symbols: string[]) => {
+    return prisma.priceCache.findMany({
+      where: {
+        symbol: {
+          in: symbols,
+        },
+      },
+    });
+  },
+
+  /**
+   * Get all cached prices
+   */
+  findAll: async () => {
+    return prisma.priceCache.findMany();
+  },
+
+  /**
+   * Upsert price cache for a single symbol
+   */
+  upsert: async (data: {
+    symbol: string;
+    name: string;
+    price: number;
+    change1h: number;
+    change24h: number;
+    change7d: number;
+    change30d: number;
+    volume24h: number;
+    marketCap: number;
+    high24h?: number | null;
+    low24h?: number | null;
+    lastUpdated: Date;
+  }) => {
+    return prisma.priceCache.upsert({
       where: { symbol: data.symbol },
       create: {
         symbol: data.symbol,
@@ -88,12 +148,12 @@ export class MarketDataRepository {
         lastUpdated: data.lastUpdated,
       },
     });
-  }
+  },
 
   /**
    * Upsert multiple price caches in a transaction
    */
-  async upsertMany(prices: Array<{
+  upsertMany: async (prices: Array<{
     symbol: string;
     name: string;
     price: number;
@@ -106,10 +166,10 @@ export class MarketDataRepository {
     high24h?: number | null;
     low24h?: number | null;
     lastUpdated: Date;
-  }>): Promise<void> {
-    await this.prisma.$transaction(
+  }>) => {
+    await prisma.$transaction(
       prices.map(data =>
-        this.prisma.priceCache.upsert({
+        prisma.priceCache.upsert({
           where: { symbol: data.symbol },
           create: {
             symbol: data.symbol,
@@ -141,13 +201,13 @@ export class MarketDataRepository {
         })
       )
     );
-  }
+  },
 
   /**
    * Delete stale price cache entries older than specified date
    */
-  async deleteStale(olderThan: Date): Promise<number> {
-    const result = await this.prisma.priceCache.deleteMany({
+  deleteStale: async (olderThan: Date) => {
+    const result = await prisma.priceCache.deleteMany({
       where: {
         lastUpdated: {
           lt: olderThan,
@@ -155,7 +215,7 @@ export class MarketDataRepository {
       },
     });
     return result.count;
-  }
+  },
 
   // ============================================================
   // Price History Operations
@@ -164,8 +224,8 @@ export class MarketDataRepository {
   /**
    * Find historical prices by symbol and timeframe
    */
-  async findHistoricalPrices(symbol: string, timeframe: Timeframe): Promise<PriceHistory[]> {
-    return this.prisma.priceHistory.findMany({
+  findHistoricalPrices: async (symbol: string, timeframe: Timeframe) => {
+    return prisma.priceHistory.findMany({
       where: {
         symbol,
         timeframe,
@@ -174,18 +234,18 @@ export class MarketDataRepository {
         timestamp: 'asc',
       },
     });
-  }
+  },
 
   /**
    * Find historical prices by symbol, timeframe, and date range
    */
-  async findHistoricalPricesByDateRange(
+  findHistoricalPricesByDateRange: async (
     symbol: string,
     timeframe: Timeframe,
     startDate: Date,
     endDate: Date
-  ): Promise<PriceHistory[]> {
-    return this.prisma.priceHistory.findMany({
+  ) => {
+    return prisma.priceHistory.findMany({
       where: {
         symbol,
         timeframe,
@@ -198,17 +258,17 @@ export class MarketDataRepository {
         timestamp: 'asc',
       },
     });
-  }
+  },
 
   /**
    * Create historical price records in bulk
    */
-  async createHistoricalPrices(
+  createHistoricalPrices: async (
     symbol: string,
     timeframe: Timeframe,
     history: Array<{ timestamp: Date; price: number; volume: number }>
-  ): Promise<void> {
-    await this.prisma.priceHistory.createMany({
+  ) => {
+    await prisma.priceHistory.createMany({
       data: history.map(record => ({
         symbol,
         timeframe,
@@ -218,26 +278,26 @@ export class MarketDataRepository {
       })),
       skipDuplicates: true, // Skip if same symbol/timeframe/timestamp already exists
     });
-  }
+  },
 
   /**
    * Delete historical prices by symbol and timeframe
    */
-  async deleteHistoricalPrices(symbol: string, timeframe: Timeframe): Promise<number> {
-    const result = await this.prisma.priceHistory.deleteMany({
+  deleteHistoricalPrices: async (symbol: string, timeframe: Timeframe) => {
+    const result = await prisma.priceHistory.deleteMany({
       where: {
         symbol,
         timeframe,
       },
     });
     return result.count;
-  }
+  },
 
   /**
    * Delete historical prices older than specified date
    */
-  async deleteHistoricalPricesOlderThan(olderThan: Date): Promise<number> {
-    const result = await this.prisma.priceHistory.deleteMany({
+  deleteHistoricalPricesOlderThan: async (olderThan: Date) => {
+    const result = await prisma.priceHistory.deleteMany({
       where: {
         timestamp: {
           lt: olderThan,
@@ -245,18 +305,18 @@ export class MarketDataRepository {
       },
     });
     return result.count;
-  }
+  },
 
   /**
    * Replace historical prices for a symbol and timeframe
    * (Delete existing + Insert new in a transaction)
    */
-  async replaceHistoricalPrices(
+  replaceHistoricalPrices: async (
     symbol: string,
     timeframe: Timeframe,
     history: Array<{ timestamp: Date; price: number; volume: number }>
-  ): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+  ) => {
+    await prisma.$transaction(async (tx) => {
       // Delete old records
       await tx.priceHistory.deleteMany({
         where: {
@@ -276,5 +336,5 @@ export class MarketDataRepository {
         })),
       });
     });
-  }
-}
+  },
+});
