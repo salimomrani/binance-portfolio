@@ -22,6 +22,16 @@ dist/
 build/
 *.log
 
+# TypeScript build artifacts (only keep .ts files in source)
+backend/src/**/*.js
+backend/src/**/*.d.ts
+backend/src/**/*.js.map
+backend/src/**/*.d.ts.map
+backend/tests/**/*.js
+backend/tests/**/*.d.ts
+backend/tests/**/*.js.map
+backend/tests/**/*.d.ts.map
+
 # Database
 *.sqlite
 *.sqlite3
