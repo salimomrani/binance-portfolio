@@ -111,12 +111,20 @@ export class BinanceSyncService {
             continue;
           }
 
-          // Get current price
-          const priceData = prices.get(symbol);
+          // Get current price - try from batch fetch first
+          let priceData = prices.get(symbol);
+
+          // If no price data from batch fetch (likely no USDT pair), try individual fetch with fallback
           if (!priceData) {
-            logger.warn(`No price data found for ${symbol}, skipping`);
-            errors.push(`No price data available for ${symbol}`);
-            continue;
+            logger.info(`No USDT pair for ${symbol}, trying individual price fetch with fallback`);
+            try {
+              priceData = await this.marketData.getCurrentPrice(symbol);
+              logger.info(`Successfully fetched price for ${symbol} using fallback: $${priceData.price}`);
+            } catch (fallbackError) {
+              logger.warn(`Failed to fetch price for ${symbol} even with fallback:`, fallbackError);
+              errors.push(`No price data available for ${symbol} (no USDT pair and fallback failed)`);
+              continue;
+            }
           }
 
           const currentPrice = priceData.price;
