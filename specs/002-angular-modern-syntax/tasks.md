@@ -16,20 +16,20 @@ This task list breaks down the Angular modern syntax migration into atomic, test
 
 **Goal**: Prepare environment and establish baseline metrics
 
-- [ ] **T001** [P1] [SETUP] Create feature branch and verify Angular 17+ installed
+- [X] **T001** [P1] [SETUP] Create feature branch and verify Angular 17+ installed
   - `git checkout -b 002-angular-modern-syntax`
   - Verify `package.json` has Angular 17+
   - Run `npm install` to ensure dependencies installed
   - Verify build succeeds: `npm run build`
 
-- [ ] **T002** [P1] [SETUP] Document baseline metrics for comparison
+- [X] **T002** [P1] [SETUP] Document baseline metrics for comparison
   - Run `npm run build -- --stats-json`
   - Record bundle size from `dist/stats.json`
   - Run `npm test` and record pass rate
   - Document TypeScript/ESLint warnings count
   - Save metrics to `specs/002-angular-modern-syntax/baseline-metrics.md`
 
-- [ ] **T003** [P1] [SETUP] Create testing utilities for signal components
+- [X] **T003** [P1] [SETUP] Create testing utilities for signal components
   - Create `frontend/src/app/testing/signal-test-helpers.ts`
   - Add helper: `setComponentInput(fixture, inputName, value)`
   - Add helper: `getComponentSignal(component, signalName)`
