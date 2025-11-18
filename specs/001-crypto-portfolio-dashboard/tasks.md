@@ -576,9 +576,9 @@
 
 ### Frontend: Watchlist Models & Store
 
-- [ ] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
-- [ ] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
-- [ ] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
+- [X] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
+- [X] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
+- [X] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
 
 ### Frontend: Watchlist Panel Component
 
