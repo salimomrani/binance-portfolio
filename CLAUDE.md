@@ -56,55 +56,114 @@ frontend/
 └── tests/
 ```
 
-## Backend Architecture Patterns (003-backend-modular-architecture)
+## Backend Architecture Patterns (004-backend-functional-refactor)
 
 ### Layered Architecture
 All backend modules follow this pattern:
 ```
-Routes → Controller → Service → Repository → Database
+Routes → Controller (Handlers) → Service → Repository → Database
 ```
 
-### Module Structure Template
+### Functional Module Pattern
+**Use functions, NOT classes.** All backend code uses functional patterns with factory functions for dependency injection.
+
 ```typescript
-// Routes: Define endpoints and middleware
-export function createXxxRoutes(controller: XxxController): Router
+// Repository: Type definition + factory function
+export type XxxRepository = {
+  findById: (id: string) => Promise<Entity | null>;
+  create: (data: CreateDto) => Promise<Entity>;
+};
 
-// Controller: Handle HTTP concerns (req/res)
-export class XxxController {
-  constructor(private readonly service: XxxService) {}
-}
+export const createXxxRepository = (prisma: PrismaClient): XxxRepository => ({
+  findById: async (id) => prisma.entity.findUnique({ where: { id } }),
+  create: async (data) => prisma.entity.create({ data }),
+});
 
-// Service: Implement business logic
-export class XxxService {
-  constructor(private readonly repository: XxxRepository) {}
-}
+// Service: Type definition + factory function
+export type XxxService = {
+  getEntity: (id: string) => Promise<EntityDto>;
+  createEntity: (data: CreateDto) => Promise<EntityDto>;
+};
 
-// Repository: Abstract data access
-export class XxxRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export const createXxxService = (repository: XxxRepository): XxxService => ({
+  getEntity: async (id) => {
+    const entity = await repository.findById(id);
+    if (!entity) throw new Error('Entity not found');
+    return entity;
+  },
+  createEntity: async (data) => repository.create(data),
+});
+
+// Controller: Handler factory functions
+export const createGetEntityHandler = (service: XxxService) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const entity = await service.getEntity(req.params.id);
+      res.json({ success: true, data: entity, timestamp: new Date().toISOString() });
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+// Routes: Default export with handler collection
+export default function createXxxRoutes(handlers: XxxHandlers): Router {
+  const router = Router();
+  router.get('/:id', handlers.getEntity);
+  router.post('/', validateRequest(CreateXxxSchema), handlers.createEntity);
+  return router;
 }
 
 // Validation: Define Zod schemas
 export const CreateXxxSchema = z.object({ ... })
 ```
 
-### Dependency Injection
-All dependencies are explicitly injected in `app.ts`:
+### Dependency Injection (Functional Composition)
+All dependencies are explicitly composed in `app.ts` using factory functions:
 ```typescript
 const prisma = new PrismaClient();
-const repo = new XxxRepository(prisma);
-const service = new XxxService(repo);
-const controller = new XxxController(service);
-const routes = createXxxRoutes(controller);
-app.use('/api/xxx', routes);
+
+// Bottom-up composition: Repository → Service → Handlers → Routes
+const xxxRepo = createXxxRepository(prisma);
+const xxxService = createXxxService(xxxRepo);
+const xxxHandlers = {
+  getEntity: createGetEntityHandler(xxxService),
+  createEntity: createCreateEntityHandler(xxxService),
+};
+const xxxRoutes = createXxxRoutes(xxxHandlers);
+
+app.use('/api/xxx', xxxRoutes);
+```
+
+### Export Strategy
+- **Named exports**: Use for types, factory functions, handlers (everything except routes)
+- **Default export**: Use ONLY for route factory functions
+```typescript
+// Named exports (standard)
+export type XxxService = { ... };
+export const createXxxService = (...) => { ... };
+export const createGetXxxHandler = (...) => { ... };
+
+// Default export (routes only)
+export default function createXxxRoutes(...): Router { ... }
 ```
 
 ### Testing Strategy
 - Repository: Integration tests with real database (90%+ coverage)
-- Service: Unit tests with mocked repository (95%+ coverage)
+- Service: Unit tests with simple object mocks (95%+ coverage)
 - Controller: Unit tests with mocked service (90%+ coverage)
 - Routes: E2E tests with Supertest (80%+ coverage)
 - Overall: 85%+ coverage required
+
+**Testing is simpler**: Use plain objects for mocks (no mocking frameworks needed)
+```typescript
+// Simple object mock
+const mockRepo: XxxRepository = {
+  findById: jest.fn(),
+  create: jest.fn(),
+};
+const service = createXxxService(mockRepo);
+```
 
 ## Angular Modern Syntax (002-angular-modern-syntax)
 
@@ -146,14 +205,18 @@ npm test             # Run tests
 
 ### Backend
 - Use TypeScript strict mode
-- Use constructor injection for dependencies
-- Follow layered architecture (Routes → Controller → Service → Repository)
+- **Use functions, NOT classes** - functional programming patterns only
+- Use factory functions for dependency injection (e.g., `createXxxService(deps)`)
+- Use **named exports** for everything except routes (which use default export)
+- Follow layered architecture (Routes → Handlers → Service → Repository)
 - Repository layer handles ALL Prisma queries
 - Service layer handles ALL business logic
-- Controller layer handles ONLY HTTP concerns
+- Controller layer (handlers) handles ONLY HTTP concerns
+- Export types before implementations: `export type XxxService = { ... }`
 - Use Zod for validation
-- Response format: `{ data, meta?, message? }`
+- Response format: `{ success, data, timestamp, message? }`
 - Error handling: Pass to `next(error)` middleware
+- Testing: Use simple object mocks (no mocking frameworks needed)
 
 ### Frontend
 - Use Angular standalone components
@@ -166,8 +229,8 @@ npm test             # Run tests
 - Follow reactive programming patterns
 
 ## Recent Changes
+- 004-backend-functional-refactor: Refactored backend to use functional patterns (factory functions, named exports, no classes)
 - 002-angular-modern-syntax: Added TypeScript 5.3+, Angular 17+ + @angular/core 17+, RxJS 7+, @ngrx/store 18+
-
 - 003-backend-modular-architecture: Added planning documentation
 - 002-angular-modern-syntax: Added planning documentation
 - 001-crypto-portfolio-dashboard: Added
