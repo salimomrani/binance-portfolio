@@ -73,11 +73,9 @@
             @for (portfolio of portfolios(); track portfolio.id) {
               <button
                 (click)="onPortfolioSelect(portfolio.id)"
-                [class.bg-primary/10]="selectedPortfolio()?.id === portfolio.id"
-                [class.dark:bg-primary/20]="selectedPortfolio()?.id === portfolio.id"
-                [class.border-primary]="selectedPortfolio()?.id === portfolio.id"
-                [class.dark:border-primary-light]="selectedPortfolio()?.id === portfolio.id"
-                class="w-full text-left p-3 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-all duration-200"
+                [class]="selectedPortfolio()?.id === portfolio.id ?
+                  'w-full text-left p-3 border rounded-lg transition-all duration-200 bg-primary/10 dark:bg-primary/20 border-primary dark:border-primary-light' :
+                  'w-full text-left p-3 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-all duration-200'"
               >
                 <div class="font-medium text-gray-900 dark:text-neutral-100 transition-colors duration-200">{{ portfolio.name }}</div>
                 @if (portfolio.description) {
