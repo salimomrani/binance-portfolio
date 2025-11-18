@@ -550,9 +550,9 @@
 
 ### Backend: Watchlist Model & Service
 
-- [ ] T162 [P] [US5] Verify WatchlistItem model in backend/src/prisma/schema.prisma
-- [ ] T163 [P] [US5] Create backend/src/modules/watchlist/watchlist.validation.ts with AddToWatchlistSchema
-- [ ] T164 [US5] Create backend/src/modules/watchlist/watchlist.service.ts with methods:
+- [X] T162 [P] [US5] Verify WatchlistItem model in backend/src/prisma/schema.prisma
+- [X] T163 [P] [US5] Create backend/src/modules/watchlist/watchlist.validation.ts with AddToWatchlistSchema
+- [X] T164 [US5] Create backend/src/modules/watchlist/watchlist.service.ts with methods:
   - addToWatchlist(userId, data): Promise<WatchlistItem>
   - getWatchlist(userId): Promise<WatchlistItemDetails[]> (includes current prices)
   - removeFromWatchlist(userId, itemId): Promise<void>
@@ -560,15 +560,15 @@
 
 ### Backend: Watchlist Controller & Routes
 
-- [ ] T165 [US5] Create backend/src/modules/watchlist/watchlist.controller.ts with endpoints:
+- [X] T165 [US5] Create backend/src/modules/watchlist/watchlist.controller.ts with endpoints:
   - GET /api/watchlist (get user watchlist with prices)
   - POST /api/watchlist (add to watchlist)
   - DELETE /api/watchlist/:id (remove from watchlist)
-- [ ] T166 [US5] Register watchlist routes in backend/src/app.ts
+- [X] T166 [US5] Register watchlist routes in backend/src/app.ts
 
 ### Backend: Integration Tests
 
-- [ ] T167 [P] [US5] Write test in backend/tests/integration/watchlist.test.ts:
+- [X] T167 [P] [US5] Write test in backend/tests/integration/watchlist.test.ts:
   - Test adding to watchlist
   - Test fetching watchlist includes current prices
   - Test removing from watchlist
@@ -576,9 +576,9 @@
 
 ### Frontend: Watchlist Models & Store
 
-- [ ] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
-- [ ] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
-- [ ] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
+- [X] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
+- [X] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
+- [X] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
 
 ### Frontend: Watchlist Panel Component
 
