@@ -4,24 +4,42 @@ import { PrismaClient, Holding } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { AddHoldingDto, UpdateHoldingDto } from './holdings.validation';
 import { HoldingDetails } from '../portfolio/portfolio.types';
-import { MarketDataService } from '../market-data/market-data.service';
-import { CalculationsService } from '../../shared/services/calculations.service';
+import type { MarketDataService } from '../market-data/market-data.service';
+import type { CalculationsService } from '../../shared/services/calculations.service';
 import { logger } from '../../shared/services/logger.service';
 
-export class HoldingsService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly marketData: MarketDataService,
-    private readonly calculations: CalculationsService
-  ) {}
+/**
+ * Holdings Service Type
+ */
+export type HoldingsService = {
+  addHolding: (portfolioId: string, data: AddHoldingDto) => Promise<Holding>;
+  getHoldings: (
+    portfolioId: string,
+    sortBy?: 'symbol' | 'value' | 'gainLoss',
+    order?: 'asc' | 'desc'
+  ) => Promise<HoldingDetails[]>;
+  getHoldingById: (holdingId: string) => Promise<HoldingDetails>;
+  updateHolding: (holdingId: string, data: UpdateHoldingDto) => Promise<Holding>;
+  deleteHolding: (holdingId: string) => Promise<void>;
+  calculateHoldingValue: (holding: Holding) => Promise<HoldingDetails>;
+};
 
+/**
+ * Create Holdings Service
+ * Factory function for creating holdings service instance
+ */
+export const createHoldingsService = (
+  prisma: PrismaClient,
+  marketData: MarketDataService,
+  calculations: CalculationsService
+): HoldingsService => ({
   /**
    * Add a new holding to a portfolio
    */
-  async addHolding(portfolioId: string, data: AddHoldingDto): Promise<Holding> {
+  addHolding: async (portfolioId: string, data: AddHoldingDto) => {
     try {
       // Check if holding already exists
-      const existing = await this.prisma.holding.findUnique({
+      const existing = await prisma.holding.findUnique({
         where: {
           portfolioId_symbol: {
             portfolioId,
@@ -34,7 +52,7 @@ export class HoldingsService {
         throw new Error(`Holding for ${data.symbol} already exists in this portfolio`);
       }
 
-      const holding = await this.prisma.holding.create({
+      const holding = await prisma.holding.create({
         data: {
           portfolioId,
           symbol: data.symbol,
@@ -51,18 +69,18 @@ export class HoldingsService {
       logger.error('Error adding holding:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get all holdings for a portfolio with current values
    */
-  async getHoldings(
+  getHoldings: async (
     portfolioId: string,
     sortBy?: 'symbol' | 'value' | 'gainLoss',
     order: 'asc' | 'desc' = 'asc'
-  ): Promise<HoldingDetails[]> {
+  ) => {
     try {
-      const holdings = await this.prisma.holding.findMany({
+      const holdings = await prisma.holding.findMany({
         where: { portfolioId },
         orderBy: sortBy ? { [sortBy]: order } : { createdAt: 'asc' },
       });
@@ -73,7 +91,7 @@ export class HoldingsService {
 
       // Get current prices
       const symbols = holdings.map(h => h.symbol);
-      const prices = await this.marketData.getMultiplePrices(symbols);
+      const prices = await marketData.getMultiplePrices(symbols);
 
       // Calculate total portfolio value for allocation percentages
       let totalValue = new Decimal(0);
@@ -93,7 +111,7 @@ export class HoldingsService {
         const currentValue = holdingValues[index];
         const costBasis = quantity.times(avgCost);
 
-        const gainLoss = this.calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+        const gainLoss = calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
 
         const allocationPercentage = !totalValue.equals(0)
           ? currentValue.dividedBy(totalValue).times(100).toDecimalPlaces(2).toNumber()
@@ -139,14 +157,14 @@ export class HoldingsService {
       logger.error(`Error getting holdings for portfolio ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get a single holding by ID with current values
    */
-  async getHoldingById(holdingId: string): Promise<HoldingDetails> {
+  getHoldingById: async (holdingId: string) => {
     try {
-      const holding = await this.prisma.holding.findUnique({
+      const holding = await prisma.holding.findUnique({
         where: { id: holdingId },
       });
 
@@ -154,17 +172,17 @@ export class HoldingsService {
         throw new Error('Holding not found');
       }
 
-      return this.calculateHoldingValue(holding);
+      return calculateHoldingValueInternal(prisma, marketData, calculations, holding);
     } catch (error) {
       logger.error(`Error getting holding ${holdingId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Update a holding
    */
-  async updateHolding(holdingId: string, data: UpdateHoldingDto): Promise<Holding> {
+  updateHolding: async (holdingId: string, data: UpdateHoldingDto) => {
     try {
       const updateData: {
         quantity?: Decimal;
@@ -182,7 +200,7 @@ export class HoldingsService {
         updateData.notes = data.notes;
       }
 
-      const holding = await this.prisma.holding.update({
+      const holding = await prisma.holding.update({
         where: { id: holdingId },
         data: updateData,
       });
@@ -193,14 +211,14 @@ export class HoldingsService {
       logger.error(`Error updating holding ${holdingId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Delete a holding
    */
-  async deleteHolding(holdingId: string): Promise<void> {
+  deleteHolding: async (holdingId: string) => {
     try {
-      await this.prisma.holding.delete({
+      await prisma.holding.delete({
         where: { id: holdingId },
       });
 
@@ -209,44 +227,56 @@ export class HoldingsService {
       logger.error(`Error deleting holding ${holdingId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Calculate holding value with current price
    */
-  async calculateHoldingValue(holding: Holding): Promise<HoldingDetails> {
-    try {
-      const priceData = await this.marketData.getCurrentPrice(holding.symbol);
-      const currentPrice = priceData.price;
+  calculateHoldingValue: async (holding: Holding) => {
+    return calculateHoldingValueInternal(prisma, marketData, calculations, holding);
+  },
+});
 
-      const quantity = new Decimal(holding.quantity);
-      const avgCost = new Decimal(holding.averageCost);
-      const currentValue = quantity.times(currentPrice);
-      const costBasis = quantity.times(avgCost);
+/**
+ * Internal helper function to calculate holding value
+ */
+async function calculateHoldingValueInternal(
+  prisma: PrismaClient,
+  marketData: MarketDataService,
+  calculations: CalculationsService,
+  holding: Holding
+): Promise<HoldingDetails> {
+  try {
+    const priceData = await marketData.getCurrentPrice(holding.symbol);
+    const currentPrice = priceData.price;
 
-      const gainLoss = this.calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+    const quantity = new Decimal(holding.quantity);
+    const avgCost = new Decimal(holding.averageCost);
+    const currentValue = quantity.times(currentPrice);
+    const costBasis = quantity.times(avgCost);
 
-      return {
-        id: holding.id,
-        symbol: holding.symbol,
-        name: holding.name,
-        quantity: quantity.toNumber(),
-        averageCost: avgCost.toNumber(),
-        currentPrice,
-        currentValue: currentValue.toNumber(),
-        costBasis: costBasis.toNumber(),
-        gainLoss: gainLoss.amount.toNumber(),
-        gainLossPercentage: gainLoss.percentage.toNumber(),
-        allocationPercentage: 0, // Will be calculated in context of full portfolio
-        priceChange24h: priceData.change24h,
-        volume24h: priceData.volume24h,
-        marketCap: priceData.marketCap,
-        notes: holding.notes,
-        lastUpdated: new Date(),
-      };
-    } catch (error) {
-      logger.error(`Error calculating holding value for ${holding.id}:`, error);
-      throw error;
-    }
+    const gainLoss = calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+
+    return {
+      id: holding.id,
+      symbol: holding.symbol,
+      name: holding.name,
+      quantity: quantity.toNumber(),
+      averageCost: avgCost.toNumber(),
+      currentPrice,
+      currentValue: currentValue.toNumber(),
+      costBasis: costBasis.toNumber(),
+      gainLoss: gainLoss.amount.toNumber(),
+      gainLossPercentage: gainLoss.percentage.toNumber(),
+      allocationPercentage: 0, // Will be calculated in context of full portfolio
+      priceChange24h: priceData.change24h,
+      volume24h: priceData.volume24h,
+      marketCap: priceData.marketCap,
+      notes: holding.notes,
+      lastUpdated: new Date(),
+    };
+  } catch (error) {
+    logger.error(`Error calculating holding value for ${holding.id}:`, error);
+    throw error;
   }
 }

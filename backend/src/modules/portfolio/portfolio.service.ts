@@ -5,24 +5,39 @@ import { Portfolio } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './portfolio.validation';
 import { PortfolioSummary, PortfolioDetails, PortfolioStatistics, AllocationData } from './portfolio.types';
-import { PortfolioRepository } from './portfolio.repository';
-import { MarketDataService } from '../market-data/market-data.service';
-import { CalculationsService } from '../../shared/services/calculations.service';
+import type { PortfolioRepository } from './portfolio.repository';
+import type { MarketDataService } from '../market-data/market-data.service';
+import type { CalculationsService } from '../../shared/services/calculations.service';
 import { logger } from '../../shared/services/logger.service';
 
-export class PortfolioService {
-  constructor(
-    private readonly repository: PortfolioRepository,
-    private readonly marketData: MarketDataService,
-    private readonly calculations: CalculationsService
-  ) {}
+/**
+ * Portfolio Service Type
+ */
+export type PortfolioService = {
+  createPortfolio: (userId: string, data: CreatePortfolioDto) => Promise<Portfolio>;
+  getPortfolios: (userId: string) => Promise<PortfolioSummary[]>;
+  getPortfolioById: (portfolioId: string) => Promise<PortfolioDetails>;
+  updatePortfolio: (portfolioId: string, data: UpdatePortfolioDto) => Promise<Portfolio>;
+  deletePortfolio: (portfolioId: string) => Promise<void>;
+  calculatePortfolioStatistics: (portfolioId: string) => Promise<PortfolioStatistics>;
+  getPortfolioAllocation: (portfolioId: string) => Promise<AllocationData[]>;
+};
 
+/**
+ * Create Portfolio Service
+ * Factory function for creating portfolio service instance
+ */
+export const createPortfolioService = (
+  repository: PortfolioRepository,
+  marketData: MarketDataService,
+  calculations: CalculationsService
+): PortfolioService => ({
   /**
    * Create a new portfolio for a user
    */
-  async createPortfolio(userId: string, data: CreatePortfolioDto): Promise<Portfolio> {
+  createPortfolio: async (userId: string, data: CreatePortfolioDto) => {
     try {
-      const portfolio = await this.repository.create({
+      const portfolio = await repository.create({
         userId,
         name: data.name,
         description: data.description,
@@ -34,18 +49,22 @@ export class PortfolioService {
       logger.error('Error creating portfolio:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get all portfolios for a user with summary data
    */
-  async getPortfolios(userId: string): Promise<PortfolioSummary[]> {
+  getPortfolios: async (userId: string) => {
     try {
-      const portfolios = await this.repository.findAllWithHoldings(userId);
+      const portfolios = await repository.findAllWithHoldings(userId);
 
       const summaries = await Promise.all(
         portfolios.map(async portfolio => {
-          const summary = await this.calculatePortfolioSummary(portfolio.id);
+          const summary = await calculatePortfolioSummaryInternal(
+            repository,
+            marketData,
+            portfolio.id
+          );
           return {
             id: portfolio.id,
             name: portfolio.name,
@@ -63,14 +82,14 @@ export class PortfolioService {
       logger.error(`Error getting portfolios for user ${userId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get portfolio details with all holdings
    */
-  async getPortfolioById(portfolioId: string): Promise<PortfolioDetails> {
+  getPortfolioById: async (portfolioId: string) => {
     try {
-      const portfolio = await this.repository.findByIdWithHoldings(portfolioId);
+      const portfolio = await repository.findByIdWithHoldings(portfolioId);
 
       if (!portfolio) {
         throw new Error('Portfolio not found');
@@ -79,7 +98,7 @@ export class PortfolioService {
       // Get current prices for all holdings
       const symbols = portfolio.holdings.map(h => h.symbol);
       const prices = symbols.length > 0
-        ? await this.marketData.getMultiplePrices(symbols)
+        ? await marketData.getMultiplePrices(symbols)
         : new Map();
 
       // Calculate total portfolio value
@@ -96,7 +115,7 @@ export class PortfolioService {
         totalValue = totalValue.plus(currentValue);
         totalCostBasis = totalCostBasis.plus(costBasis);
 
-        const gainLoss = this.calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+        const gainLoss = calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
 
         return {
           id: holding.id,
@@ -149,14 +168,14 @@ export class PortfolioService {
       logger.error(`Error getting portfolio ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Update portfolio details
    */
-  async updatePortfolio(portfolioId: string, data: UpdatePortfolioDto): Promise<Portfolio> {
+  updatePortfolio: async (portfolioId: string, data: UpdatePortfolioDto) => {
     try {
-      const portfolio = await this.repository.update(portfolioId, data);
+      const portfolio = await repository.update(portfolioId, data);
 
       logger.info(`Updated portfolio ${portfolioId}`);
       return portfolio;
@@ -164,28 +183,29 @@ export class PortfolioService {
       logger.error(`Error updating portfolio ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Delete a portfolio
    */
-  async deletePortfolio(portfolioId: string): Promise<void> {
+  deletePortfolio: async (portfolioId: string) => {
     try {
-      await this.repository.delete(portfolioId);
+      await repository.delete(portfolioId);
 
       logger.info(`Deleted portfolio ${portfolioId}`);
     } catch (error) {
       logger.error(`Error deleting portfolio ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Calculate portfolio statistics
    */
-  async calculatePortfolioStatistics(portfolioId: string): Promise<PortfolioStatistics> {
+  calculatePortfolioStatistics: async (portfolioId: string) => {
     try {
-      const details = await this.getPortfolioById(portfolioId);
+      const service = createPortfolioService(repository, marketData, calculations);
+      const details = await service.getPortfolioById(portfolioId);
 
       let bestPerformer = null;
       let worstPerformer = null;
@@ -233,15 +253,16 @@ export class PortfolioService {
       logger.error(`Error calculating portfolio statistics ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get portfolio allocation data for charts
    * T124: Calculate allocation with unique colors per cryptocurrency
    */
-  async getPortfolioAllocation(portfolioId: string): Promise<AllocationData[]> {
+  getPortfolioAllocation: async (portfolioId: string) => {
     try {
-      const portfolio = await this.getPortfolioById(portfolioId);
+      const service = createPortfolioService(repository, marketData, calculations);
+      const portfolio = await service.getPortfolioById(portfolioId);
 
       if (portfolio.holdings.length === 0) {
         return [];
@@ -279,57 +300,26 @@ export class PortfolioService {
       logger.error(`Error getting portfolio allocation ${portfolioId}:`, error);
       throw error;
     }
-  }
+  },
+});
 
-  /**
-   * Helper: Calculate portfolio summary (used by getPortfolios)
-   */
-  private async calculatePortfolioSummary(portfolioId: string): Promise<{
-    totalValue: number;
-    totalGainLoss: number;
-    totalGainLossPercentage: number;
-    lastUpdated: Date;
-  }> {
-    try {
-      const holdings = await this.repository.findHoldings(portfolioId);
+/**
+ * Helper: Calculate portfolio summary (used by getPortfolios)
+ */
+async function calculatePortfolioSummaryInternal(
+  repository: PortfolioRepository,
+  marketData: MarketDataService,
+  portfolioId: string
+): Promise<{
+  totalValue: number;
+  totalGainLoss: number;
+  totalGainLossPercentage: number;
+  lastUpdated: Date;
+}> {
+  try {
+    const holdings = await repository.findHoldings(portfolioId);
 
-      if (holdings.length === 0) {
-        return {
-          totalValue: 0,
-          totalGainLoss: 0,
-          totalGainLossPercentage: 0,
-          lastUpdated: new Date(),
-        };
-      }
-
-      const symbols = holdings.map(h => h.symbol);
-      const prices = await this.marketData.getMultiplePrices(symbols);
-
-      let totalValue = new Decimal(0);
-      let totalCostBasis = new Decimal(0);
-
-      holdings.forEach(holding => {
-        const currentPrice = prices.get(holding.symbol)?.price || 0;
-        const quantity = new Decimal(holding.quantity);
-        const avgCost = new Decimal(holding.averageCost);
-
-        totalValue = totalValue.plus(quantity.times(currentPrice));
-        totalCostBasis = totalCostBasis.plus(quantity.times(avgCost));
-      });
-
-      const totalGainLoss = totalValue.minus(totalCostBasis);
-      const totalGainLossPercentage = !totalCostBasis.equals(0)
-        ? totalGainLoss.dividedBy(totalCostBasis).times(100).toNumber()
-        : 0;
-
-      return {
-        totalValue: totalValue.toNumber(),
-        totalGainLoss: totalGainLoss.toNumber(),
-        totalGainLossPercentage,
-        lastUpdated: new Date(),
-      };
-    } catch (error) {
-      logger.error(`Error calculating summary for portfolio ${portfolioId}:`, error);
+    if (holdings.length === 0) {
       return {
         totalValue: 0,
         totalGainLoss: 0,
@@ -337,5 +327,40 @@ export class PortfolioService {
         lastUpdated: new Date(),
       };
     }
+
+    const symbols = holdings.map(h => h.symbol);
+    const prices = await marketData.getMultiplePrices(symbols);
+
+    let totalValue = new Decimal(0);
+    let totalCostBasis = new Decimal(0);
+
+    holdings.forEach(holding => {
+      const currentPrice = prices.get(holding.symbol)?.price || 0;
+      const quantity = new Decimal(holding.quantity);
+      const avgCost = new Decimal(holding.averageCost);
+
+      totalValue = totalValue.plus(quantity.times(currentPrice));
+      totalCostBasis = totalCostBasis.plus(quantity.times(avgCost));
+    });
+
+    const totalGainLoss = totalValue.minus(totalCostBasis);
+    const totalGainLossPercentage = !totalCostBasis.equals(0)
+      ? totalGainLoss.dividedBy(totalCostBasis).times(100).toNumber()
+      : 0;
+
+    return {
+      totalValue: totalValue.toNumber(),
+      totalGainLoss: totalGainLoss.toNumber(),
+      totalGainLossPercentage,
+      lastUpdated: new Date(),
+    };
+  } catch (error) {
+    logger.error(`Error calculating summary for portfolio ${portfolioId}:`, error);
+    return {
+      totalValue: 0,
+      totalGainLoss: 0,
+      totalGainLossPercentage: 0,
+      lastUpdated: new Date(),
+    };
   }
 }
