@@ -1,9 +1,9 @@
 import { PrismaClient, PriceCache } from '@prisma/client';
-import { MarketDataRepository } from '../market-data.repository';
+import { MarketDataRepository, createMarketDataRepository } from '../market-data.repository';
 
 /**
  * MarketDataRepository Integration Tests
- * 
+ *
  * These are integration tests that use a real test database.
  * Tests all CRUD operations and specialized queries.
  * Target: 90%+ coverage
@@ -22,7 +22,7 @@ describe('MarketDataRepository Integration Tests', () => {
       }
     });
     await prisma.$connect();
-    repository = new MarketDataRepository(prisma);
+    repository = createMarketDataRepository(prisma);
   });
 
   afterAll(async () => {
