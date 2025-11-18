@@ -20,6 +20,10 @@ import { HoldingsController } from './modules/holdings/holdings.controller';
 import { createTransactionService } from './modules/holdings/transaction.service';
 import { createEarningsService } from './modules/earnings/earnings.service';
 import createEarningsRouter from './modules/earnings/earnings.routes';
+import { createWatchlistRepository } from './modules/watchlist/watchlist.repository';
+import { createWatchlistService } from './modules/watchlist/watchlist.service';
+import { WatchlistController } from './modules/watchlist/watchlist.controller';
+import { createWatchlistRoutes } from './modules/watchlist/watchlist.routes';
 
 /**
  * Create and configure Express application
@@ -50,18 +54,20 @@ export function createApp(): Application {
     );
   });
 
-  // Initialize services and controllers (T067-T068, T120)
+  // Initialize services and controllers (T067-T068, T120, T166)
   const { prisma, cacheService } = initializeServices();
   const marketDataRouter = initializeMarketDataRouter(prisma, cacheService);
   const portfolioRouter = initializePortfolioRouter(prisma, cacheService);
   const holdingsController = initializeHoldingsController(prisma, cacheService);
   const earningsRouter = initializeEarningsRouter(prisma, cacheService);
+  const watchlistRouter = initializeWatchlistRouter(prisma, cacheService);
 
   // API routes
   app.use('/api/market', marketDataRouter);
   app.use('/api/portfolios', portfolioRouter);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
   app.use('/api/earnings', earningsRouter);
+  app.use('/api/watchlist', watchlistRouter);
 
   // 404 handler
   app.use(notFoundHandler);
@@ -172,4 +178,27 @@ function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheServi
   const earningsService = createEarningsService(prisma, binanceAdapter);
 
   return createEarningsRouter(earningsService);
+}
+
+/**
+ * Initialize watchlist router with dependencies
+ * T166: Watchlist routes registration
+ */
+function initializeWatchlistRouter(prisma: PrismaClient, cacheService: CacheService) {
+  const marketData = new MarketDataService(
+    {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
+      cacheTTL: 60,
+      retryAttempts: 3,
+      retryDelay: 1000,
+    },
+    prisma,
+    cacheService
+  );
+  const watchlistRepo = createWatchlistRepository(prisma);
+  const watchlistService = createWatchlistService(watchlistRepo, marketData);
+  const watchlistController = new WatchlistController(watchlistService);
+
+  return createWatchlistRoutes(watchlistController);
 }
