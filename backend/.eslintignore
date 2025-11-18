@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Generated files
+**/*.js
+**/*.d.ts
+**/*.js.map
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Prisma generated
+prisma/client/
+.prisma/
