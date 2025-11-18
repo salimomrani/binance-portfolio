@@ -84,12 +84,12 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 ### Controller Refactoring (US1)
 
 - [X] T017 [US1] Refactor `backend/src/modules/portfolio/portfolio.controller.ts` to only handle HTTP concerns
-- [ ] T018 [US1] Create `backend/src/modules/portfolio/__tests__/portfolio.controller.test.ts` with unit tests using mocked service (90%+ coverage)
+- [X] T018 [US1] Create `backend/src/modules/portfolio/__tests__/portfolio.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
 - [X] T019 [US3] Create `backend/src/modules/portfolio/portfolio.routes.ts` with Express router factory function
-- [ ] T020 [US3] Create `backend/tests/integration/portfolio.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
+- [X] T020 [US3] Create `backend/tests/integration/portfolio.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:
 - Repository handles all Prisma queries
@@ -109,26 +109,26 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Repository Layer (US2)
 
-- [ ] T021 [US2] Create `backend/src/modules/holdings/holdings.repository.ts` with CRUD operations (findAll, findById, findBySymbol, findWithTransactions, create, update, delete, getTotalValue, getSymbols)
-- [ ] T022 [US2] Create `backend/src/modules/holdings/transaction.repository.ts` with CRUD operations (findAll, findById, findByDateRange, create, update, delete, getTotalInvested, getAveragePrice)
-- [ ] T023 [US2] Create `backend/src/modules/holdings/__tests__/holdings.repository.test.ts` with integration tests (90%+ coverage)
-- [ ] T024 [US2] Create `backend/src/modules/holdings/__tests__/transaction.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T021 [US2] Create `backend/src/modules/holdings/holdings.repository.ts` with CRUD operations (findAll, findById, findBySymbol, findWithTransactions, create, update, delete, getTotalValue, getSymbols)
+- [X] T022 [US2] Create `backend/src/modules/holdings/transaction.repository.ts` with CRUD operations (findAll, findById, findByDateRange, create, update, delete, getTotalInvested, getAveragePrice)
+- [X] T023 [US2] Create `backend/src/modules/holdings/__tests__/holdings.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T024 [US2] Create `backend/src/modules/holdings/__tests__/transaction.repository.test.ts` with integration tests (90%+ coverage)
 
 ### Service Refactoring (US2)
 
-- [ ] T025 [US2] Refactor `backend/src/modules/holdings/holdings.service.ts` to use HoldingRepository and TransactionRepository
-- [ ] T026 [US2] Refactor `backend/src/modules/holdings/transaction.service.ts` to use TransactionRepository
+- [X] T025 [US2] Refactor `backend/src/modules/holdings/holdings.service.ts` to use HoldingRepository and TransactionRepository
+- [X] T026 [US2] Refactor `backend/src/modules/holdings/transaction.service.ts` to use TransactionRepository
 - [ ] T027 [US2] Create `backend/src/modules/holdings/__tests__/holdings.service.test.ts` with unit tests using mocked repositories (95%+ coverage)
 - [ ] T028 [US2] Create `backend/src/modules/holdings/__tests__/transaction.service.test.ts` with unit tests using mocked repository (95%+ coverage)
 
 ### Controller Refactoring (US1)
 
-- [ ] T029 [US1] Refactor `backend/src/modules/holdings/holdings.controller.ts` to only handle HTTP concerns
+- [X] T029 [US1] Refactor `backend/src/modules/holdings/holdings.controller.ts` to only handle HTTP concerns
 - [ ] T030 [US1] Create `backend/src/modules/holdings/__tests__/holdings.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
-- [ ] T031 [US3] Create `backend/src/modules/holdings/holdings.routes.ts` with Express router factory function
+- [X] T031 [US3] Create `backend/src/modules/holdings/holdings.routes.ts` with Express router factory function
 - [ ] T032 [US3] Create `backend/tests/integration/holdings.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:
@@ -149,11 +149,11 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### DI Container Setup
 
-- [ ] T033 [US3] Refactor `backend/src/app.ts` to create explicit DI container with infrastructure layer (Prisma, cache, calculations)
-- [ ] T034 [US3] Wire market-data module dependencies in app.ts (repository → service → controller → routes)
-- [ ] T035 [US3] Wire portfolio module dependencies in app.ts (repository → service → controller → routes)
-- [ ] T036 [US3] Wire holdings module dependencies in app.ts (repositories → services → controller → routes)
-- [ ] T037 [US3] Mount all routes with proper paths (/api/market-data, /api/portfolios, /api/holdings)
+- [X] T033 [US3] Refactor `backend/src/app.ts` to create explicit DI container with infrastructure layer (Prisma, cache, calculations)
+- [X] T034 [US3] Wire market-data module dependencies in app.ts (repository → service → controller → routes)
+- [X] T035 [US3] Wire portfolio module dependencies in app.ts (repository → service → controller → routes)
+- [X] T036 [US3] Wire holdings module dependencies in app.ts (repositories → services → controller → routes)
+- [X] T037 [US3] Mount all routes with proper paths (/api/market-data, /api/portfolios, /api/holdings)
 - [ ] T038 [US4] Verify server starts successfully and all endpoints respond correctly
 
 **Exit Criteria**:
