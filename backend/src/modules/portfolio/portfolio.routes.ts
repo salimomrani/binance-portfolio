@@ -1,70 +1,44 @@
 /**
  * Portfolio Routes
- * Defines Express routes and maps them to controller methods
+ * Defines Express routes and maps them to handler functions
  */
 
 import { Router } from 'express';
-import { PortfolioController } from './portfolio.controller';
+import type { PortfolioHandlers } from './portfolio.controller';
 import { validate } from '../../shared/middleware/validator';
 import { CreatePortfolioSchema, UpdatePortfolioSchema } from './portfolio.validation';
 
 /**
  * Create portfolio routes
- * @param controller - Portfolio controller instance
+ * @param handlers - Portfolio handler functions
  * @returns Express router with all portfolio endpoints
  */
-export function createPortfolioRoutes(controller: PortfolioController): Router {
+export default function createPortfolioRoutes(handlers: PortfolioHandlers): Router {
   const router = Router();
 
   // GET /api/portfolios - Get all portfolios for user
-  router.get(
-    '/',
-    (req, res, next) => controller.getPortfolios(req, res, next)
-  );
+  router.get('/', handlers.getPortfolios);
 
   // POST /api/portfolios - Create new portfolio
-  router.post(
-    '/',
-    validate(CreatePortfolioSchema),
-    (req, res, next) => controller.createPortfolio(req, res, next)
-  );
+  router.post('/', validate(CreatePortfolioSchema), handlers.createPortfolio);
 
   // POST /api/portfolios/sync-binance - Sync portfolio from Binance
-  router.post(
-    '/sync-binance',
-    (req, res, next) => controller.syncFromBinance(req, res, next)
-  );
+  router.post('/sync-binance', handlers.syncFromBinance);
 
   // GET /api/portfolios/:id - Get portfolio details
-  router.get(
-    '/:id',
-    (req, res, next) => controller.getPortfolioById(req, res, next)
-  );
+  router.get('/:id', handlers.getPortfolioById);
 
   // PATCH /api/portfolios/:id - Update portfolio
-  router.patch(
-    '/:id',
-    validate(UpdatePortfolioSchema),
-    (req, res, next) => controller.updatePortfolio(req, res, next)
-  );
+  router.patch('/:id', validate(UpdatePortfolioSchema), handlers.updatePortfolio);
 
   // DELETE /api/portfolios/:id - Delete portfolio
-  router.delete(
-    '/:id',
-    (req, res, next) => controller.deletePortfolio(req, res, next)
-  );
+  router.delete('/:id', handlers.deletePortfolio);
 
   // GET /api/portfolios/:id/statistics - Get portfolio statistics
-  router.get(
-    '/:id/statistics',
-    (req, res, next) => controller.getPortfolioStatistics(req, res, next)
-  );
+  router.get('/:id/statistics', handlers.getPortfolioStatistics);
 
   // GET /api/portfolios/:id/allocation - Get portfolio allocation data
-  router.get(
-    '/:id/allocation',
-    (req, res, next) => controller.getPortfolioAllocation(req, res, next)
-  );
+  router.get('/:id/allocation', handlers.getPortfolioAllocation);
 
   return router;
 }
