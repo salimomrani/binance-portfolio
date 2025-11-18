@@ -27,6 +27,8 @@ model User {
   portfolios    Portfolio[]
   watchlists    WatchlistItem[]
   preferences   UserPreferences?
+  earnPositions EarnPosition[]
+  earnRewards   EarnReward[]
 
   @@index([email])
 }
@@ -161,4 +163,59 @@ model PriceHistory {
   @@unique([symbol, timestamp, timeframe])
   @@index([symbol, timeframe, timestamp])
   @@index([timestamp])
+}
+
+// ============================================================================
+// BINANCE EARN / STAKING
+// ============================================================================
+
+model EarnPosition {
+  id                String         @id @default(uuid())
+  userId            String
+  asset             String         // BTC, ETH, USDT, etc.
+  productId         String         // Binance product ID
+  productName       String         // Flexible Savings, Locked Staking, etc.
+  type              EarnType       // FLEXIBLE or LOCKED
+  amount            Decimal        @db.Decimal(20, 8)  // Total amount in earn
+  currentApy        Decimal        @db.Decimal(10, 4)  // Current APY percentage
+  dailyEarnings     Decimal?       @db.Decimal(20, 8)  // Estimated daily earnings
+  lockPeriod        Int?           // Lock period in days (for LOCKED type)
+  lockedUntil       DateTime?      // Maturity date (for LOCKED type)
+  canRedeem         Boolean        @default(true)      // Whether can redeem now
+  autoSubscribe     Boolean        @default(false)     // Auto-subscribe setting
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  lastSyncedAt      DateTime       @default(now())     // Last time synced from Binance
+
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rewards           EarnReward[]
+
+  @@unique([userId, productId, asset])
+  @@index([userId])
+  @@index([asset])
+  @@index([type])
+}
+
+model EarnReward {
+  id                String         @id @default(uuid())
+  userId            String
+  positionId        String?        // Link to EarnPosition if applicable
+  asset             String         // Reward asset (usually same as position)
+  amount            Decimal        @db.Decimal(20, 8)  // Reward amount
+  type              EarnType       // FLEXIBLE or LOCKED
+  rewardDate        DateTime       // Date reward was earned
+  createdAt         DateTime       @default(now())
+
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position          EarnPosition?  @relation(fields: [positionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([asset])
+  @@index([rewardDate])
+  @@index([userId, rewardDate])
+}
+
+enum EarnType {
+  FLEXIBLE
+  LOCKED
 }
