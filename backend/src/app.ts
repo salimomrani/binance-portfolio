@@ -8,7 +8,7 @@ import { createSuccessResponse } from './shared/types/api-response';
 import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
-import { MarketDataController } from './modules/market-data/market-data.controller';
+import { createMarketDataHandlers } from './modules/market-data/market-data.controller';
 import createMarketDataRoutes from './modules/market-data/market-data.routes';
 import { createPortfolioService } from './modules/portfolio/portfolio.service';
 import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
@@ -93,7 +93,7 @@ function initializeServices() {
 
 /**
  * Initialize market data router with dependencies
- * T120: Market data controller with historical endpoints
+ * T120: Market data routes with functional handlers
  */
 function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
   const marketData = new MarketDataService(
@@ -108,8 +108,8 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
     cacheService
   );
 
-  const marketDataController = new MarketDataController(marketData);
-  return createMarketDataRoutes(marketDataController);
+  const marketDataHandlers = createMarketDataHandlers(marketData);
+  return createMarketDataRoutes(marketDataHandlers);
 }
 
 /**
