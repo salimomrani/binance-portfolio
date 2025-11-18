@@ -1,8 +1,8 @@
 // T120: Market data controller with historical data endpoints
 // T144-T145: Enhanced with price endpoints for market data
-// Refactored: Controller handles only HTTP concerns (req/res), no routing
+// Refactored to functional pattern with handler factories
 
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import type { MarketDataService } from './market-data.service';
 import { Timeframe } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
@@ -27,8 +27,9 @@ const GetPriceParamsSchema = z.object({
 
 // T145: Batch symbols validation schema
 const GetBatchPricesQuerySchema = z.object({
-  symbols: z.string()
-    .transform(s => s.split(',').map(sym => sym.trim().toUpperCase()))
+  symbols: z
+    .string()
+    .transform((s) => s.split(',').map((sym) => sym.trim().toUpperCase()))
     .pipe(z.array(z.string().min(1).max(10)).min(1).max(50)),
 });
 
@@ -36,17 +37,17 @@ const GetBatchPricesQuerySchema = z.object({
  * Market Data Handlers Type
  */
 export type MarketDataHandlers = {
-  getMarketData: RequestHandler;
-  getBatchPrices: RequestHandler;
-  getHistoricalPrices: RequestHandler;
-  getAdapterStatus: RequestHandler;
+  getMarketData: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getBatchPrices: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getHistoricalPrices: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getAdapterStatus: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 };
 
 /**
- * T144: GET /api/market/prices/:symbol
- * Returns full market data with all trend indicators (1h, 24h, 7d, 30d)
+ * Create GET /api/market/prices/:symbol handler
+ * T144: Returns full market data with all trend indicators (1h, 24h, 7d, 30d)
  */
-export const createGetMarketDataHandler = (service: MarketDataService): RequestHandler => {
+export const createGetMarketDataHandler = (service: MarketDataService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validate params
@@ -90,10 +91,10 @@ export const createGetMarketDataHandler = (service: MarketDataService): RequestH
 };
 
 /**
- * T145: GET /api/market/prices?symbols=BTC,ETH,ADA
- * Returns batch prices for multiple symbols
+ * Create GET /api/market/prices handler
+ * T145: Returns batch prices for multiple symbols
  */
-export const createGetBatchPricesHandler = (service: MarketDataService): RequestHandler => {
+export const createGetBatchPricesHandler = (service: MarketDataService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validate query
@@ -106,7 +107,8 @@ export const createGetBatchPricesHandler = (service: MarketDataService): Request
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Invalid or missing symbols parameter. Provide comma-separated symbols (max 50)',
+            message:
+              'Invalid or missing symbols parameter. Provide comma-separated symbols (max 50)',
             details: queryResult.error.errors,
           },
           timestamp: new Date().toISOString(),
@@ -140,10 +142,10 @@ export const createGetBatchPricesHandler = (service: MarketDataService): Request
 };
 
 /**
- * GET /api/market/history/:symbol?timeframe=1h|24h|7d|30d|1y
+ * Create GET /api/market/history/:symbol handler
  * Returns array of {timestamp, price, volume}
  */
-export const createGetHistoricalPricesHandler = (service: MarketDataService): RequestHandler => {
+export const createGetHistoricalPricesHandler = (service: MarketDataService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validate params
@@ -207,10 +209,10 @@ export const createGetHistoricalPricesHandler = (service: MarketDataService): Re
 };
 
 /**
- * GET /api/market/status
+ * Create GET /api/market/status handler
  * Returns adapter health status
  */
-export const createGetAdapterStatusHandler = (service: MarketDataService): RequestHandler => {
+export const createGetAdapterStatusHandler = (service: MarketDataService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const status = await service.getAdapterStatus();
@@ -228,3 +230,13 @@ export const createGetAdapterStatusHandler = (service: MarketDataService): Reque
     }
   };
 };
+
+/**
+ * Create all market data handlers
+ */
+export const createMarketDataHandlers = (service: MarketDataService): MarketDataHandlers => ({
+  getMarketData: createGetMarketDataHandler(service),
+  getBatchPrices: createGetBatchPricesHandler(service),
+  getHistoricalPrices: createGetHistoricalPricesHandler(service),
+  getAdapterStatus: createGetAdapterStatusHandler(service),
+});

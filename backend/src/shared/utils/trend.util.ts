@@ -105,8 +105,8 @@ export function calculateRSI(changes: number[]): number {
     return 50; // Neutral
   }
 
-  const gains = changes.filter(c => c > 0);
-  const losses = changes.filter(c => c < 0).map(c => Math.abs(c));
+  const gains = changes.filter((c) => c > 0);
+  const losses = changes.filter((c) => c < 0).map((c) => Math.abs(c));
 
   const avgGain = gains.length > 0 ? gains.reduce((a, b) => a + b, 0) / gains.length : 0;
   const avgLoss = losses.length > 0 ? losses.reduce((a, b) => a + b, 0) / losses.length : 0;
@@ -116,7 +116,7 @@ export function calculateRSI(changes: number[]): number {
   }
 
   const rs = avgGain / avgLoss;
-  const rsi = 100 - (100 / (1 + rs));
+  const rsi = 100 - 100 / (1 + rs);
 
   return parseFloat(rsi.toFixed(2));
 }
@@ -128,7 +128,11 @@ export function calculateRSI(changes: number[]): number {
  * @param threshold - Threshold percentage (default: 2%)
  * @returns True if near resistance
  */
-export function isNearResistance(currentPrice: number, high24h: number, threshold: number = 2): boolean {
+export function isNearResistance(
+  currentPrice: number,
+  high24h: number,
+  threshold: number = 2
+): boolean {
   if (!high24h) return false;
   const percentFromHigh = ((high24h - currentPrice) / high24h) * 100;
   return percentFromHigh <= threshold;
@@ -141,7 +145,11 @@ export function isNearResistance(currentPrice: number, high24h: number, threshol
  * @param threshold - Threshold percentage (default: 2%)
  * @returns True if near support
  */
-export function isNearSupport(currentPrice: number, low24h: number, threshold: number = 2): boolean {
+export function isNearSupport(
+  currentPrice: number,
+  low24h: number,
+  threshold: number = 2
+): boolean {
   if (!low24h) return false;
   const percentFromLow = ((currentPrice - low24h) / low24h) * 100;
   return percentFromLow <= threshold;

@@ -1,0 +1,210 @@
+/**
+ * Custom Animations for Crypto Portfolio Dashboard
+ *
+ * This file contains custom CSS animations and keyframes for the application.
+ * Includes support for prefers-reduced-motion accessibility feature.
+ */
+
+/* ====================================================================
+   Keyframe Animations
+   ==================================================================== */
+
+/**
+ * Flash Green Animation
+ * Used for price increases and positive changes
+ */
+@keyframes flash-green {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/**
+ * Flash Red Animation
+ * Used for price decreases and negative changes
+ */
+@keyframes flash-red {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/**
+ * Fade In Animation
+ * Used for loading states and content reveals
+ */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/**
+ * Slide Up Animation
+ * Used for modals, tooltips, and popups
+ */
+@keyframes slide-up {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/**
+ * Slide Down Animation
+ * Used for dropdowns and expanding content
+ */
+@keyframes slide-down {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/**
+ * Pulse Animation
+ * Used for loading indicators
+ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/**
+ * Spin Animation
+ * Used for loading spinners
+ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ====================================================================
+   Animation Utility Classes
+   ==================================================================== */
+
+.animate-flash-green {
+  animation: flash-green 0.6s ease-out;
+}
+
+.animate-flash-red {
+  animation: flash-red 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.2s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ====================================================================
+   Accessibility: Respect prefers-reduced-motion
+   ==================================================================== */
+
+/**
+ * Disable all animations for users who prefer reduced motion
+ * This improves accessibility for users with vestibular disorders
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep essential animations but make them instant */
+  .animate-flash-green,
+  .animate-flash-red {
+    animation: none;
+  }
+}
+
+/* ====================================================================
+   Transition Utilities
+   ==================================================================== */
+
+/**
+ * Standard transition timing
+ * Use for most interactive elements
+ */
+.transition-standard {
+  transition: all 0.2s ease-in-out;
+}
+
+/**
+ * Fast transition timing
+ * Use for small UI feedback (buttons, hovers)
+ */
+.transition-fast {
+  transition: all 0.15s ease-in-out;
+}
+
+/**
+ * Slow transition timing
+ * Use for large UI changes (modals, panels)
+ */
+.transition-slow {
+  transition: all 0.3s ease-in-out;
+}
+
+/* ====================================================================
+   Dark Mode Transitions
+   ==================================================================== */
+
+/**
+ * Smooth transitions for dark mode changes
+ * Applied to elements that change appearance in dark mode
+ */
+.dark-mode-transition {
+  transition: background-color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
+              color 0.2s ease-in-out;
+}

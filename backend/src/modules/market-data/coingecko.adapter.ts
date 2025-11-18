@@ -1,7 +1,13 @@
 // T052: CoinGecko API adapter as fallback
 
 import axios, { AxiosInstance } from 'axios';
-import { MarketDataAdapter, CryptoPrice, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
+import {
+  MarketDataAdapter,
+  CryptoPrice,
+  PriceHistory,
+  Timeframe,
+  AdapterConfig,
+} from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 
 export class CoinGeckoAdapter implements MarketDataAdapter {
@@ -93,7 +99,7 @@ export class CoinGeckoAdapter implements MarketDataAdapter {
 
   async getMultiplePrices(symbols: string[]): Promise<Map<string, CryptoPrice>> {
     try {
-      const coinIds = symbols.map(s => this.getCoinId(s));
+      const coinIds = symbols.map((s) => this.getCoinId(s));
 
       const response = await this.client.get('/coins/markets', {
         params: {

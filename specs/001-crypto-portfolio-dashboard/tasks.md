@@ -550,9 +550,9 @@
 
 ### Backend: Watchlist Model & Service
 
-- [ ] T162 [P] [US5] Verify WatchlistItem model in backend/src/prisma/schema.prisma
-- [ ] T163 [P] [US5] Create backend/src/modules/watchlist/watchlist.validation.ts with AddToWatchlistSchema
-- [ ] T164 [US5] Create backend/src/modules/watchlist/watchlist.service.ts with methods:
+- [X] T162 [P] [US5] Verify WatchlistItem model in backend/src/prisma/schema.prisma
+- [X] T163 [P] [US5] Create backend/src/modules/watchlist/watchlist.validation.ts with AddToWatchlistSchema
+- [X] T164 [US5] Create backend/src/modules/watchlist/watchlist.service.ts with methods:
   - addToWatchlist(userId, data): Promise<WatchlistItem>
   - getWatchlist(userId): Promise<WatchlistItemDetails[]> (includes current prices)
   - removeFromWatchlist(userId, itemId): Promise<void>
@@ -560,15 +560,15 @@
 
 ### Backend: Watchlist Controller & Routes
 
-- [ ] T165 [US5] Create backend/src/modules/watchlist/watchlist.controller.ts with endpoints:
+- [X] T165 [US5] Create backend/src/modules/watchlist/watchlist.controller.ts with endpoints:
   - GET /api/watchlist (get user watchlist with prices)
   - POST /api/watchlist (add to watchlist)
   - DELETE /api/watchlist/:id (remove from watchlist)
-- [ ] T166 [US5] Register watchlist routes in backend/src/app.ts
+- [X] T166 [US5] Register watchlist routes in backend/src/app.ts
 
 ### Backend: Integration Tests
 
-- [ ] T167 [P] [US5] Write test in backend/tests/integration/watchlist.test.ts:
+- [X] T167 [P] [US5] Write test in backend/tests/integration/watchlist.test.ts:
   - Test adding to watchlist
   - Test fetching watchlist includes current prices
   - Test removing from watchlist
@@ -576,55 +576,55 @@
 
 ### Frontend: Watchlist Models & Store
 
-- [ ] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
-- [ ] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
-- [ ] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
+- [X] T168 [P] [US5] Create frontend/src/app/shared/models/watchlist.model.ts with WatchlistItem interface
+- [X] T169 [US5] Create frontend/src/app/features/watchlist/store/ (state, actions, reducer, effects, selectors)
+- [X] T170 [US5] Create frontend/src/app/features/watchlist/services/watchlist-api.service.ts
 
 ### Frontend: Watchlist Panel Component
 
-- [ ] T171 [US5] Create frontend/src/app/features/watchlist/components/watchlist-panel/ component:
+- [X] T171 [US5] Create frontend/src/app/features/watchlist/components/watchlist-panel/ component:
   - watchlist-panel.component.ts
   - watchlist-panel.component.html
   - watchlist-panel.component.scss
   - watchlist-panel.component.spec.ts
-- [ ] T172 [US5] Display watchlist items in table format with columns:
+- [X] T172 [US5] Display watchlist items in table format with columns:
   - Symbol + Name
   - Current Price
   - 24h Change (with trend-indicator)
   - Volume
   - Remove button
-- [ ] T173 [US5] Add "View Details" link to crypto-detail page for each item
+- [X] T173 [US5] Add "View Details" link to crypto-detail page for each item
 
 ### Frontend: Add to Watchlist Dialog
 
-- [ ] T174 [US5] Create frontend/src/app/features/watchlist/components/add-to-watchlist-dialog/ component:
+- [X] T174 [US5] Create frontend/src/app/features/watchlist/components/add-to-watchlist-dialog/ component:
   - Search/autocomplete for cryptocurrency symbol
   - Display crypto name after selection
   - Optional notes field
   - Validation (not already in watchlist, valid symbol)
-- [ ] T175 [US5] Integrate add-to-watchlist-dialog trigger button in:
+- [X] T175 [US5] Integrate add-to-watchlist-dialog trigger button in:
   - Market overview page
   - Crypto detail page
   - Portfolio dashboard (for discovered cryptos)
 
 ### Frontend: Watchlist Integration in Dashboard
 
-- [ ] T176 [US5] Update portfolio-dashboard component:
+- [X] T176 [US5] Update portfolio-dashboard component:
   - Add tab/toggle for Holdings vs Watchlist
   - Display watchlist-panel when watchlist tab active
   - Show count badges (e.g., "Holdings (5)" | "Watchlist (12)")
-- [ ] T177 [US5] Add watchlist to price-update.service polling (fetch prices for watchlist symbols)
+- [X] T177 [US5] Add watchlist to price-update.service polling (fetch prices for watchlist symbols)
 
 ### Frontend: Watchlist Page
 
-- [ ] T178 [US5] Create standalone watchlist page at /watchlist route
-- [ ] T179 [US5] Add navigation link to watchlist in app header/sidebar
+- [X] T178 [US5] Create standalone watchlist page at /watchlist route
+- [X] T179 [US5] Add navigation link to watchlist in app header/sidebar
 
 ### Frontend: Component Tests
 
-- [ ] T180 [P] [US5] Write test for watchlist-panel.component.spec.ts verifying list display
-- [ ] T181 [P] [US5] Write test for add-to-watchlist-dialog.component.spec.ts verifying validation
-- [ ] T182 [P] [US5] Write integration test verifying watchlist updates after price polling
+- [X] T180 [P] [US5] Write test for watchlist-panel.component.spec.ts verifying list display
+- [X] T181 [P] [US5] Write test for add-to-watchlist-dialog.component.spec.ts verifying validation
+- [X] T182 [P] [US5] Write integration test verifying watchlist updates after price polling
 
 **Checkpoint**: User Story 5 complete - Users can watch cryptocurrencies not in portfolio
 
@@ -636,11 +636,11 @@
 
 ### Testing & Quality
 
-- [ ] T183 [P] Run all backend unit tests: cd backend && npm test
-- [ ] T184 [P] Run all backend integration tests with coverage: cd backend && npm run test:coverage
+- [X] T183 [P] Run all backend unit tests: cd backend && npm test
+- [X] T184 [P] Run all backend integration tests with coverage: cd backend && npm run test:coverage
 - [ ] T185 [P] Run all frontend component tests: cd frontend && npm test
 - [ ] T186 [P] Verify test coverage meets target (>80% for business logic)
-- [ ] T187 [P] Run ESLint on backend: cd backend && npm run lint
+- [X] T187 [P] Run ESLint on backend: cd backend && npm run lint
 - [ ] T188 [P] Run ESLint on frontend: cd frontend && npm run lint
 - [ ] T189 [P] Run Prettier formatting check on both projects
 
@@ -648,7 +648,7 @@
 
 - [ ] T190 [P] Audit backend dependencies: cd backend && npm audit
 - [ ] T191 [P] Audit frontend dependencies: cd frontend && npm audit
-- [ ] T192 Verify .env.example matches actual .env structure (no secrets committed)
+- [X] T192 Verify .env.example matches actual .env structure (no secrets committed)
 - [ ] T193 [P] Test rate limiting: Send >100 requests in 15 minutes, verify 429 responses
 - [ ] T194 [P] Verify CORS configuration only allows frontend origin
 - [ ] T195 [P] Test input validation with malformed data (SQL injection attempts, XSS)
@@ -689,17 +689,17 @@
 
 ### Documentation
 
-- [ ] T215 [P] Create backend/README.md with:
+- [X] T215 [P] Create backend/README.md with:
   - Setup instructions
   - Environment variables documentation
   - API endpoints overview
   - Testing guide
-- [ ] T216 [P] Create frontend/README.md with:
+- [X] T216 [P] Create frontend/README.md with:
   - Setup instructions
   - Component architecture
   - State management overview
   - Build & deployment
-- [ ] T217 [P] Update root README.md with:
+- [X] T217 [P] Update root README.md with:
   - Project overview
   - Quick start (link to specs/001-crypto-portfolio-dashboard/quickstart.md)
   - Architecture diagram
@@ -716,7 +716,7 @@
   - Health check endpoint
 - [ ] T221 [P] Create Dockerfile for frontend/Dockerfile (Nginx to serve static files)
 - [ ] T222 [P] Update docker-compose.yml to include backend and frontend services (for local full-stack testing)
-- [ ] T223 [P] Create .dockerignore files for both backend and frontend
+- [X] T223 [P] Create .dockerignore files for both backend and frontend
 - [ ] T224 Test full Docker setup: docker-compose up -d (all services healthy)
 - [ ] T225 [P] Create GitHub Actions workflow for CI/CD:
   - Run linting

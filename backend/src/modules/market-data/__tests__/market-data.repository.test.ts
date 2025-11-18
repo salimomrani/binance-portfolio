@@ -1,20 +1,28 @@
+import { PrismaClient, PriceCache } from '@prisma/client';
+import { MarketDataRepository, createMarketDataRepository } from '../market-data.repository';
+
 /**
- * Integration tests for MarketDataRepository
- * Tests all database operations with real Prisma client
- * Target coverage: 90%+
+ * MarketDataRepository Integration Tests
+ *
+ * These are integration tests that use a real test database.
+ * Tests all CRUD operations and specialized queries.
+ * Target: 90%+ coverage
  */
 
-import { PrismaClient } from '@prisma/client';
-import { MarketDataRepository } from '../market-data.repository';
-import { createTestPrismaClient, cleanupDatabase } from '../../../../tests/helpers';
-
-describe('MarketDataRepository', () => {
+describe('MarketDataRepository Integration Tests', () => {
   let prisma: PrismaClient;
   let repository: MarketDataRepository;
 
   beforeAll(async () => {
-    prisma = createTestPrismaClient();
-    repository = new MarketDataRepository(prisma);
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL_TEST || 'postgresql://postgres:postgres@localhost:5432/binance_portfolio_test'
+        }
+      }
+    });
+    await prisma.$connect();
+    repository = createMarketDataRepository(prisma);
   });
 
   afterAll(async () => {
@@ -22,34 +30,26 @@ describe('MarketDataRepository', () => {
   });
 
   beforeEach(async () => {
-    await cleanupDatabase(prisma);
+    await prisma.priceCache.deleteMany();
   });
 
-  // ============================================================
-  // Price Cache Operations
-  // ============================================================
-
   describe('findBySymbol', () => {
-    it('should return null when price cache does not exist', async () => {
-      const result = await repository.findBySymbol('BTC');
-      expect(result).toBeNull();
-    });
-
-    it('should find price cache by symbol', async () => {
-      // Arrange: Create test data
-      const testData = {
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
-      };
-      await repository.upsert(testData);
+    it('should find a single market data entry by symbol', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000,
+          lastUpdated: new Date()
+        }
+      });
 
       // Act
       const result = await repository.findBySymbol('BTC');
@@ -58,70 +58,116 @@ describe('MarketDataRepository', () => {
       expect(result).not.toBeNull();
       expect(result?.symbol).toBe('BTC');
       expect(result?.name).toBe('Bitcoin');
-      expect(result?.price.toNumber()).toBe(50000);
+      expect(Number(result?.price)).toBe(50000);
+    });
+
+    it('should handle lowercase symbols by converting to uppercase', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'ETH',
+          name: 'Ethereum',
+          price: 3000,
+          change1h: 0.5,
+          change24h: 1.5,
+          change7d: 3.0,
+          change30d: 8.0,
+          volume24h: 500000000,
+          marketCap: 350000000000,
+          lastUpdated: new Date()
+        }
+      });
+
+      // Act
+      const result = await repository.findBySymbol('eth');
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result?.symbol).toBe('ETH');
+    });
+
+    it('should return null if symbol not found', async () => {
+      // Act
+      const result = await repository.findBySymbol('NOTFOUND');
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 
   describe('findBySymbols', () => {
-    it('should return empty array when no symbols found', async () => {
-      const result = await repository.findBySymbols(['BTC', 'ETH']);
-      expect(result).toEqual([]);
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ADA',
+            name: 'Cardano',
+            price: 0.5,
+            change1h: -0.2,
+            change24h: -1.0,
+            change7d: 2.0,
+            change30d: 5.0,
+            volume24h: 100000000,
+            marketCap: 15000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
     });
 
-    it('should find multiple price caches by symbols', async () => {
-      // Arrange
-      await repository.upsertMany([
-        {
-          symbol: 'BTC',
-          name: 'Bitcoin',
-          price: 50000,
-          change1h: 0.5,
-          change24h: 2.5,
-          change7d: 10.0,
-          change30d: 15.0,
-          volume24h: 1000000000,
-          marketCap: 1000000000000,
-          lastUpdated: new Date(),
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ethereum',
-          price: 3000,
-          change1h: 0.3,
-          change24h: 1.5,
-          change7d: 5.0,
-          change30d: 10.0,
-          volume24h: 500000000,
-          marketCap: 500000000000,
-          lastUpdated: new Date(),
-        },
-      ]);
-
+    it('should find multiple market data entries by symbols', async () => {
       // Act
       const result = await repository.findBySymbols(['BTC', 'ETH']);
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.map(p => p.symbol).sort()).toEqual(['BTC', 'ETH']);
+      expect(result.map(r => r.symbol)).toEqual(expect.arrayContaining(['BTC', 'ETH']));
     });
 
-    it('should only return found symbols', async () => {
-      // Arrange
-      await repository.upsert({
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
-      });
-
+    it('should handle lowercase symbols', async () => {
       // Act
-      const result = await repository.findBySymbols(['BTC', 'ETH', 'DOGE']);
+      const result = await repository.findBySymbols(['btc', 'eth']);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.symbol)).toEqual(expect.arrayContaining(['BTC', 'ETH']));
+    });
+
+    it('should return empty array if no symbols found', async () => {
+      // Act
+      const result = await repository.findBySymbols(['NOTFOUND1', 'NOTFOUND2']);
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it('should return only found symbols if some do not exist', async () => {
+      // Act
+      const result = await repository.findBySymbols(['BTC', 'NOTFOUND']);
 
       // Assert
       expect(result).toHaveLength(1);
@@ -130,519 +176,1340 @@ describe('MarketDataRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should return empty array when no price caches exist', async () => {
-      const result = await repository.findAll();
-      expect(result).toEqual([]);
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ADA',
+            name: 'Cardano',
+            price: 0.5,
+            change1h: -0.2,
+            change24h: -1.0,
+            change7d: 2.0,
+            change30d: 5.0,
+            volume24h: 100000000,
+            marketCap: 15000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
     });
 
-    it('should return all price caches', async () => {
-      // Arrange
-      await repository.upsertMany([
-        {
-          symbol: 'BTC',
-          name: 'Bitcoin',
-          price: 50000,
-          change1h: 0.5,
-          change24h: 2.5,
-          change7d: 10.0,
-          change30d: 15.0,
-          volume24h: 1000000000,
-          marketCap: 1000000000000,
-          lastUpdated: new Date(),
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ethereum',
-          price: 3000,
-          change1h: 0.3,
-          change24h: 1.5,
-          change7d: 5.0,
-          change30d: 10.0,
-          volume24h: 500000000,
-          marketCap: 500000000000,
-          lastUpdated: new Date(),
-        },
-      ]);
-
+    it('should return all market data entries', async () => {
       // Act
       const result = await repository.findAll();
 
       // Assert
-      expect(result.length).toBeGreaterThanOrEqual(2);
+      expect(result).toHaveLength(3);
+    });
+
+    it('should order by market cap descending', async () => {
+      // Act
+      const result = await repository.findAll();
+
+      // Assert
+      expect(result[0].symbol).toBe('BTC');
+      expect(result[1].symbol).toBe('ETH');
+      expect(result[2].symbol).toBe('ADA');
+    });
+
+    it('should respect limit parameter', async () => {
+      // Act
+      const result = await repository.findAll(2);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0].symbol).toBe('BTC');
+      expect(result[1].symbol).toBe('ETH');
+    });
+  });
+
+  describe('findTrending', () => {
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'PUMP',
+            name: 'Pumpcoin',
+            price: 10,
+            change1h: 1.0,
+            change24h: 50.0,  // Highest
+            change7d: 100.0,
+            change30d: 200.0,
+            volume24h: 1000000,
+            marketCap: 100000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'UP',
+            name: 'Upcoin',
+            price: 5,
+            change1h: 0.5,
+            change24h: 25.0,  // Second highest
+            change7d: 50.0,
+            change30d: 100.0,
+            volume24h: 500000,
+            marketCap: 50000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'DOWN',
+            name: 'Downcoin',
+            price: 1,
+            change1h: -1.0,
+            change24h: -10.0,  // Negative
+            change7d: -20.0,
+            change30d: -30.0,
+            volume24h: 100000,
+            marketCap: 10000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+    });
+
+    it('should return trending cryptos ordered by 24h change descending', async () => {
+      // Act
+      const result = await repository.findTrending(10);
+
+      // Assert
+      expect(result).toHaveLength(3);
+      expect(result[0].symbol).toBe('PUMP');
+      expect(result[1].symbol).toBe('UP');
+      expect(result[2].symbol).toBe('DOWN');
+    });
+
+    it('should respect limit parameter', async () => {
+      // Act
+      const result = await repository.findTrending(2);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0].symbol).toBe('PUMP');
+      expect(result[1].symbol).toBe('UP');
+    });
+
+    it('should use default limit of 10', async () => {
+      // Act
+      const result = await repository.findTrending();
+
+      // Assert
+      expect(result.length).toBeLessThanOrEqual(10);
+    });
+  });
+
+  describe('findTopLosers', () => {
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'DOWN',
+            name: 'Downcoin',
+            price: 1,
+            change1h: -1.0,
+            change24h: -30.0,  // Lowest
+            change7d: -40.0,
+            change30d: -50.0,
+            volume24h: 100000,
+            marketCap: 10000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'FALL',
+            name: 'Fallcoin',
+            price: 2,
+            change1h: -0.5,
+            change24h: -15.0,  // Second lowest
+            change7d: -20.0,
+            change30d: -25.0,
+            volume24h: 200000,
+            marketCap: 20000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'UP',
+            name: 'Upcoin',
+            price: 5,
+            change1h: 1.0,
+            change24h: 10.0,  // Positive
+            change7d: 20.0,
+            change30d: 30.0,
+            volume24h: 500000,
+            marketCap: 50000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+    });
+
+    it('should return top losers ordered by 24h change ascending', async () => {
+      // Act
+      const result = await repository.findTopLosers(10);
+
+      // Assert
+      expect(result).toHaveLength(3);
+      expect(result[0].symbol).toBe('DOWN');
+      expect(result[1].symbol).toBe('FALL');
+      expect(result[2].symbol).toBe('UP');
+    });
+
+    it('should respect limit parameter', async () => {
+      // Act
+      const result = await repository.findTopLosers(2);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0].symbol).toBe('DOWN');
+      expect(result[1].symbol).toBe('FALL');
+    });
+
+    it('should use default limit of 10', async () => {
+      // Act
+      const result = await repository.findTopLosers();
+
+      // Assert
+      expect(result.length).toBeLessThanOrEqual(10);
+    });
+  });
+
+  describe('findByMarketCapRange', () => {
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,  // 900B
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,  // 350B
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ADA',
+            name: 'Cardano',
+            price: 0.5,
+            change1h: -0.2,
+            change24h: -1.0,
+            change7d: 2.0,
+            change30d: 5.0,
+            volume24h: 100000000,
+            marketCap: 15000000000,  // 15B
+            lastUpdated: new Date()
+          }
+        ]
+      });
+    });
+
+    it('should find cryptos within market cap range', async () => {
+      // Act
+      const result = await repository.findByMarketCapRange(100000000000, 500000000000);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0].symbol).toBe('ETH');
+    });
+
+    it('should include boundary values', async () => {
+      // Act
+      const result = await repository.findByMarketCapRange(350000000000, 900000000000);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.symbol)).toEqual(expect.arrayContaining(['BTC', 'ETH']));
+    });
+
+    it('should order by market cap descending', async () => {
+      // Act
+      const result = await repository.findByMarketCapRange(0, 1000000000000);
+
+      // Assert
+      expect(result).toHaveLength(3);
+      expect(result[0].symbol).toBe('BTC');
+      expect(result[1].symbol).toBe('ETH');
+      expect(result[2].symbol).toBe('ADA');
+    });
+
+    it('should respect limit parameter', async () => {
+      // Act
+      const result = await repository.findByMarketCapRange(0, 1000000000000, 2);
+
+      // Assert
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array if no matches', async () => {
+      // Act
+      const result = await repository.findByMarketCapRange(1, 100);
+
+      // Assert
+      expect(result).toEqual([]);
     });
   });
 
   describe('upsert', () => {
-    it('should create new price cache', async () => {
-      // Arrange
-      const testData = {
+    it('should insert new market data', async () => {
+      // Act
+      const result = await repository.upsert({
         symbol: 'BTC',
         name: 'Bitcoin',
         price: 50000,
-        change1h: 0.5,
+        change1h: 1.5,
         change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
+        change7d: 5.0,
+        change30d: 10.0,
         volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
-      };
-
-      // Act
-      const result = await repository.upsert(testData);
+        marketCap: 900000000000
+      });
 
       // Assert
       expect(result.symbol).toBe('BTC');
-      expect(result.price.toNumber()).toBe(50000);
+      expect(result.name).toBe('Bitcoin');
+      expect(Number(result.price)).toBe(50000);
+      expect(result.source).toBe('binance');
     });
 
-    it('should update existing price cache', async () => {
-      // Arrange: Create initial data
-      await repository.upsert({
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
+    it('should update existing market data', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 45000,
+          change1h: 1.0,
+          change24h: 2.0,
+          change7d: 4.0,
+          change30d: 8.0,
+          volume24h: 900000000,
+          marketCap: 850000000000,
+          lastUpdated: new Date('2024-01-01')
+        }
       });
 
-      // Act: Update with new price
-      const updatedData = {
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 51000,
-        change1h: 1.0,
-        change24h: 3.0,
-        change7d: 11.0,
-        change30d: 16.0,
-        volume24h: 1100000000,
-        marketCap: 1100000000000,
-        lastUpdated: new Date(),
-      };
-      const result = await repository.upsert(updatedData);
-
-      // Assert
-      expect(result.price.toNumber()).toBe(51000);
-      expect(result.change1h.toNumber()).toBe(1.0);
-
-      // Verify only one record exists
-      const all = await repository.findAll();
-      expect(all.length).toBe(1);
-    });
-
-    it('should handle optional high24h and low24h fields', async () => {
-      // Arrange
-      const testData = {
+      // Act
+      const result = await repository.upsert({
         symbol: 'BTC',
         name: 'Bitcoin',
         price: 50000,
-        change1h: 0.5,
+        change1h: 1.5,
         change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
+        change7d: 5.0,
+        change30d: 10.0,
         volume24h: 1000000000,
-        marketCap: 1000000000000,
+        marketCap: 900000000000
+      });
+
+      // Assert
+      expect(Number(result.price)).toBe(50000);
+      expect(result.lastUpdated.getTime()).toBeGreaterThan(new Date('2024-01-01').getTime());
+    });
+
+    it('should normalize symbol to uppercase', async () => {
+      // Act
+      const result = await repository.upsert({
+        symbol: 'btc',
+        name: 'Bitcoin',
+        price: 50000,
+        change1h: 1.5,
+        change24h: 2.5,
+        change7d: 5.0,
+        change30d: 10.0,
+        volume24h: 1000000000,
+        marketCap: 900000000000
+      });
+
+      // Assert
+      expect(result.symbol).toBe('BTC');
+    });
+
+    it('should use custom source if provided', async () => {
+      // Act
+      const result = await repository.upsert({
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        price: 50000,
+        change1h: 1.5,
+        change24h: 2.5,
+        change7d: 5.0,
+        change30d: 10.0,
+        volume24h: 1000000000,
+        marketCap: 900000000000,
+        source: 'coingecko'
+      });
+
+      // Assert
+      expect(result.source).toBe('coingecko');
+    });
+
+    it('should handle optional high24h and low24h', async () => {
+      // Act
+      const result = await repository.upsert({
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        price: 50000,
+        change1h: 1.5,
+        change24h: 2.5,
+        change7d: 5.0,
+        change30d: 10.0,
+        volume24h: 1000000000,
+        marketCap: 900000000000,
         high24h: 52000,
-        low24h: 48000,
-        lastUpdated: new Date(),
-      };
-
-      // Act
-      const result = await repository.upsert(testData);
+        low24h: 48000
+      });
 
       // Assert
-      expect(result.high24h?.toNumber()).toBe(52000);
-      expect(result.low24h?.toNumber()).toBe(48000);
-    });
-
-    it('should handle null high24h and low24h fields', async () => {
-      // Arrange
-      const testData = {
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        high24h: null,
-        low24h: null,
-        lastUpdated: new Date(),
-      };
-
-      // Act
-      const result = await repository.upsert(testData);
-
-      // Assert
-      expect(result.high24h).toBeNull();
-      expect(result.low24h).toBeNull();
+      expect(Number(result.high24h)).toBe(52000);
+      expect(Number(result.low24h)).toBe(48000);
     });
   });
 
   describe('upsertMany', () => {
-    it('should create multiple price caches', async () => {
-      // Arrange
-      const testData = [
-        {
-          symbol: 'BTC',
-          name: 'Bitcoin',
-          price: 50000,
-          change1h: 0.5,
-          change24h: 2.5,
-          change7d: 10.0,
-          change30d: 15.0,
-          volume24h: 1000000000,
-          marketCap: 1000000000000,
-          lastUpdated: new Date(),
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ethereum',
-          price: 3000,
-          change1h: 0.3,
-          change24h: 1.5,
-          change7d: 5.0,
-          change30d: 10.0,
-          volume24h: 500000000,
-          marketCap: 500000000000,
-          lastUpdated: new Date(),
-        },
-      ];
-
+    it('should insert multiple new entries', async () => {
       // Act
-      await repository.upsertMany(testData);
-
-      // Assert
-      const all = await repository.findAll();
-      expect(all.length).toBe(2);
-    });
-
-    it('should update existing and create new price caches', async () => {
-      // Arrange: Create initial BTC data
-      await repository.upsert({
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
-      });
-
-      // Act: Update BTC and create ETH
       await repository.upsertMany([
         {
           symbol: 'BTC',
           name: 'Bitcoin',
-          price: 51000,
-          change1h: 1.0,
-          change24h: 3.0,
-          change7d: 11.0,
-          change30d: 16.0,
-          volume24h: 1100000000,
-          marketCap: 1100000000000,
-          lastUpdated: new Date(),
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000
         },
         {
           symbol: 'ETH',
           name: 'Ethereum',
           price: 3000,
-          change1h: 0.3,
+          change1h: 0.5,
           change24h: 1.5,
-          change7d: 5.0,
-          change30d: 10.0,
+          change7d: 3.0,
+          change30d: 8.0,
           volume24h: 500000000,
-          marketCap: 500000000000,
-          lastUpdated: new Date(),
-        },
+          marketCap: 350000000000
+        }
       ]);
 
       // Assert
-      const all = await repository.findAll();
-      expect(all.length).toBe(2);
+      const count = await prisma.priceCache.count();
+      expect(count).toBe(2);
+    });
 
-      const btc = await repository.findBySymbol('BTC');
-      expect(btc?.price.toNumber()).toBe(51000);
+    it('should update existing entries', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 45000,
+          change1h: 1.0,
+          change24h: 2.0,
+          change7d: 4.0,
+          change30d: 8.0,
+          volume24h: 900000000,
+          marketCap: 850000000000,
+          lastUpdated: new Date('2024-01-01')
+        }
+      });
+
+      // Act
+      await repository.upsertMany([
+        {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000
+        }
+      ]);
+
+      // Assert
+      const btc = await prisma.priceCache.findUnique({ where: { symbol: 'BTC' } });
+      expect(Number(btc?.price)).toBe(50000);
+    });
+
+    it('should handle mix of insert and update in transaction', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 45000,
+          change1h: 1.0,
+          change24h: 2.0,
+          change7d: 4.0,
+          change30d: 8.0,
+          volume24h: 900000000,
+          marketCap: 850000000000,
+          lastUpdated: new Date('2024-01-01')
+        }
+      });
+
+      // Act
+      await repository.upsertMany([
+        {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000
+        },
+        {
+          symbol: 'ETH',
+          name: 'Ethereum',
+          price: 3000,
+          change1h: 0.5,
+          change24h: 1.5,
+          change7d: 3.0,
+          change30d: 8.0,
+          volume24h: 500000000,
+          marketCap: 350000000000
+        }
+      ]);
+
+      // Assert
+      const count = await prisma.priceCache.count();
+      expect(count).toBe(2);
+
+      const btc = await prisma.priceCache.findUnique({ where: { symbol: 'BTC' } });
+      expect(Number(btc?.price)).toBe(50000);
+    });
+
+    it('should normalize all symbols to uppercase', async () => {
+      // Act
+      await repository.upsertMany([
+        {
+          symbol: 'btc',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000
+        },
+        {
+          symbol: 'eth',
+          name: 'Ethereum',
+          price: 3000,
+          change1h: 0.5,
+          change24h: 1.5,
+          change7d: 3.0,
+          change30d: 8.0,
+          volume24h: 500000000,
+          marketCap: 350000000000
+        }
+      ]);
+
+      // Assert
+      const btc = await prisma.priceCache.findUnique({ where: { symbol: 'BTC' } });
+      const eth = await prisma.priceCache.findUnique({ where: { symbol: 'ETH' } });
+      expect(btc).not.toBeNull();
+      expect(eth).not.toBeNull();
     });
   });
 
   describe('deleteStale', () => {
-    it('should delete price caches older than specified date', async () => {
-      // Arrange: Create old and new price caches
-      const oldDate = new Date('2023-01-01');
-      const newDate = new Date();
+    it('should delete entries older than specified date', async () => {
+      // Arrange
+      const oldDate = new Date('2024-01-01');
+      const recentDate = new Date('2024-06-01');
 
-      await repository.upsertMany([
-        {
-          symbol: 'BTC',
-          name: 'Bitcoin',
-          price: 50000,
-          change1h: 0.5,
-          change24h: 2.5,
-          change7d: 10.0,
-          change30d: 15.0,
-          volume24h: 1000000000,
-          marketCap: 1000000000000,
-          lastUpdated: oldDate,
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ethereum',
-          price: 3000,
-          change1h: 0.3,
-          change24h: 1.5,
-          change7d: 5.0,
-          change30d: 10.0,
-          volume24h: 500000000,
-          marketCap: 500000000000,
-          lastUpdated: newDate,
-        },
-      ]);
-
-      // Act: Delete caches older than 2023-06-01
-      const cutoffDate = new Date('2023-06-01');
-      const deletedCount = await repository.deleteStale(cutoffDate);
-
-      // Assert
-      expect(deletedCount).toBe(1);
-
-      const remaining = await repository.findAll();
-      expect(remaining.length).toBe(1);
-      expect(remaining[0].symbol).toBe('ETH');
-    });
-
-    it('should return 0 when no stale caches exist', async () => {
-      // Arrange: Create recent price cache
-      await repository.upsert({
-        symbol: 'BTC',
-        name: 'Bitcoin',
-        price: 50000,
-        change1h: 0.5,
-        change24h: 2.5,
-        change7d: 10.0,
-        change30d: 15.0,
-        volume24h: 1000000000,
-        marketCap: 1000000000000,
-        lastUpdated: new Date(),
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'OLD1',
+            name: 'Old Coin 1',
+            price: 1,
+            change1h: 0,
+            change24h: 0,
+            change7d: 0,
+            change30d: 0,
+            volume24h: 1000,
+            marketCap: 10000,
+            lastUpdated: oldDate
+          },
+          {
+            symbol: 'OLD2',
+            name: 'Old Coin 2',
+            price: 2,
+            change1h: 0,
+            change24h: 0,
+            change7d: 0,
+            change30d: 0,
+            volume24h: 2000,
+            marketCap: 20000,
+            lastUpdated: oldDate
+          },
+          {
+            symbol: 'RECENT',
+            name: 'Recent Coin',
+            price: 3,
+            change1h: 0,
+            change24h: 0,
+            change7d: 0,
+            change30d: 0,
+            volume24h: 3000,
+            marketCap: 30000,
+            lastUpdated: recentDate
+          }
+        ]
       });
 
-      // Act: Delete caches older than yesterday
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const deletedCount = await repository.deleteStale(yesterday);
+      // Act
+      const deletedCount = await repository.deleteStale(new Date('2024-03-01'));
+
+      // Assert
+      expect(deletedCount).toBe(2);
+
+      const remaining = await prisma.priceCache.findMany();
+      expect(remaining).toHaveLength(1);
+      expect(remaining[0].symbol).toBe('RECENT');
+    });
+
+    it('should return 0 if no stale entries', async () => {
+      // Arrange
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'RECENT',
+          name: 'Recent Coin',
+          price: 1,
+          change1h: 0,
+          change24h: 0,
+          change7d: 0,
+          change30d: 0,
+          volume24h: 1000,
+          marketCap: 10000,
+          lastUpdated: new Date()
+        }
+      });
+
+      // Act
+      const deletedCount = await repository.deleteStale(new Date('2024-01-01'));
 
       // Assert
       expect(deletedCount).toBe(0);
     });
   });
 
-  // ============================================================
-  // Price History Operations
-  // ============================================================
+  describe('exists', () => {
+    beforeEach(async () => {
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000,
+          lastUpdated: new Date()
+        }
+      });
+    });
 
-  describe('findHistoricalPrices', () => {
-    it('should return empty array when no history exists', async () => {
-      const result = await repository.findHistoricalPrices('BTC', '1h');
+    it('should return true if symbol exists', async () => {
+      // Act
+      const result = await repository.exists('BTC');
+
+      // Assert
+      expect(result).toBe(true);
+    });
+
+    it('should return false if symbol does not exist', async () => {
+      // Act
+      const result = await repository.exists('NOTFOUND');
+
+      // Assert
+      expect(result).toBe(false);
+    });
+
+    it('should handle lowercase symbols', async () => {
+      // Act
+      const result = await repository.exists('btc');
+
+      // Assert
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('count', () => {
+    it('should return 0 for empty table', async () => {
+      // Act
+      const result = await repository.count();
+
+      // Assert
+      expect(result).toBe(0);
+    });
+
+    it('should return correct count', async () => {
+      // Arrange
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+
+      // Act
+      const result = await repository.count();
+
+      // Assert
+      expect(result).toBe(2);
+    });
+  });
+
+  describe('getLastUpdated', () => {
+    it('should return last updated date for symbol', async () => {
+      // Arrange
+      const testDate = new Date('2024-06-01T10:00:00Z');
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000,
+          lastUpdated: testDate
+        }
+      });
+
+      // Act
+      const result = await repository.getLastUpdated('BTC');
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result?.getTime()).toBe(testDate.getTime());
+    });
+
+    it('should return null if symbol not found', async () => {
+      // Act
+      const result = await repository.getLastUpdated('NOTFOUND');
+
+      // Assert
+      expect(result).toBeNull();
+    });
+
+    it('should handle lowercase symbols', async () => {
+      // Arrange
+      const testDate = new Date('2024-06-01T10:00:00Z');
+      await prisma.priceCache.create({
+        data: {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          price: 50000,
+          change1h: 1.5,
+          change24h: 2.5,
+          change7d: 5.0,
+          change30d: 10.0,
+          volume24h: 1000000000,
+          marketCap: 900000000000,
+          lastUpdated: testDate
+        }
+      });
+
+      // Act
+      const result = await repository.getLastUpdated('btc');
+
+      // Assert
+      expect(result).not.toBeNull();
+    });
+  });
+
+  describe('search', () => {
+    beforeEach(async () => {
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'BCH',
+            name: 'Bitcoin Cash',
+            price: 300,
+            change1h: 0.2,
+            change24h: 1.0,
+            change7d: 2.0,
+            change30d: 5.0,
+            volume24h: 100000000,
+            marketCap: 5000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+    });
+
+    it('should search by symbol', async () => {
+      // Act
+      const result = await repository.search('BTC');
+
+      // Assert
+      expect(result.length).toBeGreaterThan(0);
+      expect(result.some(r => r.symbol === 'BTC')).toBe(true);
+    });
+
+    it('should search by name (case insensitive)', async () => {
+      // Act
+      const result = await repository.search('bitcoin');
+
+      // Assert
+      expect(result.length).toBe(2); // Bitcoin and Bitcoin Cash
+      expect(result.some(r => r.symbol === 'BTC')).toBe(true);
+      expect(result.some(r => r.symbol === 'BCH')).toBe(true);
+    });
+
+    it('should search by partial match', async () => {
+      // Act
+      const result = await repository.search('bit');
+
+      // Assert
+      expect(result.length).toBe(2); // Bitcoin and Bitcoin Cash
+    });
+
+    it('should order by market cap descending', async () => {
+      // Act
+      const result = await repository.search('bitcoin');
+
+      // Assert
+      expect(result[0].symbol).toBe('BTC'); // Higher market cap
+      expect(result[1].symbol).toBe('BCH');
+    });
+
+    it('should respect limit parameter', async () => {
+      // Act
+      const result = await repository.search('bitcoin', 1);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0].symbol).toBe('BTC');
+    });
+
+    it('should use default limit of 10', async () => {
+      // Act
+      const result = await repository.search('bitcoin');
+
+      // Assert
+      expect(result.length).toBeLessThanOrEqual(10);
+    });
+
+    it('should return empty array if no matches', async () => {
+      // Act
+      const result = await repository.search('notfound');
+
+      // Assert
       expect(result).toEqual([]);
     });
+  });
 
-    it('should find historical prices by symbol and timeframe', async () => {
+  describe('getMarketStats', () => {
+    it('should return zero stats for empty table', async () => {
+      // Act
+      const result = await repository.getMarketStats();
+
+      // Assert
+      expect(result.totalMarketCap).toBe(0);
+      expect(result.totalVolume24h).toBe(0);
+      expect(result.avgChange24h).toBe(0);
+      expect(result.cryptoCount).toBe(0);
+    });
+
+    it('should calculate correct market statistics', async () => {
       // Arrange
-      const now = new Date();
-      const history = [
-        { timestamp: new Date(now.getTime() - 3600000), price: 49000, volume: 1000000 },
-        { timestamp: new Date(now.getTime() - 7200000), price: 48000, volume: 900000 },
-      ];
-      await repository.createHistoricalPrices('BTC', '1h', history);
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.0,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 4.0,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
 
+      // Act
+      const result = await repository.getMarketStats();
+
+      // Assert
+      expect(result.totalMarketCap).toBe(1250000000000); // 900B + 350B
+      expect(result.totalVolume24h).toBe(1500000000); // 1B + 500M
+      expect(result.avgChange24h).toBe(3.0); // (2 + 4) / 2
+      expect(result.cryptoCount).toBe(2);
+    });
+
+    it('should handle negative changes in average', async () => {
+      // Arrange
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'UP',
+            name: 'Upcoin',
+            price: 10,
+            change1h: 1.0,
+            change24h: 10.0,
+            change7d: 20.0,
+            change30d: 30.0,
+            volume24h: 1000000,
+            marketCap: 100000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'DOWN',
+            name: 'Downcoin',
+            price: 5,
+            change1h: -1.0,
+            change24h: -10.0,
+            change7d: -20.0,
+            change30d: -30.0,
+            volume24h: 500000,
+            marketCap: 50000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+
+      // Act
+      const result = await repository.getMarketStats();
+
+      // Assert
+      expect(result.avgChange24h).toBe(0.0); // (10 + -10) / 2
+    });
+  });
+
+  describe('findHistoricalPrices', () => {
+    beforeEach(async () => {
+      await prisma.priceHistory.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            timeframe: '1h',
+            price: 50000,
+            volume: 1000000000,
+            timestamp: new Date('2024-06-01T10:00:00Z')
+          },
+          {
+            symbol: 'BTC',
+            timeframe: '1h',
+            price: 51000,
+            volume: 1100000000,
+            timestamp: new Date('2024-06-01T11:00:00Z')
+          },
+          {
+            symbol: 'BTC',
+            timeframe: '24h',
+            price: 49000,
+            volume: 2000000000,
+            timestamp: new Date('2024-05-31T10:00:00Z')
+          },
+          {
+            symbol: 'ETH',
+            timeframe: '1h',
+            price: 3000,
+            volume: 500000000,
+            timestamp: new Date('2024-06-01T10:00:00Z')
+          }
+        ]
+      });
+    });
+
+    afterEach(async () => {
+      await prisma.priceHistory.deleteMany();
+    });
+
+    it('should find historical prices for symbol and timeframe', async () => {
       // Act
       const result = await repository.findHistoricalPrices('BTC', '1h');
 
       // Assert
-      expect(result.length).toBe(2);
+      expect(result).toHaveLength(2);
       expect(result[0].symbol).toBe('BTC');
       expect(result[0].timeframe).toBe('1h');
-      // Results should be ordered by timestamp ascending
-      expect(result[0].price.toNumber()).toBe(48000);
-      expect(result[1].price.toNumber()).toBe(49000);
     });
 
-    it('should filter by timeframe correctly', async () => {
-      // Arrange: Create history for different timeframes
-      await repository.createHistoricalPrices('BTC', '1h', [
-        { timestamp: new Date(), price: 50000, volume: 1000000 },
-      ]);
-      await repository.createHistoricalPrices('BTC', '1d', [
-        { timestamp: new Date(), price: 51000, volume: 2000000 },
-      ]);
-
+    it('should order results by timestamp ascending', async () => {
       // Act
-      const result1h = await repository.findHistoricalPrices('BTC', '1h');
-      const result1d = await repository.findHistoricalPrices('BTC', '1d');
-
-      // Assert
-      expect(result1h.length).toBe(1);
-      expect(result1h[0].timeframe).toBe('1h');
-      expect(result1d.length).toBe(1);
-      expect(result1d[0].timeframe).toBe('1d');
-    });
-  });
-
-  describe('findHistoricalPricesByDateRange', () => {
-    it('should find historical prices within date range', async () => {
-      // Arrange
-      const baseTime = new Date('2024-01-01T00:00:00Z');
-      const history = [
-        { timestamp: new Date(baseTime.getTime()), price: 48000, volume: 1000000 },
-        { timestamp: new Date(baseTime.getTime() + 3600000), price: 49000, volume: 1100000 },
-        { timestamp: new Date(baseTime.getTime() + 7200000), price: 50000, volume: 1200000 },
-        { timestamp: new Date(baseTime.getTime() + 10800000), price: 51000, volume: 1300000 },
-      ];
-      await repository.createHistoricalPrices('BTC', '1h', history);
-
-      // Act: Get prices between hour 1 and hour 2
-      const startDate = new Date(baseTime.getTime() + 3600000);
-      const endDate = new Date(baseTime.getTime() + 7200000);
-      const result = await repository.findHistoricalPricesByDateRange('BTC', '1h', startDate, endDate);
-
-      // Assert
-      expect(result.length).toBe(2);
-      expect(result[0].price.toNumber()).toBe(49000);
-      expect(result[1].price.toNumber()).toBe(50000);
-    });
-  });
-
-  describe('createHistoricalPrices', () => {
-    it('should create historical price records', async () => {
-      // Arrange
-      const history = [
-        { timestamp: new Date(), price: 50000, volume: 1000000 },
-        { timestamp: new Date(Date.now() - 3600000), price: 49000, volume: 900000 },
-      ];
-
-      // Act
-      await repository.createHistoricalPrices('BTC', '1h', history);
-
-      // Assert
       const result = await repository.findHistoricalPrices('BTC', '1h');
-      expect(result.length).toBe(2);
-    });
-
-    it('should skip duplicates when creating historical prices', async () => {
-      // Arrange
-      const timestamp = new Date();
-      const history1 = [
-        { timestamp, price: 50000, volume: 1000000 },
-      ];
-      const history2 = [
-        { timestamp, price: 51000, volume: 1100000 }, // Same timestamp
-      ];
-
-      // Act
-      await repository.createHistoricalPrices('BTC', '1h', history1);
-      await repository.createHistoricalPrices('BTC', '1h', history2);
-
-      // Assert: Should only have 1 record (duplicate skipped)
-      const result = await repository.findHistoricalPrices('BTC', '1h');
-      expect(result.length).toBe(1);
-      expect(result[0].price.toNumber()).toBe(50000); // First one kept
-    });
-  });
-
-  describe('deleteHistoricalPrices', () => {
-    it('should delete historical prices by symbol and timeframe', async () => {
-      // Arrange
-      await repository.createHistoricalPrices('BTC', '1h', [
-        { timestamp: new Date(), price: 50000, volume: 1000000 },
-      ]);
-      await repository.createHistoricalPrices('BTC', '1d', [
-        { timestamp: new Date(), price: 51000, volume: 2000000 },
-      ]);
-
-      // Act
-      const deletedCount = await repository.deleteHistoricalPrices('BTC', '1h');
 
       // Assert
-      expect(deletedCount).toBe(1);
-
-      const result1h = await repository.findHistoricalPrices('BTC', '1h');
-      const result1d = await repository.findHistoricalPrices('BTC', '1d');
-      expect(result1h.length).toBe(0);
-      expect(result1d.length).toBe(1); // 1d should remain
+      expect(result).toHaveLength(2);
+      expect(result[0].timestamp.getTime()).toBeLessThan(result[1].timestamp.getTime());
     });
-  });
 
-  describe('deleteHistoricalPricesOlderThan', () => {
-    it('should delete historical prices older than specified date', async () => {
-      // Arrange
-      const oldDate = new Date('2023-01-01');
-      const newDate = new Date();
-
-      await repository.createHistoricalPrices('BTC', '1h', [
-        { timestamp: oldDate, price: 48000, volume: 1000000 },
-        { timestamp: newDate, price: 50000, volume: 1100000 },
-      ]);
-
+    it('should filter by timeframe', async () => {
       // Act
-      const cutoffDate = new Date('2023-06-01');
-      const deletedCount = await repository.deleteHistoricalPricesOlderThan(cutoffDate);
+      const result = await repository.findHistoricalPrices('BTC', '24h');
 
       // Assert
-      expect(deletedCount).toBe(1);
+      expect(result).toHaveLength(1);
+      expect(result[0].timeframe).toBe('24h');
+    });
 
-      const remaining = await repository.findHistoricalPrices('BTC', '1h');
-      expect(remaining.length).toBe(1);
-      expect(remaining[0].price.toNumber()).toBe(50000);
+    it('should handle lowercase symbols', async () => {
+      // Act
+      const result = await repository.findHistoricalPrices('btc', '1h');
+
+      // Assert
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array if no matches', async () => {
+      // Act
+      const result = await repository.findHistoricalPrices('NOTFOUND', '1h');
+
+      // Assert
+      expect(result).toEqual([]);
     });
   });
 
   describe('replaceHistoricalPrices', () => {
-    it('should replace existing historical prices', async () => {
-      // Arrange: Create initial history
-      const oldHistory = [
-        { timestamp: new Date('2024-01-01T00:00:00Z'), price: 48000, volume: 1000000 },
-        { timestamp: new Date('2024-01-01T01:00:00Z'), price: 49000, volume: 1100000 },
-      ];
-      await repository.createHistoricalPrices('BTC', '1h', oldHistory);
-
-      // Act: Replace with new history
-      const newHistory = [
-        { timestamp: new Date('2024-01-02T00:00:00Z'), price: 50000, volume: 1200000 },
-        { timestamp: new Date('2024-01-02T01:00:00Z'), price: 51000, volume: 1300000 },
-      ];
-      await repository.replaceHistoricalPrices('BTC', '1h', newHistory);
-
-      // Assert
-      const result = await repository.findHistoricalPrices('BTC', '1h');
-      expect(result.length).toBe(2);
-      expect(result[0].price.toNumber()).toBe(50000);
-      expect(result[1].price.toNumber()).toBe(51000);
+    afterEach(async () => {
+      await prisma.priceHistory.deleteMany();
     });
 
-    it('should handle transaction atomically', async () => {
-      // Arrange: Create initial history
-      await repository.createHistoricalPrices('BTC', '1h', [
-        { timestamp: new Date(), price: 50000, volume: 1000000 },
+    it('should insert historical prices', async () => {
+      // Act
+      await repository.replaceHistoricalPrices('BTC', '1h', [
+        {
+          timestamp: new Date('2024-06-01T10:00:00Z'),
+          price: 50000,
+          volume: 1000000000
+        },
+        {
+          timestamp: new Date('2024-06-01T11:00:00Z'),
+          price: 51000,
+          volume: 1100000000
+        }
       ]);
 
-      // Act & Assert: Replace should succeed atomically
-      const newHistory = [
-        { timestamp: new Date(), price: 51000, volume: 1100000 },
-      ];
-      await repository.replaceHistoricalPrices('BTC', '1h', newHistory);
+      // Assert
+      const result = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '1h' }
+      });
+      expect(result).toHaveLength(2);
+    });
 
-      const result = await repository.findHistoricalPrices('BTC', '1h');
-      expect(result.length).toBe(1);
-      expect(result[0].price.toNumber()).toBe(51000);
+    it('should replace existing historical prices', async () => {
+      // Arrange
+      await prisma.priceHistory.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            timeframe: '1h',
+            price: 45000,
+            volume: 900000000,
+            timestamp: new Date('2024-06-01T09:00:00Z')
+          },
+          {
+            symbol: 'BTC',
+            timeframe: '1h',
+            price: 46000,
+            volume: 950000000,
+            timestamp: new Date('2024-06-01T10:00:00Z')
+          }
+        ]
+      });
+
+      // Act
+      await repository.replaceHistoricalPrices('BTC', '1h', [
+        {
+          timestamp: new Date('2024-06-01T11:00:00Z'),
+          price: 51000,
+          volume: 1100000000
+        }
+      ]);
+
+      // Assert
+      const result = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '1h' }
+      });
+      expect(result).toHaveLength(1);
+      expect(Number(result[0].price)).toBe(51000);
+    });
+
+    it('should only delete records for specific symbol and timeframe', async () => {
+      // Arrange
+      await prisma.priceHistory.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            timeframe: '1h',
+            price: 50000,
+            volume: 1000000000,
+            timestamp: new Date('2024-06-01T10:00:00Z')
+          },
+          {
+            symbol: 'BTC',
+            timeframe: '24h',
+            price: 49000,
+            volume: 2000000000,
+            timestamp: new Date('2024-05-31T10:00:00Z')
+          },
+          {
+            symbol: 'ETH',
+            timeframe: '1h',
+            price: 3000,
+            volume: 500000000,
+            timestamp: new Date('2024-06-01T10:00:00Z')
+          }
+        ]
+      });
+
+      // Act
+      await repository.replaceHistoricalPrices('BTC', '1h', [
+        {
+          timestamp: new Date('2024-06-01T12:00:00Z'),
+          price: 52000,
+          volume: 1200000000
+        }
+      ]);
+
+      // Assert
+      const btc1h = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '1h' }
+      });
+      const btc24h = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '24h' }
+      });
+      const eth1h = await prisma.priceHistory.findMany({
+        where: { symbol: 'ETH', timeframe: '1h' }
+      });
+
+      expect(btc1h).toHaveLength(1);
+      expect(Number(btc1h[0].price)).toBe(52000);
+      expect(btc24h).toHaveLength(1); // Not deleted
+      expect(eth1h).toHaveLength(1); // Not deleted
+    });
+
+    it('should normalize symbol to uppercase', async () => {
+      // Act
+      await repository.replaceHistoricalPrices('btc', '1h', [
+        {
+          timestamp: new Date('2024-06-01T10:00:00Z'),
+          price: 50000,
+          volume: 1000000000
+        }
+      ]);
+
+      // Assert
+      const result = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC' }
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0].symbol).toBe('BTC');
+    });
+
+    it('should handle empty history array', async () => {
+      // Arrange
+      await prisma.priceHistory.create({
+        data: {
+          symbol: 'BTC',
+          timeframe: '1h',
+          price: 50000,
+          volume: 1000000000,
+          timestamp: new Date('2024-06-01T10:00:00Z')
+        }
+      });
+
+      // Act
+      await repository.replaceHistoricalPrices('BTC', '1h', []);
+
+      // Assert
+      const result = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '1h' }
+      });
+      expect(result).toHaveLength(0);
+    });
+
+    it('should execute in a transaction', async () => {
+      // This test verifies transactional behavior by checking that
+      // either all operations succeed or all fail together.
+      // We test this indirectly by checking the final state.
+
+      // Act
+      await repository.replaceHistoricalPrices('BTC', '1h', [
+        {
+          timestamp: new Date('2024-06-01T10:00:00Z'),
+          price: 50000,
+          volume: 1000000000
+        },
+        {
+          timestamp: new Date('2024-06-01T11:00:00Z'),
+          price: 51000,
+          volume: 1100000000
+        }
+      ]);
+
+      // Assert
+      const result = await prisma.priceHistory.findMany({
+        where: { symbol: 'BTC', timeframe: '1h' }
+      });
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe('deleteAll', () => {
+    it('should delete all entries', async () => {
+      // Arrange
+      await prisma.priceCache.createMany({
+        data: [
+          {
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            price: 50000,
+            change1h: 1.5,
+            change24h: 2.5,
+            change7d: 5.0,
+            change30d: 10.0,
+            volume24h: 1000000000,
+            marketCap: 900000000000,
+            lastUpdated: new Date()
+          },
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            price: 3000,
+            change1h: 0.5,
+            change24h: 1.5,
+            change7d: 3.0,
+            change30d: 8.0,
+            volume24h: 500000000,
+            marketCap: 350000000000,
+            lastUpdated: new Date()
+          }
+        ]
+      });
+
+      // Act
+      const deletedCount = await repository.deleteAll();
+
+      // Assert
+      expect(deletedCount).toBe(2);
+
+      const remaining = await prisma.priceCache.findMany();
+      expect(remaining).toHaveLength(0);
+    });
+
+    it('should return 0 for empty table', async () => {
+      // Act
+      const deletedCount = await repository.deleteAll();
+
+      // Assert
+      expect(deletedCount).toBe(0);
     });
   });
 });

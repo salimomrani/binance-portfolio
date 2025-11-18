@@ -3,37 +3,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import design tokens and animations */
+@import './styles/design-tokens.css';
+@import './styles/animations.css';
+
 /* Custom global styles */
 body {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-gray-50 text-gray-900 transition-colors duration-200;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Dark mode global styles */
+.dark body {
+  @apply bg-neutral-900 text-neutral-50;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
 }
 
 /* Card component styles */
 .card {
-  @apply bg-white rounded-lg shadow-md p-6;
+  @apply bg-white rounded-lg shadow-md p-6 transition-colors duration-200;
+}
+
+.dark .card {
+  @apply bg-neutral-800 shadow-xl;
 }
 
 /* Button styles */
 .btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
 }
 
 .btn-primary {
-  @apply bg-primary text-white hover:bg-primary-dark;
+  @apply bg-primary text-white hover:bg-primary-dark hover:shadow-lg;
+}
+
+.dark .btn-primary {
+  @apply bg-primary-light hover:bg-primary;
 }
 
 .btn-secondary {
   @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
 }
 
+.dark .btn-secondary {
+  @apply bg-neutral-700 text-neutral-200 hover:bg-neutral-600;
+}
+
 .btn-danger {
   @apply bg-loss text-white hover:bg-loss-dark;
 }
 
+.dark .btn-danger {
+  @apply bg-loss-light hover:bg-loss;
+}
+
 /* Input styles */
 .input {
-  @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-gray-900 transition-colors duration-200;
+}
+
+.dark .input {
+  @apply border-neutral-600 bg-neutral-800 text-neutral-100 focus:ring-primary-light focus:border-transparent;
 }
 
 /* Table styles */
@@ -42,15 +79,27 @@ body {
 }
 
 .table th {
-  @apply bg-gray-100 font-semibold text-left px-4 py-3 border-b border-gray-200;
+  @apply bg-gray-100 font-semibold text-left px-4 py-3 border-b border-gray-200 transition-colors duration-200;
+}
+
+.dark .table th {
+  @apply bg-neutral-800 border-neutral-700;
 }
 
 .table td {
-  @apply px-4 py-3 border-b border-gray-200;
+  @apply px-4 py-3 border-b border-gray-200 transition-colors duration-200;
+}
+
+.dark .table td {
+  @apply border-neutral-700;
 }
 
 .table tr:hover {
   @apply bg-gray-50;
+}
+
+.dark .table tr:hover {
+  @apply bg-neutral-800;
 }
 
 /* T157: Price flash animations */

@@ -2,14 +2,13 @@
 
 import {
   Component,
-  Input,
-  OnChanges,
-  SimpleChanges,
+  input,
   ViewChild,
   ElementRef,
   AfterViewInit,
   OnDestroy,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 
@@ -31,23 +30,30 @@ export interface AllocationData {
   styleUrls: ['./pie-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
-  @Input() allocationData: AllocationData[] = [];
-  @Input() title: string = 'Portfolio Allocation';
+export class PieChartComponent implements AfterViewInit, OnDestroy {
+  // Signal inputs
+  allocationData = input<AllocationData[]>([]);
+  title = input<string>('Portfolio Allocation');
 
   @ViewChild('chartCanvas', { static: false })
   chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   private chart?: Chart;
+  private isInitialized = false;
+
+  constructor() {
+    // Effect to update chart when allocationData changes
+    effect(() => {
+      const data = this.allocationData();
+      if (this.isInitialized && data.length > 0) {
+        this.updateChart();
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     this.renderChart();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['allocationData'] && !changes['allocationData'].firstChange) {
-      this.updateChart();
-    }
+    this.isInitialized = true;
   }
 
   ngOnDestroy(): void {
@@ -65,14 +71,17 @@ export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     // T128: Configure doughnut chart with custom styling
+    const data = this.allocationData();
+    const titleText = this.title();
+
     const config: ChartConfiguration = {
       type: 'doughnut' as ChartType,
       data: {
-        labels: this.allocationData.map((item) => `${item.symbol} (${item.percentage.toFixed(2)}%)`),
+        labels: data.map((item) => `${item.symbol} (${item.percentage.toFixed(2)}%)`),
         datasets: [
           {
-            data: this.allocationData.map((item) => item.value),
-            backgroundColor: this.allocationData.map((item) => item.color),
+            data: data.map((item) => item.value),
+            backgroundColor: data.map((item) => item.color),
             borderColor: '#ffffff',
             borderWidth: 2,
           },
@@ -109,7 +118,7 @@ export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
             callbacks: {
               label: (context) => {
                 const index = context.dataIndex;
-                const allocation = this.allocationData[index];
+                const allocation = data[index];
                 return [
                   `${allocation.name}`,
                   `Value: $${allocation.value.toLocaleString('en-US', {
@@ -122,8 +131,8 @@ export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
             },
           },
           title: {
-            display: !!this.title,
-            text: this.title,
+            display: !!titleText,
+            text: titleText,
             font: {
               size: 16,
               weight: 'bold',
@@ -148,14 +157,16 @@ export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
       return;
     }
 
+    const data = this.allocationData();
+
     // Update chart data
-    this.chart.data.labels = this.allocationData.map(
+    this.chart.data.labels = data.map(
       (item) => `${item.symbol} (${item.percentage.toFixed(2)}%)`
     );
-    this.chart.data.datasets[0].data = this.allocationData.map(
+    this.chart.data.datasets[0].data = data.map(
       (item) => item.value
     );
-    this.chart.data.datasets[0].backgroundColor = this.allocationData.map(
+    this.chart.data.datasets[0].backgroundColor = data.map(
       (item) => item.color
     );
 

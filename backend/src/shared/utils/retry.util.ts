@@ -23,10 +23,7 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
 /**
  * Execute a function with exponential backoff retry logic
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   let attempt = 1;
   let delay = opts.initialDelay;
@@ -62,10 +59,7 @@ export async function withRetry<T>(
 /**
  * Backwards-compatible helper that supports { retries, delay } signature
  */
-export async function retry<T>(
-  fn: () => Promise<T>,
-  options: LegacyRetryOptions = {}
-): Promise<T> {
+export async function retry<T>(fn: () => Promise<T>, options: LegacyRetryOptions = {}): Promise<T> {
   const { retries, delay, ...rest } = options;
 
   const normalized: RetryOptions = {
@@ -90,8 +84,7 @@ function shouldRetry(error: unknown, retryableErrors: string[]): boolean {
 
   if (error instanceof Error) {
     return retryableErrors.some(
-      (errorType) =>
-        error.name === errorType || error.message.includes(errorType)
+      (errorType) => error.name === errorType || error.message.includes(errorType)
     );
   }
 
@@ -109,11 +102,7 @@ function sleep(ms: number): Promise<void> {
  * Retry decorator for class methods
  */
 export function Retry(options: RetryOptions = {}) {
-  return function (
-    _target: unknown,
-    _propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: unknown[]) {

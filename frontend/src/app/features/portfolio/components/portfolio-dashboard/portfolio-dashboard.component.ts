@@ -1,21 +1,40 @@
 // T079-T081: Portfolio dashboard component with signals for reactive state
 // T156: Integrated price-update service for real-time price polling
+// T176: Added Holdings/Watchlist tabs
 
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { PortfolioFacadeService } from '../../services/portfolio-facade.service';
 import { PortfolioApiService } from '../../services/portfolio-api.service';
 import { Portfolio, AddHoldingRequest } from '../../../../shared/models/portfolio.model';
+import { AddToWatchlistRequest } from '../../../../shared/models/watchlist.model';
 import { PortfolioSummaryComponent } from '../portfolio-summary/portfolio-summary.component';
 import { PortfolioTableComponent } from '../portfolio-table/portfolio-table.component';
 import { AddHoldingDialogComponent } from '../../../holdings/components/add-holding-dialog/add-holding-dialog.component';
+import { WatchlistPanelComponent } from '../../../watchlist/components/watchlist-panel/watchlist-panel.component';
+import { AddToWatchlistDialogComponent } from '../../../watchlist/components/add-to-watchlist-dialog/add-to-watchlist-dialog.component';
 import { PriceUpdateService } from '../../../../core/services/price-update.service';
+import { WatchlistActions } from '../../../watchlist/store/watchlist.actions';
+import {
+  selectWatchlistCount,
+  selectAllWatchlistItems,
+} from '../../../watchlist/store/watchlist.selectors';
+
+type ViewTab = 'holdings' | 'watchlist';
 
 @Component({
   selector: 'app-portfolio-dashboard',
   standalone: true,
-  imports: [CommonModule, PortfolioSummaryComponent, PortfolioTableComponent, AddHoldingDialogComponent],
+  imports: [
+    CommonModule,
+    PortfolioSummaryComponent,
+    PortfolioTableComponent,
+    AddHoldingDialogComponent,
+    WatchlistPanelComponent,
+    AddToWatchlistDialogComponent,
+  ],
   templateUrl: './portfolio-dashboard.component.html',
   styleUrl: './portfolio-dashboard.component.scss',
 })
@@ -24,6 +43,7 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
   private readonly portfolioApi = inject(PortfolioApiService);
   private readonly router = inject(Router);
   private readonly priceUpdateService = inject(PriceUpdateService);
+  private readonly store = inject(Store);
 
   // Signals for reactive state
   protected readonly portfolios = signal<Portfolio[]>([]);
@@ -32,6 +52,14 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
   protected readonly error = signal<string | null>(null);
   protected readonly lastUpdated = signal<Date | null>(null);
   protected readonly isAddHoldingDialogOpen = signal<boolean>(false);
+
+  // T176: Watchlist state
+  protected readonly activeTab = signal<ViewTab>('holdings');
+  protected readonly isAddToWatchlistDialogOpen = signal<boolean>(false);
+  protected readonly watchlistCount = this.store.selectSignal(selectWatchlistCount);
+
+  // T177: Watchlist items for price polling
+  private readonly watchlistItems = this.store.selectSignal(selectAllWatchlistItems);
 
   // Computed signals
   protected readonly hasPortfolios = computed(() => this.portfolios().length > 0);
@@ -47,10 +75,25 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
     return portfolio.holdings.map(h => h.symbol);
   });
 
+  // T177: Extract symbols from watchlist for price updates
+  private readonly watchlistSymbols = computed(() => {
+    const items = this.watchlistItems();
+    return items.map(item => item.symbol);
+  });
+
+  // T177: Combine portfolio and watchlist symbols (unique values only)
+  private readonly allSymbols = computed(() => {
+    const portfolio = this.portfolioSymbols();
+    const watchlist = this.watchlistSymbols();
+    const combined = [...portfolio, ...watchlist];
+    // Return unique symbols
+    return Array.from(new Set(combined));
+  });
+
   constructor() {
-    // Effect to start/stop price updates when portfolio symbols change
+    // T177: Effect to start/stop price updates when any symbols change
     effect(() => {
-      const symbols = this.portfolioSymbols();
+      const symbols = this.allSymbols();
       if (symbols.length > 0) {
         this.priceUpdateService.stopPriceUpdates();
         this.priceUpdateService.startPriceUpdates(symbols);
@@ -171,6 +214,37 @@ export class PortfolioDashboardComponent implements OnInit, OnDestroy {
 
     this.portfolioFacade.addHolding(portfolioId, request);
     this.isAddHoldingDialogOpen.set(false);
+  }
+
+  // T176: Watchlist methods
+
+  /**
+   * Switch active tab
+   */
+  onTabChange(tab: ViewTab): void {
+    this.activeTab.set(tab);
+  }
+
+  /**
+   * Open add to watchlist dialog
+   */
+  onOpenAddToWatchlistDialog(): void {
+    this.isAddToWatchlistDialogOpen.set(true);
+  }
+
+  /**
+   * Close add to watchlist dialog
+   */
+  onCloseAddToWatchlistDialog(): void {
+    this.isAddToWatchlistDialogOpen.set(false);
+  }
+
+  /**
+   * Handle adding to watchlist
+   */
+  onAddToWatchlist(request: AddToWatchlistRequest): void {
+    this.store.dispatch(WatchlistActions.addToWatchlist({ request }));
+    this.isAddToWatchlistDialogOpen.set(false);
   }
 
   ngOnDestroy(): void {

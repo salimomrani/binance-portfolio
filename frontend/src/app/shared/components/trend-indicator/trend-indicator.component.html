@@ -1,9 +1,9 @@
 <!-- T150: Trend Indicator Component Template -->
 <span
   class="inline-flex items-center gap-1 rounded-md font-medium"
-  [ngClass]="[colorClass, bgColorClass, sizeClasses]"
-  [attr.data-trend]="trend"
+  [ngClass]="[colorClass(), bgColorClass(), sizeClasses()]"
+  [attr.data-trend]="trend()"
 >
-  <span *ngIf="showArrow" class="font-bold">{{ arrowIcon }}</span>
-  <span>{{ formattedChange }}</span>
+  <span *ngIf="showArrow()" class="font-bold">{{ arrowIcon() }}</span>
+  <span>{{ formattedChange() }}</span>
 </span>

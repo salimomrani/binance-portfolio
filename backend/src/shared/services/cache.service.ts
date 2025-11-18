@@ -196,7 +196,7 @@ export class CacheService {
       '^' +
         pattern
           .split('*')
-          .map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
           .join('.*') +
         '$'
     );

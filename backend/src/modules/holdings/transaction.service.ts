@@ -1,8 +1,11 @@
 // T095: Transaction service implementation
+// T026: Refactored to use TransactionRepository and HoldingsRepository
 
-import { PrismaClient, Transaction, TransactionType } from '@prisma/client';
+import { Transaction, TransactionType } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { AddTransactionInput } from './transaction.validation';
+import type { TransactionRepository } from './transaction.repository';
+import type { HoldingsRepository } from './holdings.repository';
 import { logger } from '../../shared/services/logger.service';
 import { PaginatedResponse } from '../../shared/types/api-response';
 
@@ -21,7 +24,10 @@ export interface TransactionQueryOptions {
  */
 export type TransactionService = {
   addTransaction: (holdingId: string, data: AddTransactionInput) => Promise<Transaction>;
-  getTransactions: (holdingId: string, options?: TransactionQueryOptions) => Promise<PaginatedResponse<Transaction>>;
+  getTransactions: (
+    holdingId: string,
+    options?: TransactionQueryOptions
+  ) => Promise<PaginatedResponse<Transaction>>;
   updateHoldingAverageCost: (holdingId: string) => Promise<void>;
   deleteTransaction: (transactionId: string) => Promise<void>;
 };
@@ -30,22 +36,18 @@ export type TransactionService = {
  * Create Transaction Service
  * Factory function for creating transaction service instance
  */
-export const createTransactionService = (prisma: PrismaClient): TransactionService => ({
+export const createTransactionService = (
+  transactionRepo: TransactionRepository,
+  holdingsRepo: HoldingsRepository
+): TransactionService => ({
   /**
    * Add a new transaction to a holding
    * Automatically recalculates the holding's average cost
    */
   addTransaction: async (holdingId: string, data: AddTransactionInput) => {
     try {
-      // Verify holding exists
-      const holding = await prisma.holding.findUnique({
-        where: { id: holdingId },
-        include: {
-          transactions: {
-            orderBy: { date: 'asc' },
-          },
-        },
-      });
+      // Verify holding exists and get current quantity
+      const holding = await holdingsRepo.findWithTransactions(holdingId);
 
       if (!holding) {
         throw new Error(`Holding with ID ${holdingId} not found`);
@@ -68,17 +70,15 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
       }
 
       // Create transaction
-      const transaction = await prisma.transaction.create({
-        data: {
-          holdingId,
-          type: data.type as TransactionType,
-          quantity: quantity.toFixed(8),
-          pricePerUnit: pricePerUnit.toFixed(8),
-          totalCost: totalCost.toFixed(8),
-          fee: fee.toFixed(8),
-          date: new Date(data.date),
-          notes: data.notes,
-        },
+      const transaction = await transactionRepo.create({
+        holdingId,
+        type: data.type as TransactionType,
+        quantity,
+        pricePerUnit,
+        totalCost,
+        fee,
+        date: new Date(data.date),
+        notes: data.notes,
       });
 
       logger.info(
@@ -86,7 +86,7 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
       );
 
       // Recalculate holding's average cost and quantity
-      await updateHoldingAverageCostInternal(prisma, holdingId);
+      await updateHoldingAverageCostInternal(transactionRepo, holdingsRepo, holdingId);
 
       return transaction;
     } catch (error) {
@@ -100,27 +100,15 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
    */
   getTransactions: async (holdingId: string, options: TransactionQueryOptions = {}) => {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        sortBy = 'date',
-        order = 'desc',
-      } = options;
+      const { page = 1, limit = 10, sortBy = 'date', order = 'desc' } = options;
 
       const skip = (page - 1) * limit;
 
       // Get total count
-      const total = await prisma.transaction.count({
-        where: { holdingId },
-      });
+      const total = await transactionRepo.count(holdingId);
 
       // Get transactions
-      const transactions = await prisma.transaction.findMany({
-        where: { holdingId },
-        orderBy: { [sortBy]: order },
-        skip,
-        take: limit,
-      });
+      const transactions = await transactionRepo.findAll(holdingId, sortBy, order, skip, limit);
 
       const totalPages = Math.ceil(total / limit);
 
@@ -132,7 +120,7 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
           total,
           totalPages,
           hasNext: page < totalPages,
-          hasPrev: page > 1,
+          hasPrevious: page > 1,
         },
       };
     } catch (error) {
@@ -145,7 +133,7 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
    * Recalculate holding's average cost and quantity based on all transactions
    */
   updateHoldingAverageCost: async (holdingId: string) => {
-    return updateHoldingAverageCostInternal(prisma, holdingId);
+    return updateHoldingAverageCostInternal(transactionRepo, holdingsRepo, holdingId);
   },
 
   /**
@@ -153,9 +141,7 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
    */
   deleteTransaction: async (transactionId: string) => {
     try {
-      const transaction = await prisma.transaction.findUnique({
-        where: { id: transactionId },
-      });
+      const transaction = await transactionRepo.findById(transactionId);
 
       if (!transaction) {
         throw new Error(`Transaction with ID ${transactionId} not found`);
@@ -164,14 +150,12 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
       const holdingId = transaction.holdingId;
 
       // Delete transaction
-      await prisma.transaction.delete({
-        where: { id: transactionId },
-      });
+      await transactionRepo.delete(transactionId);
 
       logger.info(`Deleted transaction ${transactionId}`);
 
       // Recalculate holding's average cost
-      await updateHoldingAverageCostInternal(prisma, holdingId);
+      await updateHoldingAverageCostInternal(transactionRepo, holdingsRepo, holdingId);
     } catch (error) {
       logger.error('Error deleting transaction:', error);
       throw error;
@@ -183,16 +167,13 @@ export const createTransactionService = (prisma: PrismaClient): TransactionServi
  * Internal helper function to recalculate holding's average cost
  * Uses weighted average cost method for BUY transactions
  */
-async function updateHoldingAverageCostInternal(prisma: PrismaClient, holdingId: string): Promise<void> {
+async function updateHoldingAverageCostInternal(
+  _transactionRepo: TransactionRepository,
+  holdingsRepo: HoldingsRepository,
+  holdingId: string
+): Promise<void> {
   try {
-    const holding = await prisma.holding.findUnique({
-      where: { id: holdingId },
-      include: {
-        transactions: {
-          orderBy: { date: 'asc' },
-        },
-      },
-    });
+    const holding = await holdingsRepo.findWithTransactions(holdingId);
 
     if (!holding) {
       throw new Error(`Holding with ID ${holdingId} not found`);
@@ -227,18 +208,14 @@ async function updateHoldingAverageCostInternal(prisma: PrismaClient, holdingId:
     }
 
     // Calculate new average cost
-    const newAverageCost =
-      totalQuantity.greaterThan(0)
-        ? totalCost.dividedBy(totalQuantity)
-        : new Decimal(0);
+    const newAverageCost = totalQuantity.greaterThan(0)
+      ? totalCost.dividedBy(totalQuantity)
+      : new Decimal(0);
 
     // Update holding
-    await prisma.holding.update({
-      where: { id: holdingId },
-      data: {
-        quantity: totalQuantity.toFixed(8),
-        averageCost: newAverageCost.toFixed(8),
-      },
+    await holdingsRepo.update(holdingId, {
+      quantity: totalQuantity,
+      averageCost: newAverageCost,
     });
 
     logger.info(

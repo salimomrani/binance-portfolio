@@ -1,6 +1,7 @@
 /**
  * Portfolio Routes
  * Defines Express routes and maps them to handler functions
+ * Refactored to use functional handlers
  */
 
 import { Router } from 'express';

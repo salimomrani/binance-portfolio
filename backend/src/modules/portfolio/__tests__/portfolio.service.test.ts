@@ -86,11 +86,7 @@ describe('PortfolioService', () => {
     } as any;
 
     // Create service instance
-    service = new PortfolioService(
-      mockRepository,
-      mockMarketDataService,
-      mockCalculationsService
-    );
+    service = new PortfolioService(mockRepository, mockMarketDataService, mockCalculationsService);
   });
 
   // ============================================================
@@ -273,8 +269,19 @@ describe('PortfolioService', () => {
 
     it('should calculate allocation percentages correctly', async () => {
       // Arrange
-      const holding1 = { ...mockHolding, symbol: 'BTC', quantity: new Decimal(1), averageCost: new Decimal(50000) };
-      const holding2 = { ...mockHolding, id: 'holding-2', symbol: 'ETH', quantity: new Decimal(10), averageCost: new Decimal(3000) };
+      const holding1 = {
+        ...mockHolding,
+        symbol: 'BTC',
+        quantity: new Decimal(1),
+        averageCost: new Decimal(50000),
+      };
+      const holding2 = {
+        ...mockHolding,
+        id: 'holding-2',
+        symbol: 'ETH',
+        quantity: new Decimal(10),
+        averageCost: new Decimal(3000),
+      };
 
       const portfolioWithHoldings = {
         ...mockPortfolio,
@@ -299,8 +306,8 @@ describe('PortfolioService', () => {
       expect(result.holdings).toHaveLength(2);
       // BTC: 55000, ETH: 33000 (10 * 3300), Total: 88000
       // BTC allocation should be ~62.5%, ETH ~37.5%
-      const btcHolding = result.holdings.find(h => h.symbol === 'BTC');
-      const ethHolding = result.holdings.find(h => h.symbol === 'ETH');
+      const btcHolding = result.holdings.find((h) => h.symbol === 'BTC');
+      const ethHolding = result.holdings.find((h) => h.symbol === 'ETH');
       expect(btcHolding?.allocationPercentage).toBeGreaterThan(60);
       expect(ethHolding?.allocationPercentage).toBeGreaterThan(35);
     });
@@ -357,7 +364,9 @@ describe('PortfolioService', () => {
       mockRepository.update.mockRejectedValue(new Error('Portfolio not found'));
 
       // Act & Assert
-      await expect(service.updatePortfolio('portfolio-1', {})).rejects.toThrow('Portfolio not found');
+      await expect(service.updatePortfolio('portfolio-1', {})).rejects.toThrow(
+        'Portfolio not found'
+      );
     });
   });
 
@@ -393,8 +402,19 @@ describe('PortfolioService', () => {
   describe('calculatePortfolioStatistics', () => {
     it('should calculate statistics for portfolio with holdings', async () => {
       // Arrange
-      const holding1 = { ...mockHolding, symbol: 'BTC', quantity: new Decimal(1), averageCost: new Decimal(50000) };
-      const holding2 = { ...mockHolding, id: 'holding-2', symbol: 'ETH', quantity: new Decimal(10), averageCost: new Decimal(3000) };
+      const holding1 = {
+        ...mockHolding,
+        symbol: 'BTC',
+        quantity: new Decimal(1),
+        averageCost: new Decimal(50000),
+      };
+      const holding2 = {
+        ...mockHolding,
+        id: 'holding-2',
+        symbol: 'ETH',
+        quantity: new Decimal(10),
+        averageCost: new Decimal(3000),
+      };
 
       const portfolioWithHoldings = {
         ...mockPortfolio,
@@ -478,7 +498,9 @@ describe('PortfolioService', () => {
       mockRepository.findByIdWithHoldings.mockRejectedValue(new Error('Portfolio not found'));
 
       // Act & Assert
-      await expect(service.calculatePortfolioStatistics('portfolio-1')).rejects.toThrow('Portfolio not found');
+      await expect(service.calculatePortfolioStatistics('portfolio-1')).rejects.toThrow(
+        'Portfolio not found'
+      );
     });
   });
 
@@ -489,8 +511,21 @@ describe('PortfolioService', () => {
   describe('getPortfolioAllocation', () => {
     it('should return allocation data for portfolio with holdings', async () => {
       // Arrange
-      const holding1 = { ...mockHolding, symbol: 'BTC', name: 'Bitcoin', quantity: new Decimal(1), averageCost: new Decimal(50000) };
-      const holding2 = { ...mockHolding, id: 'holding-2', symbol: 'ETH', name: 'Ethereum', quantity: new Decimal(10), averageCost: new Decimal(3000) };
+      const holding1 = {
+        ...mockHolding,
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        quantity: new Decimal(1),
+        averageCost: new Decimal(50000),
+      };
+      const holding2 = {
+        ...mockHolding,
+        id: 'holding-2',
+        symbol: 'ETH',
+        name: 'Ethereum',
+        quantity: new Decimal(10),
+        averageCost: new Decimal(3000),
+      };
 
       const portfolioWithHoldings = {
         ...mockPortfolio,
@@ -566,7 +601,7 @@ describe('PortfolioService', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      const colors = result.map(r => r.color);
+      const colors = result.map((r) => r.color);
       expect(new Set(colors).size).toBeGreaterThan(1); // At least some different colors
     });
 
@@ -575,7 +610,9 @@ describe('PortfolioService', () => {
       mockRepository.findByIdWithHoldings.mockRejectedValue(new Error('Portfolio not found'));
 
       // Act & Assert
-      await expect(service.getPortfolioAllocation('portfolio-1')).rejects.toThrow('Portfolio not found');
+      await expect(service.getPortfolioAllocation('portfolio-1')).rejects.toThrow(
+        'Portfolio not found'
+      );
     });
   });
 });

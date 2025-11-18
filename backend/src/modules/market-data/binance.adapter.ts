@@ -3,7 +3,14 @@
 
 import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
-import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
+import {
+  MarketDataAdapter,
+  CryptoPrice,
+  CryptoMarketData,
+  PriceHistory,
+  Timeframe,
+  AdapterConfig,
+} from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import {
   BinanceFlexiblePosition,
@@ -159,7 +166,7 @@ export class BinanceAdapter implements MarketDataAdapter {
 
   async getMultiplePrices(symbols: string[]): Promise<Map<string, CryptoPrice>> {
     try {
-      const binanceSymbols = symbols.map(s => `${s}USDT`);
+      const binanceSymbols = symbols.map((s) => `${s}USDT`);
 
       const response = await this.client.get('/ticker/24hr', {
         params: { symbols: JSON.stringify(binanceSymbols) },
@@ -341,9 +348,10 @@ export class BinanceAdapter implements MarketDataAdapter {
         type: 'FLEXIBLE' as const,
         amount: parseFloat(pos.totalAmount),
         currentApy: parseFloat(pos.latestAnnualPercentageRate),
-        dailyEarnings: pos.totalAmount && pos.latestAnnualPercentageRate
-          ? (parseFloat(pos.totalAmount) * parseFloat(pos.latestAnnualPercentageRate)) / 365 / 100
-          : undefined,
+        dailyEarnings:
+          pos.totalAmount && pos.latestAnnualPercentageRate
+            ? (parseFloat(pos.totalAmount) * parseFloat(pos.latestAnnualPercentageRate)) / 365 / 100
+            : undefined,
         canRedeem: pos.canRedeem,
         autoSubscribe: pos.autoSubscribe,
       }));

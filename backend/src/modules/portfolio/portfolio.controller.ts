@@ -1,7 +1,7 @@
 // T065: Portfolio controller
-// Refactored: Controller handles only HTTP concerns (req/res), no routing (Phase 3)
+// Refactored to functional pattern with handler factories
 
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import type { PortfolioService } from './portfolio.service';
 import type { BinanceSyncService } from './binance-sync.service';
 import { logger } from '../../shared/services/logger.service';
@@ -10,24 +10,24 @@ import { logger } from '../../shared/services/logger.service';
  * Portfolio Handlers Type
  */
 export type PortfolioHandlers = {
-  getPortfolios: RequestHandler;
-  createPortfolio: RequestHandler;
-  getPortfolioById: RequestHandler;
-  updatePortfolio: RequestHandler;
-  deletePortfolio: RequestHandler;
-  getPortfolioStatistics: RequestHandler;
-  getPortfolioAllocation: RequestHandler;
-  syncFromBinance: RequestHandler;
+  getPortfolios: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  createPortfolio: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getPortfolioById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  updatePortfolio: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  deletePortfolio: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getPortfolioStatistics: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getPortfolioAllocation: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  syncFromBinance: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 };
 
 /**
- * GET /api/portfolios - Get user's portfolios
+ * Create GET /api/portfolios handler
  */
-export const createGetPortfoliosHandler = (service: PortfolioService): RequestHandler => {
+export const createGetPortfoliosHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware (for now use mock)
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Fetching portfolios for user ${userId}`);
 
@@ -46,13 +46,13 @@ export const createGetPortfoliosHandler = (service: PortfolioService): RequestHa
 };
 
 /**
- * POST /api/portfolios - Create new portfolio
+ * Create POST /api/portfolios handler
  */
-export const createCreatePortfolioHandler = (service: PortfolioService): RequestHandler => {
+export const createCreatePortfolioHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Creating portfolio for user ${userId}`);
 
@@ -72,9 +72,9 @@ export const createCreatePortfolioHandler = (service: PortfolioService): Request
 };
 
 /**
- * GET /api/portfolios/:id - Get portfolio details
+ * Create GET /api/portfolios/:id handler
  */
-export const createGetPortfolioByIdHandler = (service: PortfolioService): RequestHandler => {
+export const createGetPortfolioByIdHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -96,9 +96,9 @@ export const createGetPortfolioByIdHandler = (service: PortfolioService): Reques
 };
 
 /**
- * PATCH /api/portfolios/:id - Update portfolio
+ * Create PATCH /api/portfolios/:id handler
  */
-export const createUpdatePortfolioHandler = (service: PortfolioService): RequestHandler => {
+export const createUpdatePortfolioHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -121,9 +121,9 @@ export const createUpdatePortfolioHandler = (service: PortfolioService): Request
 };
 
 /**
- * DELETE /api/portfolios/:id - Delete portfolio
+ * Create DELETE /api/portfolios/:id handler
  */
-export const createDeletePortfolioHandler = (service: PortfolioService): RequestHandler => {
+export const createDeletePortfolioHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -141,9 +141,9 @@ export const createDeletePortfolioHandler = (service: PortfolioService): Request
 };
 
 /**
- * GET /api/portfolios/:id/statistics - Get portfolio statistics
+ * Create GET /api/portfolios/:id/statistics handler
  */
-export const createGetPortfolioStatisticsHandler = (service: PortfolioService): RequestHandler => {
+export const createGetPortfolioStatisticsHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -165,10 +165,10 @@ export const createGetPortfolioStatisticsHandler = (service: PortfolioService): 
 };
 
 /**
- * GET /api/portfolios/:id/allocation - Get portfolio allocation data
+ * Create GET /api/portfolios/:id/allocation handler
  * T123: Returns AllocationData[] with symbol, name, value, percentage, color
  */
-export const createGetPortfolioAllocationHandler = (service: PortfolioService): RequestHandler => {
+export const createGetPortfolioAllocationHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -190,13 +190,10 @@ export const createGetPortfolioAllocationHandler = (service: PortfolioService): 
 };
 
 /**
- * POST /api/portfolios/sync-binance - Sync portfolio from Binance account
+ * Create POST /api/portfolios/sync-binance handler
  * Fetches current balances from Binance and creates/updates a portfolio
  */
-export const createSyncFromBinanceHandler = (
-  service: PortfolioService,
-  binanceSyncService?: BinanceSyncService
-): RequestHandler => {
+export const createSyncFromBinanceHandler = (binanceSyncService?: BinanceSyncService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!binanceSyncService) {
@@ -205,7 +202,8 @@ export const createSyncFromBinanceHandler = (
           error: {
             code: 'SERVICE_NOT_AVAILABLE',
             message: 'Binance sync service is not configured',
-            details: 'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
+            details:
+              'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
           },
           timestamp: new Date().toISOString(),
         });
@@ -213,7 +211,7 @@ export const createSyncFromBinanceHandler = (
       }
 
       // TODO: Get userId from auth middleware
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Syncing portfolio from Binance for user ${userId}`);
 
@@ -231,3 +229,20 @@ export const createSyncFromBinanceHandler = (
     }
   };
 };
+
+/**
+ * Create all portfolio handlers
+ */
+export const createPortfolioHandlers = (
+  portfolioService: PortfolioService,
+  binanceSyncService?: BinanceSyncService
+): PortfolioHandlers => ({
+  getPortfolios: createGetPortfoliosHandler(portfolioService),
+  createPortfolio: createCreatePortfolioHandler(portfolioService),
+  getPortfolioById: createGetPortfolioByIdHandler(portfolioService),
+  updatePortfolio: createUpdatePortfolioHandler(portfolioService),
+  deletePortfolio: createDeletePortfolioHandler(portfolioService),
+  getPortfolioStatistics: createGetPortfolioStatisticsHandler(portfolioService),
+  getPortfolioAllocation: createGetPortfolioAllocationHandler(portfolioService),
+  syncFromBinance: createSyncFromBinanceHandler(binanceSyncService),
+});

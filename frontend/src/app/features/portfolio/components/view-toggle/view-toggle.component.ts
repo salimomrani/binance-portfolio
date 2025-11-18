@@ -1,6 +1,6 @@
 // T131: View toggle component (Table view | Chart view)
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type ViewMode = 'table' | 'chart';
@@ -14,12 +14,12 @@ export type ViewMode = 'table' | 'chart';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewToggleComponent {
-  @Input() activeView: ViewMode = 'table';
-  @Output() viewChange = new EventEmitter<ViewMode>();
+  // Signal inputs/outputs
+  activeView = input<ViewMode>('table');
+  viewChange = output<ViewMode>();
 
   selectView(view: ViewMode): void {
-    if (this.activeView !== view) {
-      this.activeView = view;
+    if (this.activeView() !== view) {
       this.viewChange.emit(view);
     }
   }

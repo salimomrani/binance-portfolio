@@ -7,52 +7,28 @@ import { errorHandler, notFoundHandler } from './shared/middleware/error-handler
 import { createSuccessResponse } from './shared/types/api-response';
 import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
-
-// Market Data Module
-import { createMarketDataRepository } from './modules/market-data/market-data.repository';
-import { createMarketDataCache } from './modules/market-data/market-data.cache';
 import { createMarketDataService } from './modules/market-data/market-data.service';
-import {
-  createGetMarketDataHandler,
-  createGetBatchPricesHandler,
-  createGetHistoricalPricesHandler,
-  createGetAdapterStatusHandler,
-} from './modules/market-data/market-data.controller';
+import { createMarketDataCache } from './modules/market-data/market-data.cache';
+import { createMarketDataHandlers } from './modules/market-data/market-data.controller';
 import createMarketDataRoutes from './modules/market-data/market-data.routes';
-
-// Portfolio Module
-import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
+import { createMarketDataRepository } from './modules/market-data/market-data.repository';
 import { createPortfolioService } from './modules/portfolio/portfolio.service';
-import { createBinanceSyncService } from './modules/portfolio/binance-sync.service';
-import {
-  createGetPortfoliosHandler,
-  createCreatePortfolioHandler,
-  createGetPortfolioByIdHandler,
-  createUpdatePortfolioHandler,
-  createDeletePortfolioHandler,
-  createGetPortfolioStatisticsHandler,
-  createGetPortfolioAllocationHandler,
-  createSyncFromBinanceHandler,
-} from './modules/portfolio/portfolio.controller';
+import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
+import { createPortfolioHandlers } from './modules/portfolio/portfolio.controller';
 import createPortfolioRoutes from './modules/portfolio/portfolio.routes';
-
-// Holdings Module
+import { createBinanceSyncService } from './modules/portfolio/binance-sync.service';
+import { createHoldingsRepository } from './modules/holdings/holdings.repository';
+import { createTransactionRepository } from './modules/holdings/transaction.repository';
 import { createHoldingsService } from './modules/holdings/holdings.service';
 import { createTransactionService } from './modules/holdings/transaction.service';
-import {
-  createGetHoldingsHandler,
-  createAddHoldingHandler,
-  createGetHoldingByIdHandler,
-  createUpdateHoldingHandler,
-  createDeleteHoldingHandler,
-  createGetTransactionsHandler,
-  createAddTransactionHandler,
-} from './modules/holdings/holdings.controller';
+import { createHoldingsHandlers } from './modules/holdings/holdings.controller';
 import createHoldingsRoutes from './modules/holdings/holdings.routes';
-
-// Earnings Module
 import { createEarningsService } from './modules/earnings/earnings.service';
 import createEarningsRouter from './modules/earnings/earnings.routes';
+import { createWatchlistRepository } from './modules/watchlist/watchlist.repository';
+import { createWatchlistService } from './modules/watchlist/watchlist.service';
+import { createWatchlistHandlers } from './modules/watchlist/watchlist.controller';
+import createWatchlistRoutes from './modules/watchlist/watchlist.routes';
 
 /**
  * Create and configure Express application
@@ -83,18 +59,20 @@ export function createApp(): Application {
     );
   });
 
-  // Initialize services and routers
+  // Initialize services and controllers (T067-T068, T120, T166, T036)
   const { prisma, cacheService } = initializeServices();
   const marketDataRouter = initializeMarketDataRouter(prisma, cacheService);
   const portfolioRouter = initializePortfolioRouter(prisma, cacheService);
   const holdingsRouter = initializeHoldingsRouter(prisma, cacheService);
   const earningsRouter = initializeEarningsRouter(prisma, cacheService);
+  const watchlistRouter = initializeWatchlistRouter(prisma, cacheService);
 
   // API routes
   app.use('/api/market', marketDataRouter);
   app.use('/api/portfolios', portfolioRouter);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsRouter);
   app.use('/api/earnings', earningsRouter);
+  app.use('/api/watchlist', watchlistRouter);
 
   // 404 handler
   app.use(notFoundHandler);
@@ -116,14 +94,12 @@ function initializeServices() {
 }
 
 /**
- * Initialize market data router with functional dependencies
+ * Initialize market data router with dependencies
+ * T120: Market data routes with functional handlers
  */
 function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
-  // Create repository
-  const marketDataRepo = createMarketDataRepository(prisma);
-
-  // Create service
-  const marketDataService = createMarketDataService(
+  const marketDataRepository = createMarketDataRepository(prisma);
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -131,19 +107,12 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    marketDataRepo,
+    marketDataRepository,
     cacheService,
     createMarketDataCache
   );
 
-  // Create handlers
-  const marketDataHandlers = {
-    getMarketData: createGetMarketDataHandler(marketDataService),
-    getBatchPrices: createGetBatchPricesHandler(marketDataService),
-    getHistoricalPrices: createGetHistoricalPricesHandler(marketDataService),
-    getAdapterStatus: createGetAdapterStatusHandler(marketDataService),
-  };
-
+  const marketDataHandlers = createMarketDataHandlers(marketData);
   return createMarketDataRoutes(marketDataHandlers);
 }
 
@@ -153,10 +122,8 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
 function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheService) {
   // Create calculation service
   const calculations = new CalculationsService();
-
-  // Create market data dependencies
-  const marketDataRepo = createMarketDataRepository(prisma);
-  const marketDataService = createMarketDataService(
+  const marketDataRepository = createMarketDataRepository(prisma);
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -164,44 +131,34 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    marketDataRepo,
+    marketDataRepository,
     cacheService,
     createMarketDataCache
   );
 
   // Create portfolio service
   const portfolioRepo = createPortfolioRepository(prisma);
-  const portfolioService = createPortfolioService(portfolioRepo, marketDataService, calculations);
+  const portfolioService = createPortfolioService(portfolioRepo, marketData, calculations);
 
   // Create Binance sync service
-  const binanceAdapter = marketDataService.getBinanceAdapter();
-  const binanceSyncService = createBinanceSyncService(prisma, binanceAdapter, marketDataService);
+  const binanceAdapter = marketData.getBinanceAdapter();
+  const binanceSyncService = createBinanceSyncService(prisma, binanceAdapter, marketData);
 
-  // Create handlers
-  const portfolioHandlers = {
-    getPortfolios: createGetPortfoliosHandler(portfolioService),
-    createPortfolio: createCreatePortfolioHandler(portfolioService),
-    getPortfolioById: createGetPortfolioByIdHandler(portfolioService),
-    updatePortfolio: createUpdatePortfolioHandler(portfolioService),
-    deletePortfolio: createDeletePortfolioHandler(portfolioService),
-    getPortfolioStatistics: createGetPortfolioStatisticsHandler(portfolioService),
-    getPortfolioAllocation: createGetPortfolioAllocationHandler(portfolioService),
-    syncFromBinance: createSyncFromBinanceHandler(portfolioService, binanceSyncService),
-  };
-
+  const portfolioHandlers = createPortfolioHandlers(portfolioService, binanceSyncService);
   return createPortfolioRoutes(portfolioHandlers);
 }
 
 /**
- * Initialize holdings router with functional dependencies
+ * Initialize holdings router with dependencies
+ * T036: Refactored to use functional pattern with repositories
+ * T096: Added TransactionService initialization
  */
 function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheService) {
-  // Create calculation service
   const calculations = new CalculationsService();
 
   // Create market data dependencies
   const marketDataRepo = createMarketDataRepository(prisma);
-  const marketDataService = createMarketDataService(
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -214,21 +171,18 @@ function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheServi
     createMarketDataCache
   );
 
-  // Create holdings and transaction services
-  const holdingsService = createHoldingsService(prisma, marketDataService, calculations);
-  const transactionService = createTransactionService(prisma);
+  // Create repositories
+  const holdingsRepo = createHoldingsRepository(prisma);
+  const transactionRepo = createTransactionRepository(prisma);
+
+  // Create services
+  const holdingsService = createHoldingsService(holdingsRepo, marketData, calculations);
+  const transactionService = createTransactionService(transactionRepo, holdingsRepo);
 
   // Create handlers
-  const holdingsHandlers = {
-    getHoldings: createGetHoldingsHandler(holdingsService),
-    addHolding: createAddHoldingHandler(holdingsService),
-    getHoldingById: createGetHoldingByIdHandler(holdingsService),
-    updateHolding: createUpdateHoldingHandler(holdingsService),
-    deleteHolding: createDeleteHoldingHandler(holdingsService),
-    getTransactions: createGetTransactionsHandler(transactionService),
-    addTransaction: createAddTransactionHandler(transactionService),
-  };
+  const holdingsHandlers = createHoldingsHandlers(holdingsService, transactionService);
 
+  // Create and return routes
   return createHoldingsRoutes(holdingsHandlers);
 }
 
@@ -256,4 +210,29 @@ function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheServi
   const earningsService = createEarningsService(prisma, binanceAdapter);
 
   return createEarningsRouter(earningsService);
+}
+
+/**
+ * Initialize watchlist router with dependencies
+ * T166: Watchlist routes registration
+ */
+function initializeWatchlistRouter(prisma: PrismaClient, cacheService: CacheService) {
+  const marketDataRepo = createMarketDataRepository(prisma);
+  const marketData = createMarketDataService(
+    {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
+      cacheTTL: 60,
+      retryAttempts: 3,
+      retryDelay: 1000,
+    },
+    marketDataRepo,
+    cacheService,
+    createMarketDataCache
+  );
+  const watchlistRepo = createWatchlistRepository(prisma);
+  const watchlistService = createWatchlistService(watchlistRepo, marketData);
+  const watchlistHandlers = createWatchlistHandlers(watchlistService);
+
+  return createWatchlistRoutes(watchlistHandlers);
 }

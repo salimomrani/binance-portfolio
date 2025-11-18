@@ -1,6 +1,6 @@
 // T109: Gain/Loss Badge Component
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 import { PercentageFormatPipe } from '../../pipes/percentage-format.pipe';
@@ -14,48 +14,42 @@ import { PercentageFormatPipe } from '../../pipes/percentage-format.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GainLossBadgeComponent {
-  @Input() value!: number;
-  @Input() percentage!: number;
-  @Input() showPercentage = true;
-  @Input() showArrow = true;
-  @Input() size: 'small' | 'medium' | 'large' = 'medium';
+  // Signal inputs
+  value = input.required<number>();
+  percentage = input.required<number>();
+  showPercentage = input<boolean>(true);
+  showArrow = input<boolean>(true);
+  size = input<'small' | 'medium' | 'large'>('medium');
 
-  get isProfit(): boolean {
-    return this.value > 0;
-  }
+  // Computed signals
+  protected readonly isProfit = computed(() => this.value() > 0);
+  protected readonly isLoss = computed(() => this.value() < 0);
+  protected readonly isNeutral = computed(() => this.value() === 0);
 
-  get isLoss(): boolean {
-    return this.value < 0;
-  }
-
-  get isNeutral(): boolean {
-    return this.value === 0;
-  }
-
-  get colorClass(): string {
-    if (this.isProfit) return 'text-profit';
-    if (this.isLoss) return 'text-loss';
+  protected readonly colorClass = computed(() => {
+    if (this.isProfit()) return 'text-profit';
+    if (this.isLoss()) return 'text-loss';
     return 'text-neutral';
-  }
+  });
 
-  get bgColorClass(): string {
-    if (this.isProfit) return 'bg-profit-light';
-    if (this.isLoss) return 'bg-loss-light';
+  protected readonly bgColorClass = computed(() => {
+    if (this.isProfit()) return 'bg-profit-light';
+    if (this.isLoss()) return 'bg-loss-light';
     return 'bg-neutral-light';
-  }
+  });
 
-  get arrowIcon(): string {
-    if (this.isProfit) return '↑';
-    if (this.isLoss) return '↓';
+  protected readonly arrowIcon = computed(() => {
+    if (this.isProfit()) return '↑';
+    if (this.isLoss()) return '↓';
     return '→';
-  }
+  });
 
-  get sizeClasses(): string {
+  protected readonly sizeClasses = computed(() => {
     const sizeMap = {
       small: 'text-xs px-2 py-0.5',
       medium: 'text-sm px-3 py-1',
       large: 'text-base px-4 py-1.5',
     };
-    return sizeMap[this.size];
-  }
+    return sizeMap[this.size()];
+  });
 }

@@ -1,6 +1,6 @@
 // T046: Error message component
 
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="message" class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+    <div *ngIf="message()" class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
       <div class="flex items-start">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -17,10 +17,10 @@ import { CommonModule } from '@angular/common';
         </div>
         <div class="ml-3">
           <h3 class="text-sm font-medium text-red-800">
-            {{ title }}
+            {{ title() }}
           </h3>
           <div class="mt-2 text-sm text-red-700">
-            <p>{{ message }}</p>
+            <p>{{ message() }}</p>
           </div>
         </div>
       </div>
@@ -29,6 +29,6 @@ import { CommonModule } from '@angular/common';
   styles: []
 })
 export class ErrorMessageComponent {
-  @Input() message: string | null = null;
-  @Input() title: string = 'Error';
+  message = input<string | null>(null);
+  title = input<string>('Error');
 }
