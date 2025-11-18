@@ -1,10 +1,10 @@
 // T053: Market data service with adapter pattern and caching
 // T143: Enhanced to support full market data with all trend indicators
 
-import { PrismaClient } from '@prisma/client';
 import { BinanceAdapter } from './binance.adapter';
 import { CoinGeckoAdapter } from './coingecko.adapter';
 import { MarketDataCache } from './market-data.cache';
+import { MarketDataRepository } from './market-data.repository';
 import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
@@ -15,15 +15,15 @@ export class MarketDataService {
   private readonly fallbackAdapter: MarketDataAdapter;
   private readonly cache: MarketDataCache;
 
-  constructor(config: AdapterConfig, prisma: PrismaClient, cacheService: CacheService) {
+  constructor(config: AdapterConfig, repository: MarketDataRepository, cacheService: CacheService) {
     // Primary adapter: Binance
     this.primaryAdapter = new BinanceAdapter(config);
 
     // Fallback adapter: CoinGecko
     this.fallbackAdapter = new CoinGeckoAdapter(config);
 
-    // Cache layer
-    this.cache = new MarketDataCache(prisma, cacheService);
+    // Cache layer (uses repository for database operations)
+    this.cache = new MarketDataCache(repository, cacheService);
   }
 
   /**

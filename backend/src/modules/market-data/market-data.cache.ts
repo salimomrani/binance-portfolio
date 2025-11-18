@@ -2,21 +2,21 @@
 // T122: Enhanced with historical data caching (5 min TTL)
 // T146: Enhanced to support full market data caching
 
-import { PrismaClient } from '@prisma/client';
 import { CryptoPrice, CryptoMarketData, PriceHistory, Timeframe } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
+import { MarketDataRepository } from './market-data.repository';
 import Decimal from 'decimal.js';
 
 export class MarketDataCache {
-  private readonly prisma: PrismaClient;
+  private readonly repository: MarketDataRepository;
   private readonly cache: CacheService;
   private readonly CACHE_TTL = 60; // 60 seconds for current prices
   private readonly HISTORY_CACHE_TTL = 300; // 5 minutes for historical data
   private readonly DB_TTL = 120; // 2 minutes
 
-  constructor(prisma: PrismaClient, cache: CacheService) {
-    this.prisma = prisma;
+  constructor(repository: MarketDataRepository, cache: CacheService) {
+    this.repository = repository;
     this.cache = cache;
   }
 
@@ -35,9 +35,7 @@ export class MarketDataCache {
       }
 
       // Try database cache
-      const dbCached = await this.prisma.priceCache.findUnique({
-        where: { symbol },
-      });
+      const dbCached = await this.repository.findBySymbol(symbol);
 
       if (dbCached && this.isFresh(dbCached.lastUpdated)) {
         const price = this.dbToCryptoPrice(dbCached);
@@ -63,36 +61,20 @@ export class MarketDataCache {
       // Set in Redis cache
       await this.cache.set(cacheKey, price, this.CACHE_TTL);
 
-      // Update database cache
-      await this.prisma.priceCache.upsert({
-        where: { symbol },
-        create: {
-          symbol,
-          name: price.name,
-          price: new Decimal(price.price),
-          change1h: new Decimal(price.change1h || 0),
-          change24h: new Decimal(price.change24h),
-          change7d: new Decimal(price.change7d || 0),
-          change30d: new Decimal(price.change30d || 0),
-          volume24h: new Decimal(price.volume24h),
-          marketCap: new Decimal(price.marketCap),
-          high24h: price.high24h ? new Decimal(price.high24h) : null,
-          low24h: price.low24h ? new Decimal(price.low24h) : null,
-          lastUpdated: price.lastUpdated,
-        },
-        update: {
-          name: price.name,
-          price: new Decimal(price.price),
-          change1h: new Decimal(price.change1h || 0),
-          change24h: new Decimal(price.change24h),
-          change7d: new Decimal(price.change7d || 0),
-          change30d: new Decimal(price.change30d || 0),
-          volume24h: new Decimal(price.volume24h),
-          marketCap: new Decimal(price.marketCap),
-          high24h: price.high24h ? new Decimal(price.high24h) : null,
-          low24h: price.low24h ? new Decimal(price.low24h) : null,
-          lastUpdated: price.lastUpdated,
-        },
+      // Update database cache using repository
+      await this.repository.upsert({
+        symbol,
+        name: price.name,
+        price: price.price,
+        change1h: price.change1h || 0,
+        change24h: price.change24h,
+        change7d: price.change7d || 0,
+        change30d: price.change30d || 0,
+        volume24h: price.volume24h,
+        marketCap: price.marketCap,
+        high24h: price.high24h || null,
+        low24h: price.low24h || null,
+        lastUpdated: price.lastUpdated,
       });
 
       logger.debug(`Cached price for ${symbol}`);
@@ -116,9 +98,7 @@ export class MarketDataCache {
       }
 
       // Try database cache
-      const dbCached = await this.prisma.priceCache.findUnique({
-        where: { symbol },
-      });
+      const dbCached = await this.repository.findBySymbol(symbol);
 
       if (dbCached && this.isFresh(dbCached.lastUpdated)) {
         const marketData = this.dbToCryptoMarketData(dbCached);
@@ -144,36 +124,20 @@ export class MarketDataCache {
       // Set in Redis cache
       await this.cache.set(cacheKey, data, this.CACHE_TTL);
 
-      // Update database cache
-      await this.prisma.priceCache.upsert({
-        where: { symbol },
-        create: {
-          symbol,
-          name: data.name,
-          price: new Decimal(data.price),
-          change1h: new Decimal(data.change1h),
-          change24h: new Decimal(data.change24h),
-          change7d: new Decimal(data.change7d),
-          change30d: new Decimal(data.change30d),
-          volume24h: new Decimal(data.volume24h),
-          marketCap: new Decimal(data.marketCap),
-          high24h: data.high24h ? new Decimal(data.high24h) : null,
-          low24h: data.low24h ? new Decimal(data.low24h) : null,
-          lastUpdated: data.lastUpdated,
-        },
-        update: {
-          name: data.name,
-          price: new Decimal(data.price),
-          change1h: new Decimal(data.change1h),
-          change24h: new Decimal(data.change24h),
-          change7d: new Decimal(data.change7d),
-          change30d: new Decimal(data.change30d),
-          volume24h: new Decimal(data.volume24h),
-          marketCap: new Decimal(data.marketCap),
-          high24h: data.high24h ? new Decimal(data.high24h) : null,
-          low24h: data.low24h ? new Decimal(data.low24h) : null,
-          lastUpdated: data.lastUpdated,
-        },
+      // Update database cache using repository
+      await this.repository.upsert({
+        symbol,
+        name: data.name,
+        price: data.price,
+        change1h: data.change1h,
+        change24h: data.change24h,
+        change7d: data.change7d,
+        change30d: data.change30d,
+        volume24h: data.volume24h,
+        marketCap: data.marketCap,
+        high24h: data.high24h || null,
+        low24h: data.low24h || null,
+        lastUpdated: data.lastUpdated,
       });
 
       logger.debug(`Cached full market data for ${symbol}`);
@@ -299,16 +263,8 @@ export class MarketDataCache {
         return cached;
       }
 
-      // Try database cache
-      const dbCached = await this.prisma.priceHistory.findMany({
-        where: {
-          symbol,
-          timeframe,
-        },
-        orderBy: {
-          timestamp: 'asc',
-        },
-      });
+      // Try database cache using repository
+      const dbCached = await this.repository.findHistoricalPrices(symbol, timeframe);
 
       if (dbCached.length > 0) {
         const history = dbCached.map(record => ({
@@ -348,25 +304,8 @@ export class MarketDataCache {
       // Set in Redis cache
       await this.cache.set(cacheKey, history, this.HISTORY_CACHE_TTL);
 
-      // Store in database for persistence
-      // First, delete old records for this symbol/timeframe
-      await this.prisma.priceHistory.deleteMany({
-        where: {
-          symbol,
-          timeframe,
-        },
-      });
-
-      // Insert new records
-      await this.prisma.priceHistory.createMany({
-        data: history.map(record => ({
-          symbol,
-          timeframe,
-          timestamp: record.timestamp,
-          price: new Decimal(record.price),
-          volume: new Decimal(record.volume),
-        })),
-      });
+      // Store in database for persistence using repository
+      await this.repository.replaceHistoricalPrices(symbol, timeframe, history);
 
       logger.debug(`Cached historical data for ${symbol} ${timeframe}`);
     } catch (error) {

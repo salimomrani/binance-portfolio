@@ -1,7 +1,8 @@
 // T120: Market data controller with historical data endpoints
 // T144-T145: Enhanced with price endpoints for market data
+// Refactored: Controller handles only HTTP concerns (req/res), no routing
 
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { MarketDataService } from './market-data.service';
 import { Timeframe } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
@@ -32,34 +33,13 @@ const GetBatchPricesQuerySchema = z.object({
 });
 
 export class MarketDataController {
-  private readonly router: Router;
-  private readonly marketDataService: MarketDataService;
-
-  constructor(marketDataService: MarketDataService) {
-    this.router = Router();
-    this.marketDataService = marketDataService;
-    this.setupRoutes();
-  }
-
-  private setupRoutes(): void {
-    // T144: GET /api/market/prices/:symbol - Get full market data for single symbol
-    this.router.get('/prices/:symbol', this.getMarketData.bind(this));
-
-    // T145: GET /api/market/prices?symbols=BTC,ETH,ADA - Get prices for multiple symbols
-    this.router.get('/prices', this.getBatchPrices.bind(this));
-
-    // GET /api/market/history/:symbol?timeframe=1h|24h|7d|30d|1y
-    this.router.get('/history/:symbol', this.getHistoricalPrices.bind(this));
-
-    // GET /api/market/status - Adapter health status
-    this.router.get('/status', this.getAdapterStatus.bind(this));
-  }
+  constructor(private readonly service: MarketDataService) {}
 
   /**
    * T144: GET /api/market/prices/:symbol
    * Returns full market data with all trend indicators (1h, 24h, 7d, 30d)
    */
-  private async getMarketData(
+  async getMarketData(
     req: Request,
     res: Response,
     next: NextFunction
@@ -89,7 +69,7 @@ export class MarketDataController {
       logger.info(`Fetching full market data for ${symbol}`);
 
       // Get market data from service
-      const marketData = await this.marketDataService.getFullMarketData(symbol);
+      const marketData = await this.service.getFullMarketData(symbol);
 
       const response: ApiSuccess<typeof marketData> = {
         success: true,
@@ -108,7 +88,7 @@ export class MarketDataController {
    * T145: GET /api/market/prices?symbols=BTC,ETH,ADA
    * Returns batch prices for multiple symbols
    */
-  private async getBatchPrices(
+  async getBatchPrices(
     req: Request,
     res: Response,
     next: NextFunction
@@ -138,7 +118,7 @@ export class MarketDataController {
       logger.info(`Fetching batch prices for ${symbols.length} symbols`);
 
       // Get prices from service
-      const prices = await this.marketDataService.getMultiplePrices(symbols);
+      const prices = await this.service.getMultiplePrices(symbols);
 
       // Convert Map to object for JSON serialization
       const pricesObject = Object.fromEntries(prices.entries());
@@ -160,7 +140,7 @@ export class MarketDataController {
    * GET /api/market/history/:symbol?timeframe=1h|24h|7d|30d|1y
    * Returns array of {timestamp, price, volume}
    */
-  private async getHistoricalPrices(
+  async getHistoricalPrices(
     req: Request,
     res: Response,
     next: NextFunction
@@ -210,7 +190,7 @@ export class MarketDataController {
       logger.info(`Fetching historical prices for ${symbol} with timeframe ${timeframe}`);
 
       // Get historical data from service
-      const history = await this.marketDataService.getHistoricalPrices(symbol, timeframe as Timeframe);
+      const history = await this.service.getHistoricalPrices(symbol, timeframe as Timeframe);
 
       const response: ApiSuccess<typeof history> = {
         success: true,
@@ -229,13 +209,13 @@ export class MarketDataController {
    * GET /api/market/status
    * Returns adapter health status
    */
-  private async getAdapterStatus(
+  async getAdapterStatus(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const status = await this.marketDataService.getAdapterStatus();
+      const status = await this.service.getAdapterStatus();
 
       const response: ApiSuccess<typeof status> = {
         success: true,
@@ -248,9 +228,5 @@ export class MarketDataController {
       logger.error('Error fetching adapter status:', error);
       next(error);
     }
-  }
-
-  public getRouter(): Router {
-    return this.router;
   }
 }
