@@ -47,8 +47,8 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 - [X] T015 [US1] Add dark/light mode toggle button in app.component.html header
 - [X] T016 [US1] Update app.component.html sidebar with dark mode classes
 - [X] T017 [US1] Update app.component.html mobile navigation with dark mode classes
-- [ ] T018 [P] [US1] Modernize portfolio-dashboard.component.html with dark mode classes
-- [ ] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
+- [X] T018 [P] [US1] Modernize portfolio-dashboard.component.html with dark mode classes
+- [X] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
 - [ ] T020 [P] [US1] Modernize portfolio-table.component.html with dark mode classes
 - [ ] T021 [P] [US1] Modernize portfolio-stats.component.html with dark mode classes
 - [ ] T022 [P] [US1] Modernize holdings.component.html with dark mode classes
@@ -56,7 +56,7 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 - [ ] T024 [P] [US1] Modernize market-trends.component.html with dark mode classes
 - [ ] T025 [P] [US1] Modernize market-overview.component.html with dark mode classes
 - [ ] T026 [P] [US1] Modernize crypto-detail.component.html with dark mode classes
-- [ ] T027 [P] [US1] Modernize all shared components (loading-spinner, error-message, badges) with dark mode classes
+- [X] T027 [P] [US1] Modernize all shared components (loading-spinner, error-message, badges) with dark mode classes
 
 **Checkpoint**: Dark mode fonctionnel sur tous les composants, préférence sauvegardée, détection système OS
 
