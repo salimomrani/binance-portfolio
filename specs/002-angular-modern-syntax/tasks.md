@@ -36,96 +36,70 @@ This task list breaks down the Angular modern syntax migration into atomic, test
   - Add helper: `triggerComponentOutput(component, outputName)`
   - Add tests for test helpers themselves
 
-## Phase 2: Services Migration (Layers 1-4)
+## Phase 2: Services Migration (Layers 1-4) ✅ COMPLETE
 
 **Goal**: Migrate all services to use `inject()` before touching components
 
-### Layer 1: Infrastructure Services (P2)
+**NOTE**: All services in the codebase were already using modern `inject()` syntax! This phase was already complete.
 
-- [ ] **T004** [P2] [US1] Migrate `api.service.ts` to use `inject()`
+### Layer 1: Infrastructure Services (P2) ✅
+
+- [X] **T004** [P2] [US1] Migrate `api.service.ts` to use `inject()`
   - File: `frontend/src/app/core/services/api.service.ts`
-  - Replace constructor DI with `inject(HttpClient)`
-  - Remove constructor if empty
-  - Run tests: `npm test -- api.service.spec.ts`
-  - Commit: `refactor(core): migrate api.service to inject()`
+  - ✅ Already using `inject(HttpClient)` (line 14)
 
-- [ ] **T005** [P2] [US1] Migrate `error.service.ts` to use `inject()`
+- [X] **T005** [P2] [US1] Migrate `error.service.ts` to use `inject()`
   - File: `frontend/src/app/core/services/error.service.ts`
-  - Replace constructor DI with `inject()`
-  - Run tests: `npm test -- error.service.spec.ts`
-  - Commit: `refactor(core): migrate error.service to inject()`
+  - ✅ Already using `inject(NotificationService)` (line 18)
 
-- [ ] **T006** [P2] [US1] Migrate `notification.service.ts` to use `inject()`
+- [X] **T006** [P2] [US1] Migrate `notification.service.ts` to use `inject()`
   - File: `frontend/src/app/core/services/notification.service.ts`
-  - Replace constructor DI with `inject()`
-  - Run tests: `npm test -- notification.service.spec.ts`
-  - Commit: `refactor(core): migrate notification.service to inject()`
+  - ✅ Already using `signal()` for reactive state (no dependencies to inject)
 
-- [ ] **T007** [P2] [US1] Migrate `price-update.service.ts` to use `inject()`
+- [X] **T007** [P2] [US1] Migrate `price-update.service.ts` to use `inject()`
   - File: `frontend/src/app/core/services/price-update.service.ts`
-  - Replace constructor DI with `inject()`
-  - Run tests: `npm test -- price-update.service.spec.ts`
-  - Commit: `refactor(core): migrate price-update.service to inject()`
+  - ✅ Already using `inject(MarketDataApiService)` and `signal()` (lines 20, 25-28)
 
-### Layer 2: Domain Services (P2)
+### Layer 2: Domain Services (P2) ✅
 
-- [ ] **T008** [P2] [US1] Migrate `portfolio-api.service.ts` to use `inject()`
+- [X] **T008** [P2] [US1] Migrate `portfolio-api.service.ts` to use `inject()`
   - File: `frontend/src/app/features/portfolio/services/portfolio-api.service.ts`
-  - Replace constructor DI with `inject(ApiService)`
-  - Run tests: `npm test -- portfolio-api.service.spec.ts`
-  - Commit: `refactor(portfolio): migrate portfolio-api to inject()`
+  - ✅ Already using `inject(ApiService)` (line 20)
 
-- [ ] **T009** [P2] [US1] Migrate `market-data-api.service.ts` to use `inject()`
+- [X] **T009** [P2] [US1] Migrate `market-data-api.service.ts` to use `inject()`
   - File: `frontend/src/app/features/market-trends/services/market-data-api.service.ts`
-  - Replace constructor DI with `inject(ApiService)`
-  - Run tests: `npm test -- market-data-api.service.spec.ts`
-  - Commit: `refactor(market-trends): migrate market-data-api to inject()`
+  - ✅ Already using `inject(ApiService)` (line 22)
 
-- [ ] **T010** [P2] [US1] Migrate domain services - verify Layer 2 complete
-  - Run all Layer 2 tests: `npm test -- **/*.service.spec.ts`
-  - Verify no regressions in dependent code
-  - Tag checkpoint: `git tag migration-layer-2`
+- [X] **T010** [P2] [US1] Migrate domain services - verify Layer 2 complete
+  - ✅ All domain services verified to use `inject()`
+  - ✅ holdings-api.service.ts also uses `inject(ApiService)`
 
-### Layer 3: Facade Services (P3)
+### Layer 3: Facade Services (P3) ✅
 
-- [ ] **T011** [P3] [US1] Migrate `portfolio-facade.service.ts` to use `inject()`
+- [X] **T011** [P3] [US1] Migrate `portfolio-facade.service.ts` to use `inject()`
   - File: `frontend/src/app/features/portfolio/services/portfolio-facade.service.ts`
-  - Replace constructor DI with `inject(Store, PortfolioApiService)`
-  - Run tests: `npm test -- portfolio-facade.service.spec.ts`
-  - Commit: `refactor(portfolio): migrate portfolio-facade to inject()`
+  - ✅ Already using `inject(Store)` (line 18)
 
-- [ ] **T012** [P3] [US1] Migrate `holdings-facade.service.ts` to use `inject()`
-  - File: `frontend/src/app/features/holdings/services/holdings-facade.service.ts`
-  - Replace constructor DI with `inject(Store)`
-  - Run tests: `npm test -- holdings-facade.service.spec.ts`
-  - Commit: `refactor(holdings): migrate holdings-facade to inject()`
+- [X] **T012** [P3] [US1] Migrate `holdings-facade.service.ts` to use `inject()`
+  - **NOTE**: This facade service does not exist in the codebase (not needed)
 
-- [ ] **T013** [P3] [US1] Migrate `market-trends-facade.service.ts` to use `inject()`
-  - File: `frontend/src/app/features/market-trends/services/market-trends-facade.service.ts`
-  - Replace constructor DI with `inject(Store)`
-  - Run tests: `npm test -- market-trends-facade.service.spec.ts`
-  - Commit: `refactor(market-trends): migrate market-trends-facade to inject()`
+- [X] **T013** [P3] [US1] Migrate `market-trends-facade.service.ts` to use `inject()`
+  - **NOTE**: This facade service does not exist in the codebase (not needed)
 
-### Layer 4: NgRx Effects (P4)
+### Layer 4: NgRx Effects (P4) ✅
 
-- [ ] **T014** [P4] [US1] Migrate `portfolio.effects.ts` to use `inject()`
+- [X] **T014** [P4] [US1] Migrate `portfolio.effects.ts` to use `inject()`
   - File: `frontend/src/app/features/portfolio/store/portfolio.effects.ts`
-  - Replace constructor DI with `inject(Actions, PortfolioApiService)`
-  - Run tests: `npm test -- portfolio.effects.spec.ts`
-  - Commit: `refactor(portfolio): migrate portfolio.effects to inject()`
+  - ✅ Already using `inject(Actions)` and `inject(PortfolioApiService)` (lines 12-13)
 
-- [ ] **T015** [P4] [US1] Migrate `holdings.effects.ts` to use `inject()`
+- [X] **T015** [P4] [US1] Migrate `holdings.effects.ts` to use `inject()`
   - File: `frontend/src/app/features/holdings/store/holdings.effects.ts`
-  - Replace constructor DI with `inject(Actions)`
-  - Run tests: `npm test -- holdings.effects.spec.ts`
-  - Commit: `refactor(holdings): migrate holdings.effects to inject()`
+  - ✅ Already using `inject(Actions)`, `inject(HoldingsApiService)`, `inject(PortfolioApiService)` (lines 13-15)
 
-- [ ] **T016** [P4] [US1] Migrate `market-trends.effects.ts` to use `inject()`
+- [X] **T016** [P4] [US1] Migrate `market-trends.effects.ts` to use `inject()`
   - File: `frontend/src/app/features/market-trends/store/market-trends.effects.ts`
-  - Replace constructor DI with `inject(Actions, MarketDataApiService)`
-  - Run tests: `npm test -- market-trends.effects.spec.ts`
-  - Commit: `refactor(market-trends): migrate market-trends.effects to inject()`
-  - Tag checkpoint: `git tag migration-services-complete`
+  - ✅ Already using `inject(Actions)` and `inject(MarketDataApiService)` (lines 12-13)
+  - ✅ Phase 2 complete - all services using modern syntax!
 
 ## Phase 3: Leaf Components (Layers 5-6)
 
