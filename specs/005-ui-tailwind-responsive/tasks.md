@@ -43,10 +43,10 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 - [X] T011 [P] [US1] Create ThemeService tests in frontend/src/app/core/services/theme.service.spec.ts
 - [X] T012 [US1] Add dark mode classes to tailwind.config.js theme.extend.colors
 - [X] T013 [US1] Add dark mode global styles in frontend/src/styles/globals.css
-- [ ] T014 [US1] Inject ThemeService in app.component.ts and add theme toggle logic
-- [ ] T015 [US1] Add dark/light mode toggle button in app.component.html header
-- [ ] T016 [US1] Update app.component.html sidebar with dark mode classes
-- [ ] T017 [US1] Update app.component.html mobile navigation with dark mode classes
+- [X] T014 [US1] Inject ThemeService in app.component.ts and add theme toggle logic
+- [X] T015 [US1] Add dark/light mode toggle button in app.component.html header
+- [X] T016 [US1] Update app.component.html sidebar with dark mode classes
+- [X] T017 [US1] Update app.component.html mobile navigation with dark mode classes
 - [ ] T018 [P] [US1] Modernize portfolio-dashboard.component.html with dark mode classes
 - [ ] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
 - [ ] T020 [P] [US1] Modernize portfolio-table.component.html with dark mode classes

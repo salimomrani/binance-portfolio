@@ -2,6 +2,7 @@ import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular
 import { NgClass, NgFor } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,9 @@ import { interval, Subscription } from 'rxjs';
 })
 export class AppComponent implements OnInit, OnDestroy {
   readonly title = 'Crypto Portfolio Dashboard';
+
+  // Theme service
+  protected readonly themeService = inject(ThemeService);
 
   // Price update tracking
   private lastPriceUpdate = signal<Date | null>(null);
@@ -114,4 +118,29 @@ export class AppComponent implements OnInit, OnDestroy {
     this.lastPriceUpdate.set(new Date());
     // In real app, would call price-update.service.refresh()
   }
+
+  /**
+   * Toggle between light and dark theme
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
+  /**
+   * Get computed theme icon for toggle button
+   */
+  protected readonly themeIcon = computed(() => {
+    const isDark = this.themeService.isDark();
+    // Sun icon for light mode, Moon icon for dark mode
+    return isDark
+      ? 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z'
+      : 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z';
+  });
+
+  /**
+   * Get theme label for accessibility
+   */
+  protected readonly themeLabel = computed(() => {
+    return this.themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode';
+  });
 }
