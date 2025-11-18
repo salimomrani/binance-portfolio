@@ -1,16 +1,18 @@
 // T063: Portfolio service implementation
+// Refactored to use PortfolioRepository (Phase 3)
 
-import { PrismaClient, Portfolio } from '@prisma/client';
+import { Portfolio } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './portfolio.validation';
 import { PortfolioSummary, PortfolioDetails, PortfolioStatistics, AllocationData } from './portfolio.types';
+import { PortfolioRepository } from './portfolio.repository';
 import { MarketDataService } from '../market-data/market-data.service';
 import { CalculationsService } from '../../shared/services/calculations.service';
 import { logger } from '../../shared/services/logger.service';
 
 export class PortfolioService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly repository: PortfolioRepository,
     private readonly marketData: MarketDataService,
     private readonly calculations: CalculationsService
   ) {}
@@ -20,12 +22,10 @@ export class PortfolioService {
    */
   async createPortfolio(userId: string, data: CreatePortfolioDto): Promise<Portfolio> {
     try {
-      const portfolio = await this.prisma.portfolio.create({
-        data: {
-          userId,
-          name: data.name,
-          description: data.description,
-        },
+      const portfolio = await this.repository.create({
+        userId,
+        name: data.name,
+        description: data.description,
       });
 
       logger.info(`Created portfolio ${portfolio.id} for user ${userId}`);
@@ -41,13 +41,7 @@ export class PortfolioService {
    */
   async getPortfolios(userId: string): Promise<PortfolioSummary[]> {
     try {
-      const portfolios = await this.prisma.portfolio.findMany({
-        where: { userId },
-        include: {
-          holdings: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+      const portfolios = await this.repository.findAllWithHoldings(userId);
 
       const summaries = await Promise.all(
         portfolios.map(async portfolio => {
@@ -76,12 +70,7 @@ export class PortfolioService {
    */
   async getPortfolioById(portfolioId: string): Promise<PortfolioDetails> {
     try {
-      const portfolio = await this.prisma.portfolio.findUnique({
-        where: { id: portfolioId },
-        include: {
-          holdings: true,
-        },
-      });
+      const portfolio = await this.repository.findByIdWithHoldings(portfolioId);
 
       if (!portfolio) {
         throw new Error('Portfolio not found');
@@ -167,10 +156,7 @@ export class PortfolioService {
    */
   async updatePortfolio(portfolioId: string, data: UpdatePortfolioDto): Promise<Portfolio> {
     try {
-      const portfolio = await this.prisma.portfolio.update({
-        where: { id: portfolioId },
-        data,
-      });
+      const portfolio = await this.repository.update(portfolioId, data);
 
       logger.info(`Updated portfolio ${portfolioId}`);
       return portfolio;
@@ -185,9 +171,7 @@ export class PortfolioService {
    */
   async deletePortfolio(portfolioId: string): Promise<void> {
     try {
-      await this.prisma.portfolio.delete({
-        where: { id: portfolioId },
-      });
+      await this.repository.delete(portfolioId);
 
       logger.info(`Deleted portfolio ${portfolioId}`);
     } catch (error) {
@@ -307,9 +291,7 @@ export class PortfolioService {
     lastUpdated: Date;
   }> {
     try {
-      const holdings = await this.prisma.holding.findMany({
-        where: { portfolioId },
-      });
+      const holdings = await this.repository.findHoldings(portfolioId);
 
       if (holdings.length === 0) {
         return {
