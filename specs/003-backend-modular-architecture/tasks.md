@@ -84,12 +84,12 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 ### Controller Refactoring (US1)
 
 - [X] T017 [US1] Refactor `backend/src/modules/portfolio/portfolio.controller.ts` to only handle HTTP concerns
-- [ ] T018 [US1] Create `backend/src/modules/portfolio/__tests__/portfolio.controller.test.ts` with unit tests using mocked service (90%+ coverage)
+- [X] T018 [US1] Create `backend/src/modules/portfolio/__tests__/portfolio.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
 - [X] T019 [US3] Create `backend/src/modules/portfolio/portfolio.routes.ts` with Express router factory function
-- [ ] T020 [US3] Create `backend/tests/integration/portfolio.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
+- [X] T020 [US3] Create `backend/tests/integration/portfolio.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:
 - Repository handles all Prisma queries
@@ -109,8 +109,8 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Repository Layer (US2)
 
-- [ ] T021 [US2] Create `backend/src/modules/holdings/holdings.repository.ts` with CRUD operations (findAll, findById, findBySymbol, findWithTransactions, create, update, delete, getTotalValue, getSymbols)
-- [ ] T022 [US2] Create `backend/src/modules/holdings/transaction.repository.ts` with CRUD operations (findAll, findById, findByDateRange, create, update, delete, getTotalInvested, getAveragePrice)
+- [X] T021 [US2] Create `backend/src/modules/holdings/holdings.repository.ts` with CRUD operations (findAll, findById, findBySymbol, findWithTransactions, create, update, delete, getTotalValue, getSymbols)
+- [X] T022 [US2] Create `backend/src/modules/holdings/transaction.repository.ts` with CRUD operations (findAll, findById, findByDateRange, create, update, delete, getTotalInvested, getAveragePrice)
 - [ ] T023 [US2] Create `backend/src/modules/holdings/__tests__/holdings.repository.test.ts` with integration tests (90%+ coverage)
 - [ ] T024 [US2] Create `backend/src/modules/holdings/__tests__/transaction.repository.test.ts` with integration tests (90%+ coverage)
 
