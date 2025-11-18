@@ -73,22 +73,22 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Repository Layer (US2)
 
-- [ ] T013 [US2] Create `backend/src/modules/portfolio/portfolio.repository.ts` with CRUD operations (findAll, findById, findByIdWithHoldings, findDefaultPortfolio, create, update, delete, setAsDefault, countByUser, exists)
-- [ ] T014 [US2] Create `backend/src/modules/portfolio/__tests__/portfolio.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T013 [US2] Create `backend/src/modules/portfolio/portfolio.repository.ts` with CRUD operations (findAll, findById, findByIdWithHoldings, findDefaultPortfolio, create, update, delete, setAsDefault, countByUser, exists)
+- [X] T014 [US2] Create `backend/src/modules/portfolio/__tests__/portfolio.repository.test.ts` with integration tests (90%+ coverage)
 
 ### Service Refactoring (US2)
 
-- [ ] T015 [US2] Refactor `backend/src/modules/portfolio/portfolio.service.ts` to use PortfolioRepository and remove all Prisma calls
-- [ ] T016 [US2] Create `backend/src/modules/portfolio/__tests__/portfolio.service.test.ts` with unit tests using mocked repository (95%+ coverage)
+- [X] T015 [US2] Refactor `backend/src/modules/portfolio/portfolio.service.ts` to use PortfolioRepository and remove all Prisma calls
+- [X] T016 [US2] Create `backend/src/modules/portfolio/__tests__/portfolio.service.test.ts` with unit tests using mocked repository (95%+ coverage)
 
 ### Controller Refactoring (US1)
 
-- [ ] T017 [US1] Refactor `backend/src/modules/portfolio/portfolio.controller.ts` to only handle HTTP concerns
+- [X] T017 [US1] Refactor `backend/src/modules/portfolio/portfolio.controller.ts` to only handle HTTP concerns
 - [ ] T018 [US1] Create `backend/src/modules/portfolio/__tests__/portfolio.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
-- [ ] T019 [US3] Create `backend/src/modules/portfolio/portfolio.routes.ts` with Express router factory function
+- [X] T019 [US3] Create `backend/src/modules/portfolio/portfolio.routes.ts` with Express router factory function
 - [ ] T020 [US3] Create `backend/tests/integration/portfolio.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:

@@ -1,65 +1,36 @@
 // T065: Portfolio controller
+// Refactored: Controller handles only HTTP concerns (req/res), no routing (Phase 3)
 
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { PortfolioService } from './portfolio.service';
 import { BinanceSyncService } from './binance-sync.service';
-import { CreatePortfolioSchema, UpdatePortfolioSchema } from './portfolio.validation';
-import { validate } from '../../shared/middleware/validator';
+import { logger } from '../../shared/services/logger.service';
 
 export class PortfolioController {
-  public router: Router;
-
   constructor(
     private readonly portfolioService: PortfolioService,
     private readonly binanceSyncService?: BinanceSyncService
-  ) {
-    this.router = Router();
-    this.initializeRoutes();
-  }
-
-  private initializeRoutes(): void {
-    // GET /api/portfolios - List user portfolios
-    this.router.get('/', this.getPortfolios.bind(this));
-
-    // POST /api/portfolios - Create portfolio
-    this.router.post('/', validate(CreatePortfolioSchema), this.createPortfolio.bind(this));
-
-    // POST /api/portfolios/sync-binance - Sync portfolio from Binance
-    this.router.post('/sync-binance', this.syncFromBinance.bind(this));
-
-    // GET /api/portfolios/:id - Get portfolio details
-    this.router.get('/:id', this.getPortfolioById.bind(this));
-
-    // PATCH /api/portfolios/:id - Update portfolio
-    this.router.patch('/:id', validate(UpdatePortfolioSchema), this.updatePortfolio.bind(this));
-
-    // DELETE /api/portfolios/:id - Delete portfolio
-    this.router.delete('/:id', this.deletePortfolio.bind(this));
-
-    // GET /api/portfolios/:id/statistics - Get portfolio statistics
-    this.router.get('/:id/statistics', this.getPortfolioStatistics.bind(this));
-
-    // GET /api/portfolios/:id/allocation - Get portfolio allocation data
-    // T123: Portfolio allocation endpoint for charts
-    this.router.get('/:id/allocation', this.getPortfolioAllocation.bind(this));
-  }
+  ) {}
 
   /**
    * GET /api/portfolios - Get user's portfolios
    */
-  private async getPortfolios(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getPortfolios(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // TODO: Get userId from auth middleware (for now use mock)
       const userId = req.headers['x-user-id'] as string || 'mock-user-id';
 
+      logger.info(`Fetching portfolios for user ${userId}`);
+
       const portfolios = await this.portfolioService.getPortfolios(userId);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: portfolios,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error('Error fetching portfolios:', error);
       next(error);
     }
   }
@@ -67,19 +38,23 @@ export class PortfolioController {
   /**
    * POST /api/portfolios - Create new portfolio
    */
-  private async createPortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async createPortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // TODO: Get userId from auth middleware
       const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+
+      logger.info(`Creating portfolio for user ${userId}`);
 
       const portfolio = await this.portfolioService.createPortfolio(userId, req.body);
 
       res.status(201).json({
         success: true,
         data: portfolio,
-        timestamp: new Date(),
+        message: 'Portfolio created successfully',
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error('Error creating portfolio:', error);
       next(error);
     }
   }
@@ -87,18 +62,21 @@ export class PortfolioController {
   /**
    * GET /api/portfolios/:id - Get portfolio details
    */
-  private async getPortfolioById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getPortfolioById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
+      logger.info(`Fetching portfolio ${id}`);
+
       const portfolio = await this.portfolioService.getPortfolioById(id);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: portfolio,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error(`Error fetching portfolio ${req.params.id}:`, error);
       next(error);
     }
   }
@@ -106,18 +84,22 @@ export class PortfolioController {
   /**
    * PATCH /api/portfolios/:id - Update portfolio
    */
-  private async updatePortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updatePortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
+      logger.info(`Updating portfolio ${id}`);
+
       const portfolio = await this.portfolioService.updatePortfolio(id, req.body);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: portfolio,
-        timestamp: new Date(),
+        message: 'Portfolio updated successfully',
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error(`Error updating portfolio ${req.params.id}:`, error);
       next(error);
     }
   }
@@ -125,14 +107,17 @@ export class PortfolioController {
   /**
    * DELETE /api/portfolios/:id - Delete portfolio
    */
-  private async deletePortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deletePortfolio(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
+
+      logger.info(`Deleting portfolio ${id}`);
 
       await this.portfolioService.deletePortfolio(id);
 
       res.status(204).send();
     } catch (error) {
+      logger.error(`Error deleting portfolio ${req.params.id}:`, error);
       next(error);
     }
   }
@@ -140,18 +125,21 @@ export class PortfolioController {
   /**
    * GET /api/portfolios/:id/statistics - Get portfolio statistics
    */
-  private async getPortfolioStatistics(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getPortfolioStatistics(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
+      logger.info(`Fetching statistics for portfolio ${id}`);
+
       const statistics = await this.portfolioService.calculatePortfolioStatistics(id);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: statistics,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error(`Error fetching portfolio statistics ${req.params.id}:`, error);
       next(error);
     }
   }
@@ -160,18 +148,21 @@ export class PortfolioController {
    * GET /api/portfolios/:id/allocation - Get portfolio allocation data
    * T123: Returns AllocationData[] with symbol, name, value, percentage, color
    */
-  private async getPortfolioAllocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getPortfolioAllocation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
+      logger.info(`Fetching allocation for portfolio ${id}`);
+
       const allocation = await this.portfolioService.getPortfolioAllocation(id);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: allocation,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error(`Error fetching portfolio allocation ${req.params.id}:`, error);
       next(error);
     }
   }
@@ -180,14 +171,17 @@ export class PortfolioController {
    * POST /api/portfolios/sync-binance - Sync portfolio from Binance account
    * Fetches current balances from Binance and creates/updates a portfolio
    */
-  private async syncFromBinance(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async syncFromBinance(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!this.binanceSyncService) {
         res.status(501).json({
           success: false,
-          error: 'Binance sync service is not configured',
-          message: 'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
-          timestamp: new Date(),
+          error: {
+            code: 'SERVICE_NOT_AVAILABLE',
+            message: 'Binance sync service is not configured',
+            details: 'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
+          },
+          timestamp: new Date().toISOString(),
         });
         return;
       }
@@ -195,15 +189,18 @@ export class PortfolioController {
       // TODO: Get userId from auth middleware
       const userId = req.headers['x-user-id'] as string || 'mock-user-id';
 
+      logger.info(`Syncing portfolio from Binance for user ${userId}`);
+
       const result = await this.binanceSyncService.syncFromBinance(userId);
 
-      res.json({
+      res.status(200).json({
         success: true,
         data: result,
         message: `Successfully synced ${result.totalHoldings} holdings from Binance`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      logger.error('Error syncing from Binance:', error);
       next(error);
     }
   }
