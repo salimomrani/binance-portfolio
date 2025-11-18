@@ -1,13 +1,13 @@
 <!-- T109: Gain/Loss Badge Template -->
 <div
-  class="inline-flex items-center gap-1 rounded-full font-semibold {{ sizeClasses }} {{ colorClass }} {{ bgColorClass }}"
+  class="inline-flex items-center gap-1 rounded-full font-semibold {{ sizeClasses() }} {{ colorClass() }} {{ bgColorClass() }}"
   [attr.data-testid]="'gain-loss-badge'"
 >
-  @if (showArrow) {
-    <span class="arrow-icon">{{ arrowIcon }}</span>
+  @if (showArrow()) {
+    <span class="arrow-icon">{{ arrowIcon() }}</span>
   }
-  <span class="value">{{ value | currencyFormat }}</span>
-  @if (showPercentage) {
-    <span class="percentage">({{ percentage | percentageFormat }})</span>
+  <span class="value">{{ value() | currencyFormat }}</span>
+  @if (showPercentage()) {
+    <span class="percentage">({{ percentage() | percentageFormat }})</span>
   }
 </div>
