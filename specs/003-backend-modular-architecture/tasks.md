@@ -118,18 +118,18 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 - [X] T025 [US2] Refactor `backend/src/modules/holdings/holdings.service.ts` to use HoldingRepository and TransactionRepository
 - [X] T026 [US2] Refactor `backend/src/modules/holdings/transaction.service.ts` to use TransactionRepository
-- [ ] T027 [US2] Create `backend/src/modules/holdings/__tests__/holdings.service.test.ts` with unit tests using mocked repositories (95%+ coverage)
-- [ ] T028 [US2] Create `backend/src/modules/holdings/__tests__/transaction.service.test.ts` with unit tests using mocked repository (95%+ coverage)
+- [X] T027 [US2] Create `backend/src/modules/holdings/__tests__/holdings.service.test.ts` with unit tests using mocked repositories (95%+ coverage)
+- [X] T028 [US2] Create `backend/src/modules/holdings/__tests__/transaction.service.test.ts` with unit tests using mocked repository (95%+ coverage)
 
 ### Controller Refactoring (US1)
 
 - [X] T029 [US1] Refactor `backend/src/modules/holdings/holdings.controller.ts` to only handle HTTP concerns
-- [ ] T030 [US1] Create `backend/src/modules/holdings/__tests__/holdings.controller.test.ts` with unit tests using mocked service (90%+ coverage)
+- [X] T030 [US1] Create `backend/src/modules/holdings/__tests__/holdings.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
 - [X] T031 [US3] Create `backend/src/modules/holdings/holdings.routes.ts` with Express router factory function
-- [ ] T032 [US3] Create `backend/tests/integration/holdings.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
+- [X] T032 [US3] Create `backend/tests/integration/holdings.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:
 - Two repositories work together correctly
@@ -154,7 +154,7 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 - [X] T035 [US3] Wire portfolio module dependencies in app.ts (repository → service → controller → routes)
 - [X] T036 [US3] Wire holdings module dependencies in app.ts (repositories → services → controller → routes)
 - [X] T037 [US3] Mount all routes with proper paths (/api/market-data, /api/portfolios, /api/holdings)
-- [ ] T038 [US4] Verify server starts successfully and all endpoints respond correctly
+- [X] T038 [US4] Verify server starts successfully and all endpoints respond correctly
 
 **Exit Criteria**:
 - All dependencies injected explicitly
