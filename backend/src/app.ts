@@ -9,13 +9,14 @@ import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
 import { MarketDataController } from './modules/market-data/market-data.controller';
-import { PortfolioService } from './modules/portfolio/portfolio.service';
+import { createPortfolioService } from './modules/portfolio/portfolio.service';
+import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
-import { BinanceSyncService } from './modules/portfolio/binance-sync.service';
-import { HoldingsService } from './modules/holdings/holdings.service';
+import { createBinanceSyncService } from './modules/portfolio/binance-sync.service';
+import { createHoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
-import { TransactionService } from './modules/holdings/transaction.service';
-import { EarningsService } from './modules/earnings/earnings.service';
+import { createTransactionService } from './modules/holdings/transaction.service';
+import { createEarningsService } from './modules/earnings/earnings.service';
 import createEarningsRouter from './modules/earnings/earnings.routes';
 
 /**
@@ -115,11 +116,12 @@ function initializePortfolioController(prisma: PrismaClient, cacheService: Cache
     prisma,
     cacheService
   );
-  const portfolioService = new PortfolioService(prisma, marketData, calculations);
+  const portfolioRepo = createPortfolioRepository(prisma);
+  const portfolioService = createPortfolioService(portfolioRepo, marketData, calculations);
 
   // Initialize Binance sync service
   const binanceAdapter = marketData.getBinanceAdapter();
-  const binanceSyncService = new BinanceSyncService(prisma, binanceAdapter, marketData);
+  const binanceSyncService = createBinanceSyncService(prisma, binanceAdapter, marketData);
 
   return new PortfolioController(portfolioService, binanceSyncService);
 }
@@ -141,8 +143,8 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
     prisma,
     cacheService
   );
-  const holdingsService = new HoldingsService(prisma, marketData, calculations);
-  const transactionService = new TransactionService(prisma);
+  const holdingsService = createHoldingsService(prisma, marketData, calculations);
+  const transactionService = createTransactionService(prisma);
 
   return new HoldingsController(holdingsService, transactionService);
 }
@@ -163,7 +165,7 @@ function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheServi
     cacheService
   );
   const binanceAdapter = marketData.getBinanceAdapter();
-  const earningsService = new EarningsService(prisma, binanceAdapter);
+  const earningsService = createEarningsService(prisma, binanceAdapter);
 
   return createEarningsRouter(earningsService);
 }
