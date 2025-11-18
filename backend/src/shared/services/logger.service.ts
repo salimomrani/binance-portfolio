@@ -12,7 +12,7 @@ if (!fs.existsSync(logDir)) {
 // Helper function to safely stringify objects with circular references
 function safeStringify(obj: unknown, indent = 2): string {
   const seen = new WeakSet();
-  return JSON.stringify(obj, (key, value) => {
+  return JSON.stringify(obj, (_key, value) => {
     if (typeof value === 'object' && value !== null) {
       if (seen.has(value)) {
         return '[Circular]';
