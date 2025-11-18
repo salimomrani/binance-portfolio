@@ -111,8 +111,8 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 - [X] T021 [US2] Create `backend/src/modules/holdings/holdings.repository.ts` with CRUD operations (findAll, findById, findBySymbol, findWithTransactions, create, update, delete, getTotalValue, getSymbols)
 - [X] T022 [US2] Create `backend/src/modules/holdings/transaction.repository.ts` with CRUD operations (findAll, findById, findByDateRange, create, update, delete, getTotalInvested, getAveragePrice)
-- [ ] T023 [US2] Create `backend/src/modules/holdings/__tests__/holdings.repository.test.ts` with integration tests (90%+ coverage)
-- [ ] T024 [US2] Create `backend/src/modules/holdings/__tests__/transaction.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T023 [US2] Create `backend/src/modules/holdings/__tests__/holdings.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T024 [US2] Create `backend/src/modules/holdings/__tests__/transaction.repository.test.ts` with integration tests (90%+ coverage)
 
 ### Service Refactoring (US2)
 
