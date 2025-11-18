@@ -229,8 +229,7 @@
           <!-- 24h Change with trend indicator -->
           <td class="px-6 py-4 whitespace-nowrap text-right">
             <app-trend-indicator
-              [value]="item.change24h"
-              [trend]="item.trend"
+              [change]="item.change24h"
               size="medium"
             />
           </td>
@@ -276,6 +275,6 @@
     *ngIf="!isEmpty() && !loading()"
     class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-right"
   >
-    Last updated: {{ formatDate(items()[0]?.addedAt || new Date()) }}
+    Last updated: {{ formatDate(lastUpdatedDate()) }}
   </div>
 </div>
