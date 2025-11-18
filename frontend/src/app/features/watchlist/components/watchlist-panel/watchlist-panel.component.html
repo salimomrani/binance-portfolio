@@ -1,0 +1,281 @@
+<!-- T171-T173: Watchlist panel template with table layout -->
+
+<div class="watchlist-panel">
+  <!-- Header with Add button -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+      Watchlist ({{ items().length }})
+    </h2>
+    <button
+      type="button"
+      (click)="onAddToWatchlist()"
+      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Add to Watchlist
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading()" class="text-center py-8">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">Loading watchlist...</p>
+  </div>
+
+  <!-- Error state -->
+  <div
+    *ngIf="error() && !loading()"
+    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4"
+  >
+    <p class="text-red-800 dark:text-red-200">{{ error() }}</p>
+  </div>
+
+  <!-- Empty state -->
+  <div
+    *ngIf="isEmpty() && !loading() && !error()"
+    class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg"
+  >
+    <svg
+      class="mx-auto h-12 w-12 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+      />
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+      No cryptocurrencies in watchlist
+    </h3>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Get started by adding cryptocurrencies you want to monitor.
+    </p>
+    <div class="mt-6">
+      <button
+        type="button"
+        (click)="onAddToWatchlist()"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      >
+        <svg
+          class="-ml-1 mr-2 h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Add Cryptocurrency
+      </button>
+    </div>
+  </div>
+
+  <!-- T172: Watchlist table -->
+  <div
+    *ngIf="!isEmpty() && !loading()"
+    class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow"
+  >
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead class="bg-gray-50 dark:bg-gray-900">
+        <tr>
+          <!-- Symbol/Name column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            (click)="onSort('symbol')"
+          >
+            <div class="flex items-center gap-2">
+              <span>Cryptocurrency</span>
+              <span
+                class="text-gray-400"
+                [class.text-blue-600]="isSorted('symbol')"
+              >
+                {{ getSortIcon('symbol') === 'sort' ? '⇅' : getSortIcon('symbol') === 'sort-asc' ? '↑' : '↓' }}
+              </span>
+            </div>
+          </th>
+
+          <!-- Current Price column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            (click)="onSort('currentPrice')"
+          >
+            <div class="flex items-center justify-end gap-2">
+              <span>Price</span>
+              <span
+                class="text-gray-400"
+                [class.text-blue-600]="isSorted('currentPrice')"
+              >
+                {{ getSortIcon('currentPrice') === 'sort' ? '⇅' : getSortIcon('currentPrice') === 'sort-asc' ? '↑' : '↓' }}
+              </span>
+            </div>
+          </th>
+
+          <!-- 24h Change column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            (click)="onSort('change24h')"
+          >
+            <div class="flex items-center justify-end gap-2">
+              <span>24h Change</span>
+              <span
+                class="text-gray-400"
+                [class.text-blue-600]="isSorted('change24h')"
+              >
+                {{ getSortIcon('change24h') === 'sort' ? '⇅' : getSortIcon('change24h') === 'sort-asc' ? '↑' : '↓' }}
+              </span>
+            </div>
+          </th>
+
+          <!-- Volume column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            (click)="onSort('volume24h')"
+          >
+            <div class="flex items-center justify-end gap-2">
+              <span>Volume (24h)</span>
+              <span
+                class="text-gray-400"
+                [class.text-blue-600]="isSorted('volume24h')"
+              >
+                {{ getSortIcon('volume24h') === 'sort' ? '⇅' : getSortIcon('volume24h') === 'sort-asc' ? '↑' : '↓' }}
+              </span>
+            </div>
+          </th>
+
+          <!-- Market Cap column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            (click)="onSort('marketCap')"
+          >
+            <div class="flex items-center justify-end gap-2">
+              <span>Market Cap</span>
+              <span
+                class="text-gray-400"
+                [class.text-blue-600]="isSorted('marketCap')"
+              >
+                {{ getSortIcon('marketCap') === 'sort' ? '⇅' : getSortIcon('marketCap') === 'sort-asc' ? '↑' : '↓' }}
+              </span>
+            </div>
+          </th>
+
+          <!-- Actions column -->
+          <th
+            scope="col"
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <tr
+          *ngFor="let item of sortedItems()"
+          class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+        >
+          <!-- Symbol/Name -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex flex-col">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ item.symbol }}
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ item.name }}
+              </div>
+              <div
+                *ngIf="item.notes"
+                class="text-xs text-gray-400 dark:text-gray-500 mt-1 italic"
+              >
+                {{ item.notes }}
+              </div>
+            </div>
+          </td>
+
+          <!-- Current Price with flash effect -->
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div
+              class="text-sm font-medium text-gray-900 dark:text-gray-100"
+              [appPriceFlash]="item.currentPrice"
+              [previousPrice]="getPreviousPrice(item.symbol)"
+            >
+              {{ formatCurrency(item.currentPrice) }}
+            </div>
+          </td>
+
+          <!-- 24h Change with trend indicator -->
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <app-trend-indicator
+              [value]="item.change24h"
+              [trend]="item.trend"
+              size="medium"
+            />
+          </td>
+
+          <!-- Volume -->
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="text-sm text-gray-900 dark:text-gray-100">
+              {{ formatLargeNumber(item.volume24h) }}
+            </div>
+          </td>
+
+          <!-- Market Cap -->
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="text-sm text-gray-900 dark:text-gray-100">
+              {{ formatLargeNumber(item.marketCap) }}
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <!-- T173: View Details link -->
+            <a
+              [routerLink]="['/market', item.symbol]"
+              class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4"
+            >
+              View Details
+            </a>
+            <button
+              type="button"
+              (click)="onRemove(item.id)"
+              class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Added date info -->
+  <div
+    *ngIf="!isEmpty() && !loading()"
+    class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-right"
+  >
+    Last updated: {{ formatDate(items()[0]?.addedAt || new Date()) }}
+  </div>
+</div>

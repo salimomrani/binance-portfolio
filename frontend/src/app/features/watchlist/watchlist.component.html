@@ -1,6 +1,23 @@
-<section class="space-y-4">
-  <h1 class="text-2xl font-semibold text-primary">Watchlist</h1>
-  <p class="text-neutral">
-    Favorite assets and alerting will live here once the watchlist feature is wired up to Binance feeds.
-  </p>
-</section>
+<!-- T178: Standalone watchlist page template -->
+
+<div class="watchlist-page container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Watchlist</h1>
+    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      Monitor cryptocurrencies you're interested in without owning them
+    </p>
+  </div>
+
+  <!-- Watchlist Panel -->
+  <app-watchlist-panel
+    (addToWatchlist)="onOpenAddToWatchlistDialog()"
+  ></app-watchlist-panel>
+
+  <!-- Add to Watchlist Dialog -->
+  <app-add-to-watchlist-dialog
+    [isOpen]="isAddToWatchlistDialogOpen()"
+    (close)="onCloseAddToWatchlistDialog()"
+    (save)="onAddToWatchlist($event)"
+  ></app-add-to-watchlist-dialog>
+</div>

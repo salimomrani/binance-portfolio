@@ -582,49 +582,49 @@
 
 ### Frontend: Watchlist Panel Component
 
-- [ ] T171 [US5] Create frontend/src/app/features/watchlist/components/watchlist-panel/ component:
+- [X] T171 [US5] Create frontend/src/app/features/watchlist/components/watchlist-panel/ component:
   - watchlist-panel.component.ts
   - watchlist-panel.component.html
   - watchlist-panel.component.scss
   - watchlist-panel.component.spec.ts
-- [ ] T172 [US5] Display watchlist items in table format with columns:
+- [X] T172 [US5] Display watchlist items in table format with columns:
   - Symbol + Name
   - Current Price
   - 24h Change (with trend-indicator)
   - Volume
   - Remove button
-- [ ] T173 [US5] Add "View Details" link to crypto-detail page for each item
+- [X] T173 [US5] Add "View Details" link to crypto-detail page for each item
 
 ### Frontend: Add to Watchlist Dialog
 
-- [ ] T174 [US5] Create frontend/src/app/features/watchlist/components/add-to-watchlist-dialog/ component:
+- [X] T174 [US5] Create frontend/src/app/features/watchlist/components/add-to-watchlist-dialog/ component:
   - Search/autocomplete for cryptocurrency symbol
   - Display crypto name after selection
   - Optional notes field
   - Validation (not already in watchlist, valid symbol)
-- [ ] T175 [US5] Integrate add-to-watchlist-dialog trigger button in:
+- [X] T175 [US5] Integrate add-to-watchlist-dialog trigger button in:
   - Market overview page
   - Crypto detail page
   - Portfolio dashboard (for discovered cryptos)
 
 ### Frontend: Watchlist Integration in Dashboard
 
-- [ ] T176 [US5] Update portfolio-dashboard component:
+- [X] T176 [US5] Update portfolio-dashboard component:
   - Add tab/toggle for Holdings vs Watchlist
   - Display watchlist-panel when watchlist tab active
   - Show count badges (e.g., "Holdings (5)" | "Watchlist (12)")
-- [ ] T177 [US5] Add watchlist to price-update.service polling (fetch prices for watchlist symbols)
+- [X] T177 [US5] Add watchlist to price-update.service polling (fetch prices for watchlist symbols)
 
 ### Frontend: Watchlist Page
 
-- [ ] T178 [US5] Create standalone watchlist page at /watchlist route
-- [ ] T179 [US5] Add navigation link to watchlist in app header/sidebar
+- [X] T178 [US5] Create standalone watchlist page at /watchlist route
+- [X] T179 [US5] Add navigation link to watchlist in app header/sidebar
 
 ### Frontend: Component Tests
 
-- [ ] T180 [P] [US5] Write test for watchlist-panel.component.spec.ts verifying list display
-- [ ] T181 [P] [US5] Write test for add-to-watchlist-dialog.component.spec.ts verifying validation
-- [ ] T182 [P] [US5] Write integration test verifying watchlist updates after price polling
+- [X] T180 [P] [US5] Write test for watchlist-panel.component.spec.ts verifying list display
+- [X] T181 [P] [US5] Write test for add-to-watchlist-dialog.component.spec.ts verifying validation
+- [X] T182 [P] [US5] Write integration test verifying watchlist updates after price polling
 
 **Checkpoint**: User Story 5 complete - Users can watch cryptocurrencies not in portfolio
 

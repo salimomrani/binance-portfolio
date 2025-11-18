@@ -58,3 +58,18 @@ export const refreshWatchlistPrices = createAction(
 
 // Clear error
 export const clearWatchlistError = createAction('[Watchlist] Clear Error');
+
+// Namespace export for convenience
+export const WatchlistActions = {
+  loadWatchlist,
+  loadWatchlistSuccess,
+  loadWatchlistFailure,
+  addToWatchlist,
+  addToWatchlistSuccess,
+  addToWatchlistFailure,
+  removeFromWatchlist,
+  removeFromWatchlistSuccess,
+  removeFromWatchlistFailure,
+  refreshWatchlistPrices,
+  clearWatchlistError,
+};
