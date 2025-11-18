@@ -16,7 +16,7 @@ import { HoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
 import { TransactionService } from './modules/holdings/transaction.service';
 import { EarningsService } from './modules/earnings/earnings.service';
-import { createEarningsRouter } from './modules/earnings/earnings.routes';
+import createEarningsRouter from './modules/earnings/earnings.routes';
 
 /**
  * Create and configure Express application
