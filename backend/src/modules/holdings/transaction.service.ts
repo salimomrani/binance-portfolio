@@ -17,26 +17,28 @@ export interface TransactionQueryOptions {
 }
 
 /**
- * Service for managing cryptocurrency transactions
+ * Transaction Service Type
  */
-export class TransactionService {
-  constructor(private readonly prisma: PrismaClient) {}
+export type TransactionService = {
+  addTransaction: (holdingId: string, data: AddTransactionInput) => Promise<Transaction>;
+  getTransactions: (holdingId: string, options?: TransactionQueryOptions) => Promise<PaginatedResponse<Transaction>>;
+  updateHoldingAverageCost: (holdingId: string) => Promise<void>;
+  deleteTransaction: (transactionId: string) => Promise<void>;
+};
 
+/**
+ * Create Transaction Service
+ * Factory function for creating transaction service instance
+ */
+export const createTransactionService = (prisma: PrismaClient): TransactionService => ({
   /**
    * Add a new transaction to a holding
    * Automatically recalculates the holding's average cost
-   *
-   * @param holdingId - ID of the holding
-   * @param data - Transaction data
-   * @returns Created transaction
    */
-  async addTransaction(
-    holdingId: string,
-    data: AddTransactionInput
-  ): Promise<Transaction> {
+  addTransaction: async (holdingId: string, data: AddTransactionInput) => {
     try {
       // Verify holding exists
-      const holding = await this.prisma.holding.findUnique({
+      const holding = await prisma.holding.findUnique({
         where: { id: holdingId },
         include: {
           transactions: {
@@ -66,7 +68,7 @@ export class TransactionService {
       }
 
       // Create transaction
-      const transaction = await this.prisma.transaction.create({
+      const transaction = await prisma.transaction.create({
         data: {
           holdingId,
           type: data.type as TransactionType,
@@ -84,26 +86,19 @@ export class TransactionService {
       );
 
       // Recalculate holding's average cost and quantity
-      await this.updateHoldingAverageCost(holdingId);
+      await updateHoldingAverageCostInternal(prisma, holdingId);
 
       return transaction;
     } catch (error) {
       logger.error('Error adding transaction:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Get transactions for a holding with pagination
-   *
-   * @param holdingId - ID of the holding
-   * @param options - Query options (pagination, sorting)
-   * @returns Paginated list of transactions
    */
-  async getTransactions(
-    holdingId: string,
-    options: TransactionQueryOptions = {}
-  ): Promise<PaginatedResponse<Transaction>> {
+  getTransactions: async (holdingId: string, options: TransactionQueryOptions = {}) => {
     try {
       const {
         page = 1,
@@ -115,12 +110,12 @@ export class TransactionService {
       const skip = (page - 1) * limit;
 
       // Get total count
-      const total = await this.prisma.transaction.count({
+      const total = await prisma.transaction.count({
         where: { holdingId },
       });
 
       // Get transactions
-      const transactions = await this.prisma.transaction.findMany({
+      const transactions = await prisma.transaction.findMany({
         where: { holdingId },
         orderBy: { [sortBy]: order },
         skip,
@@ -144,93 +139,21 @@ export class TransactionService {
       logger.error('Error fetching transactions:', error);
       throw error;
     }
-  }
+  },
 
   /**
    * Recalculate holding's average cost and quantity based on all transactions
-   * Uses weighted average cost method for BUY transactions
-   *
-   * Formula:
-   * - New Average Cost = (Current Value + Purchase Cost) / (Current Quantity + Purchase Quantity)
-   * - For SELL: Reduces quantity but maintains average cost
-   *
-   * @param holdingId - ID of the holding to update
    */
-  async updateHoldingAverageCost(holdingId: string): Promise<void> {
-    try {
-      const holding = await this.prisma.holding.findUnique({
-        where: { id: holdingId },
-        include: {
-          transactions: {
-            orderBy: { date: 'asc' },
-          },
-        },
-      });
-
-      if (!holding) {
-        throw new Error(`Holding with ID ${holdingId} not found`);
-      }
-
-      // If no transactions, keep current values
-      if (holding.transactions.length === 0) {
-        return;
-      }
-
-      // Calculate weighted average cost and final quantity
-      let totalQuantity = new Decimal(0);
-      let totalCost = new Decimal(0);
-
-      for (const transaction of holding.transactions) {
-        const quantity = new Decimal(transaction.quantity);
-        const pricePerUnit = new Decimal(transaction.pricePerUnit);
-
-        if (transaction.type === 'BUY') {
-          // Add to total cost and quantity
-          totalCost = totalCost.plus(quantity.times(pricePerUnit));
-          totalQuantity = totalQuantity.plus(quantity);
-        } else if (transaction.type === 'SELL') {
-          // Calculate cost of sold units at average price
-          if (totalQuantity.greaterThan(0)) {
-            const currentAvgCost = totalCost.dividedBy(totalQuantity);
-            const soldCost = quantity.times(currentAvgCost);
-            totalCost = totalCost.minus(soldCost);
-            totalQuantity = totalQuantity.minus(quantity);
-          }
-        }
-      }
-
-      // Calculate new average cost
-      const newAverageCost =
-        totalQuantity.greaterThan(0)
-          ? totalCost.dividedBy(totalQuantity)
-          : new Decimal(0);
-
-      // Update holding
-      await this.prisma.holding.update({
-        where: { id: holdingId },
-        data: {
-          quantity: totalQuantity.toFixed(8),
-          averageCost: newAverageCost.toFixed(8),
-        },
-      });
-
-      logger.info(
-        `Updated holding ${holdingId}: quantity=${totalQuantity.toString()}, avgCost=${newAverageCost.toString()}`
-      );
-    } catch (error) {
-      logger.error('Error updating holding average cost:', error);
-      throw error;
-    }
-  }
+  updateHoldingAverageCost: async (holdingId: string) => {
+    return updateHoldingAverageCostInternal(prisma, holdingId);
+  },
 
   /**
    * Delete a transaction and recalculate holding's average cost
-   *
-   * @param transactionId - ID of the transaction to delete
    */
-  async deleteTransaction(transactionId: string): Promise<void> {
+  deleteTransaction: async (transactionId: string) => {
     try {
-      const transaction = await this.prisma.transaction.findUnique({
+      const transaction = await prisma.transaction.findUnique({
         where: { id: transactionId },
       });
 
@@ -241,17 +164,88 @@ export class TransactionService {
       const holdingId = transaction.holdingId;
 
       // Delete transaction
-      await this.prisma.transaction.delete({
+      await prisma.transaction.delete({
         where: { id: transactionId },
       });
 
       logger.info(`Deleted transaction ${transactionId}`);
 
       // Recalculate holding's average cost
-      await this.updateHoldingAverageCost(holdingId);
+      await updateHoldingAverageCostInternal(prisma, holdingId);
     } catch (error) {
       logger.error('Error deleting transaction:', error);
       throw error;
     }
+  },
+});
+
+/**
+ * Internal helper function to recalculate holding's average cost
+ * Uses weighted average cost method for BUY transactions
+ */
+async function updateHoldingAverageCostInternal(prisma: PrismaClient, holdingId: string): Promise<void> {
+  try {
+    const holding = await prisma.holding.findUnique({
+      where: { id: holdingId },
+      include: {
+        transactions: {
+          orderBy: { date: 'asc' },
+        },
+      },
+    });
+
+    if (!holding) {
+      throw new Error(`Holding with ID ${holdingId} not found`);
+    }
+
+    // If no transactions, keep current values
+    if (holding.transactions.length === 0) {
+      return;
+    }
+
+    // Calculate weighted average cost and final quantity
+    let totalQuantity = new Decimal(0);
+    let totalCost = new Decimal(0);
+
+    for (const transaction of holding.transactions) {
+      const quantity = new Decimal(transaction.quantity);
+      const pricePerUnit = new Decimal(transaction.pricePerUnit);
+
+      if (transaction.type === 'BUY') {
+        // Add to total cost and quantity
+        totalCost = totalCost.plus(quantity.times(pricePerUnit));
+        totalQuantity = totalQuantity.plus(quantity);
+      } else if (transaction.type === 'SELL') {
+        // Calculate cost of sold units at average price
+        if (totalQuantity.greaterThan(0)) {
+          const currentAvgCost = totalCost.dividedBy(totalQuantity);
+          const soldCost = quantity.times(currentAvgCost);
+          totalCost = totalCost.minus(soldCost);
+          totalQuantity = totalQuantity.minus(quantity);
+        }
+      }
+    }
+
+    // Calculate new average cost
+    const newAverageCost =
+      totalQuantity.greaterThan(0)
+        ? totalCost.dividedBy(totalQuantity)
+        : new Decimal(0);
+
+    // Update holding
+    await prisma.holding.update({
+      where: { id: holdingId },
+      data: {
+        quantity: totalQuantity.toFixed(8),
+        averageCost: newAverageCost.toFixed(8),
+      },
+    });
+
+    logger.info(
+      `Updated holding ${holdingId}: quantity=${totalQuantity.toString()}, avgCost=${newAverageCost.toString()}`
+    );
+  } catch (error) {
+    logger.error('Error updating holding average cost:', error);
+    throw error;
   }
 }

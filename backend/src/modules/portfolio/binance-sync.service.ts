@@ -4,7 +4,7 @@
 import { PrismaClient } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { BinanceAdapter } from '../market-data/binance.adapter';
-import { MarketDataService } from '../market-data/market-data.service';
+import type { MarketDataService } from '../market-data/market-data.service';
 import { logger } from '../../shared/services/logger.service';
 import { filterValidSymbols, getSymbolFilterReason } from '../../shared/utils/crypto-symbol.util';
 
@@ -17,25 +17,34 @@ export interface SyncResult {
   errors: string[];
 }
 
-export class BinanceSyncService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly binanceAdapter: BinanceAdapter,
-    private readonly marketData: MarketDataService
-  ) {}
+/**
+ * Binance Sync Service Type
+ */
+export type BinanceSyncService = {
+  syncFromBinance: (userId: string) => Promise<SyncResult>;
+};
 
+/**
+ * Create Binance Sync Service
+ * Factory function for creating Binance sync service instance
+ */
+export const createBinanceSyncService = (
+  prisma: PrismaClient,
+  binanceAdapter: BinanceAdapter,
+  marketData: MarketDataService
+): BinanceSyncService => ({
   /**
    * Sync portfolio from Binance account
    * Creates or updates a portfolio named "Binance Portfolio" with current balances
    */
-  async syncFromBinance(userId: string): Promise<SyncResult> {
+  syncFromBinance: async (userId: string) => {
     const errors: string[] = [];
     let holdingsAdded = 0;
     let holdingsUpdated = 0;
 
     try {
       // Validate user exists
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: userId },
       });
 
@@ -45,7 +54,7 @@ export class BinanceSyncService {
 
       // Fetch balances from Binance
       logger.info(`Fetching Binance balances for user ${userId}`);
-      const balances = await this.binanceAdapter.getAccountBalances();
+      const balances = await binanceAdapter.getAccountBalances();
 
       if (balances.length === 0) {
         throw new Error('No balances found in Binance account');
@@ -54,7 +63,7 @@ export class BinanceSyncService {
       logger.info(`Found ${balances.length} non-zero balances in Binance account`);
 
       // Find or create "Binance Portfolio"
-      let portfolio = await this.prisma.portfolio.findFirst({
+      let portfolio = await prisma.portfolio.findFirst({
         where: {
           userId,
           name: 'Binance Portfolio',
@@ -66,7 +75,7 @@ export class BinanceSyncService {
 
       if (!portfolio) {
         logger.info('Creating new Binance Portfolio');
-        portfolio = await this.prisma.portfolio.create({
+        portfolio = await prisma.portfolio.create({
           data: {
             userId,
             name: 'Binance Portfolio',
@@ -89,7 +98,7 @@ export class BinanceSyncService {
 
       // Fetch current prices for valid symbols only
       const prices = validSymbols.length > 0
-        ? await this.marketData.getMultiplePrices(validSymbols)
+        ? await marketData.getMultiplePrices(validSymbols)
         : new Map();
 
       // Process each balance
@@ -118,7 +127,7 @@ export class BinanceSyncService {
           if (!priceData) {
             logger.info(`No USDT pair for ${symbol}, trying individual price fetch with fallback`);
             try {
-              priceData = await this.marketData.getCurrentPrice(symbol);
+              priceData = await marketData.getCurrentPrice(symbol);
               logger.info(`Successfully fetched price for ${symbol} using fallback: $${priceData.price}`);
             } catch (fallbackError) {
               logger.warn(`Failed to fetch price for ${symbol} even with fallback:`, fallbackError);
@@ -131,7 +140,7 @@ export class BinanceSyncService {
           const name = priceData.name;
 
           // Check if holding already exists
-          const existingHolding = await this.prisma.holding.findUnique({
+          const existingHolding = await prisma.holding.findUnique({
             where: {
               portfolioId_symbol: {
                 portfolioId: portfolio.id,
@@ -143,7 +152,7 @@ export class BinanceSyncService {
           if (existingHolding) {
             // Update existing holding with new quantity
             // Keep the existing average cost (user can manually adjust if needed)
-            await this.prisma.holding.update({
+            await prisma.holding.update({
               where: { id: existingHolding.id },
               data: {
                 quantity: new Decimal(totalQuantity),
@@ -155,7 +164,7 @@ export class BinanceSyncService {
             logger.info(`Updated holding ${symbol}: ${totalQuantity}`);
           } else {
             // Create new holding with current price as average cost
-            await this.prisma.holding.create({
+            await prisma.holding.create({
               data: {
                 portfolioId: portfolio.id,
                 symbol,
@@ -181,7 +190,7 @@ export class BinanceSyncService {
       const holdingsToDelete = portfolio.holdings.filter((h: { symbol: string }) => !currentSymbols.includes(h.symbol));
 
       for (const holding of holdingsToDelete) {
-        await this.prisma.holding.delete({
+        await prisma.holding.delete({
           where: { id: holding.id },
         });
         logger.info(`Deleted holding ${holding.symbol} (no longer in Binance account)`);
@@ -201,5 +210,5 @@ export class BinanceSyncService {
       logger.error('Binance sync failed:', error);
       throw error;
     }
-  }
-}
+  },
+});
