@@ -1,9 +1,11 @@
 // T064: Holdings service implementation
+// T025: Refactored to use HoldingsRepository
 
-import { PrismaClient, Holding } from '@prisma/client';
+import { Holding } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { AddHoldingDto, UpdateHoldingDto } from './holdings.validation';
 import { HoldingDetails } from '../portfolio/portfolio.types';
+import type { HoldingsRepository } from './holdings.repository';
 import type { MarketDataService } from '../market-data/market-data.service';
 import type { CalculationsService } from '../../shared/services/calculations.service';
 import { logger } from '../../shared/services/logger.service';
@@ -29,7 +31,7 @@ export type HoldingsService = {
  * Factory function for creating holdings service instance
  */
 export const createHoldingsService = (
-  prisma: PrismaClient,
+  repository: HoldingsRepository,
   marketData: MarketDataService,
   calculations: CalculationsService
 ): HoldingsService => ({
@@ -39,28 +41,19 @@ export const createHoldingsService = (
   addHolding: async (portfolioId: string, data: AddHoldingDto) => {
     try {
       // Check if holding already exists
-      const existing = await prisma.holding.findUnique({
-        where: {
-          portfolioId_symbol: {
-            portfolioId,
-            symbol: data.symbol,
-          },
-        },
-      });
+      const existing = await repository.findBySymbol(portfolioId, data.symbol);
 
       if (existing) {
         throw new Error(`Holding for ${data.symbol} already exists in this portfolio`);
       }
 
-      const holding = await prisma.holding.create({
-        data: {
-          portfolioId,
-          symbol: data.symbol,
-          name: data.name,
-          quantity: new Decimal(data.quantity),
-          averageCost: new Decimal(data.averageCost),
-          notes: data.notes,
-        },
+      const holding = await repository.create({
+        portfolioId,
+        symbol: data.symbol,
+        name: data.name,
+        quantity: new Decimal(data.quantity),
+        averageCost: new Decimal(data.averageCost),
+        notes: data.notes,
       });
 
       logger.info(`Added holding ${holding.symbol} to portfolio ${portfolioId}`);
@@ -80,10 +73,7 @@ export const createHoldingsService = (
     order: 'asc' | 'desc' = 'asc'
   ) => {
     try {
-      const holdings = await prisma.holding.findMany({
-        where: { portfolioId },
-        orderBy: sortBy ? { [sortBy]: order } : { createdAt: 'asc' },
-      });
+      const holdings = await repository.findAll(portfolioId, sortBy, order);
 
       if (holdings.length === 0) {
         return [];
@@ -164,15 +154,13 @@ export const createHoldingsService = (
    */
   getHoldingById: async (holdingId: string) => {
     try {
-      const holding = await prisma.holding.findUnique({
-        where: { id: holdingId },
-      });
+      const holding = await repository.findById(holdingId);
 
       if (!holding) {
         throw new Error('Holding not found');
       }
 
-      return calculateHoldingValueInternal(prisma, marketData, calculations, holding);
+      return calculateHoldingValueInternal(marketData, calculations, holding);
     } catch (error) {
       logger.error(`Error getting holding ${holdingId}:`, error);
       throw error;
@@ -200,10 +188,7 @@ export const createHoldingsService = (
         updateData.notes = data.notes;
       }
 
-      const holding = await prisma.holding.update({
-        where: { id: holdingId },
-        data: updateData,
-      });
+      const holding = await repository.update(holdingId, updateData);
 
       logger.info(`Updated holding ${holdingId}`);
       return holding;
@@ -218,9 +203,7 @@ export const createHoldingsService = (
    */
   deleteHolding: async (holdingId: string) => {
     try {
-      await prisma.holding.delete({
-        where: { id: holdingId },
-      });
+      await repository.delete(holdingId);
 
       logger.info(`Deleted holding ${holdingId}`);
     } catch (error) {
@@ -233,7 +216,7 @@ export const createHoldingsService = (
    * Calculate holding value with current price
    */
   calculateHoldingValue: async (holding: Holding) => {
-    return calculateHoldingValueInternal(prisma, marketData, calculations, holding);
+    return calculateHoldingValueInternal(marketData, calculations, holding);
   },
 });
 
@@ -241,7 +224,6 @@ export const createHoldingsService = (
  * Internal helper function to calculate holding value
  */
 async function calculateHoldingValueInternal(
-  prisma: PrismaClient,
   marketData: MarketDataService,
   calculations: CalculationsService,
   holding: Holding

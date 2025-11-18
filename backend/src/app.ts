@@ -15,9 +15,12 @@ import { createPortfolioRepository } from './modules/portfolio/portfolio.reposit
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
 import { createPortfolioRoutes } from './modules/portfolio/portfolio.routes';
 import { createBinanceSyncService } from './modules/portfolio/binance-sync.service';
+import { createHoldingsRepository } from './modules/holdings/holdings.repository';
+import { createTransactionRepository } from './modules/holdings/transaction.repository';
 import { createHoldingsService } from './modules/holdings/holdings.service';
-import { HoldingsController } from './modules/holdings/holdings.controller';
 import { createTransactionService } from './modules/holdings/transaction.service';
+import { createHoldingsHandlers } from './modules/holdings/holdings.controller';
+import createHoldingsRoutes from './modules/holdings/holdings.routes';
 import { createEarningsService } from './modules/earnings/earnings.service';
 import createEarningsRouter from './modules/earnings/earnings.routes';
 import { createWatchlistRepository } from './modules/watchlist/watchlist.repository';
@@ -54,18 +57,18 @@ export function createApp(): Application {
     );
   });
 
-  // Initialize services and controllers (T067-T068, T120, T166)
+  // Initialize services and controllers (T067-T068, T120, T166, T036)
   const { prisma, cacheService } = initializeServices();
   const marketDataRouter = initializeMarketDataRouter(prisma, cacheService);
   const portfolioRouter = initializePortfolioRouter(prisma, cacheService);
-  const holdingsController = initializeHoldingsController(prisma, cacheService);
+  const holdingsRouter = initializeHoldingsRouter(prisma, cacheService);
   const earningsRouter = initializeEarningsRouter(prisma, cacheService);
   const watchlistRouter = initializeWatchlistRouter(prisma, cacheService);
 
   // API routes
   app.use('/api/market', marketDataRouter);
   app.use('/api/portfolios', portfolioRouter);
-  app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
+  app.use('/api/portfolios/:portfolioId/holdings', holdingsRouter);
   app.use('/api/earnings', earningsRouter);
   app.use('/api/watchlist', watchlistRouter);
 
@@ -137,10 +140,11 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
 }
 
 /**
- * Initialize holdings controller with dependencies
+ * Initialize holdings router with dependencies
+ * T036: Refactored to use functional pattern with repositories
  * T096: Added TransactionService initialization
  */
-function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheService) {
+function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheService) {
   const calculations = new CalculationsService();
   const marketData = new MarketDataService(
     {
@@ -153,10 +157,20 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
     prisma,
     cacheService
   );
-  const holdingsService = createHoldingsService(prisma, marketData, calculations);
-  const transactionService = createTransactionService(prisma);
 
-  return new HoldingsController(holdingsService, transactionService);
+  // Create repositories
+  const holdingsRepo = createHoldingsRepository(prisma);
+  const transactionRepo = createTransactionRepository(prisma);
+
+  // Create services
+  const holdingsService = createHoldingsService(holdingsRepo, marketData, calculations);
+  const transactionService = createTransactionService(transactionRepo, holdingsRepo);
+
+  // Create handlers
+  const holdingsHandlers = createHoldingsHandlers(holdingsService, transactionService);
+
+  // Create and return routes
+  return createHoldingsRoutes(holdingsHandlers);
 }
 
 /**
