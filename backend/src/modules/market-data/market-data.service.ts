@@ -5,7 +5,14 @@ import { BinanceAdapter } from './binance.adapter';
 import { CoinGeckoAdapter } from './coingecko.adapter';
 import { MarketDataCache } from './market-data.cache';
 import { MarketDataRepository } from './market-data.repository';
-import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
+import {
+  MarketDataAdapter,
+  CryptoPrice,
+  CryptoMarketData,
+  PriceHistory,
+  Timeframe,
+  AdapterConfig,
+} from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
 import { CacheService } from '../../shared/services/cache.service';
 import { retry } from '../../shared/utils/retry.util';
@@ -81,22 +88,31 @@ export class MarketDataService {
 
       // Try primary adapter
       try {
-        const data = await retry(() => (this.primaryAdapter as BinanceAdapter).getFullMarketData(symbol), {
-          retries: 3,
-          delay: 1000,
-        });
+        const data = await retry(
+          () => (this.primaryAdapter as BinanceAdapter).getFullMarketData(symbol),
+          {
+            retries: 3,
+            delay: 1000,
+          }
+        );
 
         // Cache the result
         await this.cache.setFullMarketData(symbol, data);
         return data;
       } catch (primaryError) {
-        logger.warn(`Primary adapter failed for full market data ${symbol}, trying fallback`, primaryError);
+        logger.warn(
+          `Primary adapter failed for full market data ${symbol}, trying fallback`,
+          primaryError
+        );
 
         // Try fallback adapter
-        const data = await retry(() => (this.fallbackAdapter as CoinGeckoAdapter).getFullMarketData?.(symbol), {
-          retries: 2,
-          delay: 1500,
-        });
+        const data = await retry(
+          () => (this.fallbackAdapter as CoinGeckoAdapter).getFullMarketData?.(symbol),
+          {
+            retries: 2,
+            delay: 1500,
+          }
+        );
 
         if (!data) {
           throw new Error('Fallback adapter does not support full market data');
@@ -179,22 +195,31 @@ export class MarketDataService {
 
       // Try primary adapter
       try {
-        const history = await retry(() => this.primaryAdapter.getHistoricalPrices(symbol, timeframe), {
-          retries: 3,
-          delay: 1000,
-        });
+        const history = await retry(
+          () => this.primaryAdapter.getHistoricalPrices(symbol, timeframe),
+          {
+            retries: 3,
+            delay: 1000,
+          }
+        );
 
         // Cache the result
         await this.cache.setHistoricalPrices(symbol, timeframe, history);
         return history;
       } catch (primaryError) {
-        logger.warn(`Primary adapter failed for historical data ${symbol}, trying fallback`, primaryError);
+        logger.warn(
+          `Primary adapter failed for historical data ${symbol}, trying fallback`,
+          primaryError
+        );
 
         // Try fallback adapter
-        const history = await retry(() => this.fallbackAdapter.getHistoricalPrices(symbol, timeframe), {
-          retries: 2,
-          delay: 1500,
-        });
+        const history = await retry(
+          () => this.fallbackAdapter.getHistoricalPrices(symbol, timeframe),
+          {
+            retries: 2,
+            delay: 1500,
+          }
+        );
 
         // Cache the result
         await this.cache.setHistoricalPrices(symbol, timeframe, history);

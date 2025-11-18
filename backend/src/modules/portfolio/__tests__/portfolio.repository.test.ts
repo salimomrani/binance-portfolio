@@ -204,7 +204,7 @@ describe('PortfolioRepository', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe(portfolio.id);
       expect(result?.holdings).toHaveLength(2);
-      expect(result?.holdings.map(h => h.symbol).sort()).toEqual(['BTC', 'ETH']);
+      expect(result?.holdings.map((h) => h.symbol).sort()).toEqual(['BTC', 'ETH']);
     });
   });
 
@@ -226,7 +226,7 @@ describe('PortfolioRepository', () => {
       expect(result).toBeNull();
     });
 
-    it('should find user\'s default portfolio', async () => {
+    it("should find user's default portfolio", async () => {
       // Arrange
       await prisma.portfolio.create({
         data: {
@@ -399,9 +399,7 @@ describe('PortfolioRepository', () => {
 
     it('should throw error when portfolio does not exist', async () => {
       // Act & Assert
-      await expect(
-        repository.update('non-existent-id', { name: 'New Name' })
-      ).rejects.toThrow();
+      await expect(repository.update('non-existent-id', { name: 'New Name' })).rejects.toThrow();
     });
   });
 
@@ -425,9 +423,7 @@ describe('PortfolioRepository', () => {
 
     it('should throw error when portfolio does not exist', async () => {
       // Act & Assert
-      await expect(
-        repository.delete('non-existent-id')
-      ).rejects.toThrow();
+      await expect(repository.delete('non-existent-id')).rejects.toThrow();
     });
 
     it('should cascade delete holdings when portfolio is deleted', async () => {
@@ -555,7 +551,7 @@ describe('PortfolioRepository', () => {
 
       // Assert: Verify exactly one default portfolio
       const allPortfolios = await repository.findAll(testUserId);
-      const defaultPortfolios = allPortfolios.filter(p => p.isDefault);
+      const defaultPortfolios = allPortfolios.filter((p) => p.isDefault);
       expect(defaultPortfolios).toHaveLength(1);
       expect(defaultPortfolios[0].id).toBe(portfolio2.id);
     });
@@ -681,7 +677,7 @@ describe('PortfolioRepository', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.map(h => h.symbol).sort()).toEqual(['BTC', 'ETH']);
+      expect(result.map((h) => h.symbol).sort()).toEqual(['BTC', 'ETH']);
     });
   });
 });

@@ -102,7 +102,7 @@ describe('MarketDataRepository', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.map(p => p.symbol).sort()).toEqual(['BTC', 'ETH']);
+      expect(result.map((p) => p.symbol).sort()).toEqual(['BTC', 'ETH']);
     });
 
     it('should only return found symbols', async () => {
@@ -512,7 +512,12 @@ describe('MarketDataRepository', () => {
       // Act: Get prices between hour 1 and hour 2
       const startDate = new Date(baseTime.getTime() + 3600000);
       const endDate = new Date(baseTime.getTime() + 7200000);
-      const result = await repository.findHistoricalPricesByDateRange('BTC', '1h', startDate, endDate);
+      const result = await repository.findHistoricalPricesByDateRange(
+        'BTC',
+        '1h',
+        startDate,
+        endDate
+      );
 
       // Assert
       expect(result.length).toBe(2);
@@ -540,9 +545,7 @@ describe('MarketDataRepository', () => {
     it('should skip duplicates when creating historical prices', async () => {
       // Arrange
       const timestamp = new Date();
-      const history1 = [
-        { timestamp, price: 50000, volume: 1000000 },
-      ];
+      const history1 = [{ timestamp, price: 50000, volume: 1000000 }];
       const history2 = [
         { timestamp, price: 51000, volume: 1100000 }, // Same timestamp
       ];
@@ -635,9 +638,7 @@ describe('MarketDataRepository', () => {
       ]);
 
       // Act & Assert: Replace should succeed atomically
-      const newHistory = [
-        { timestamp: new Date(), price: 51000, volume: 1100000 },
-      ];
+      const newHistory = [{ timestamp: new Date(), price: 51000, volume: 1100000 }];
       await repository.replaceHistoricalPrices('BTC', '1h', newHistory);
 
       const result = await repository.findHistoricalPrices('BTC', '1h');

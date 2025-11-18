@@ -80,12 +80,12 @@ export const createHoldingsService = (
       }
 
       // Get current prices
-      const symbols = holdings.map(h => h.symbol);
+      const symbols = holdings.map((h) => h.symbol);
       const prices = await marketData.getMultiplePrices(symbols);
 
       // Calculate total portfolio value for allocation percentages
       let totalValue = new Decimal(0);
-      const holdingValues = holdings.map(holding => {
+      const holdingValues = holdings.map((holding) => {
         const currentPrice = prices.get(holding.symbol)?.price || 0;
         const quantity = new Decimal(holding.quantity);
         const value = quantity.times(currentPrice);
@@ -101,7 +101,11 @@ export const createHoldingsService = (
         const currentValue = holdingValues[index];
         const costBasis = quantity.times(avgCost);
 
-        const gainLoss = calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+        const gainLoss = calculations.calculateGainLoss(
+          quantity,
+          avgCost,
+          new Decimal(currentPrice)
+        );
 
         const allocationPercentage = !totalValue.equals(0)
           ? currentValue.dividedBy(totalValue).times(100).toDecimalPlaces(2).toNumber()

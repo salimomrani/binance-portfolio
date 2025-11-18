@@ -40,7 +40,12 @@ export type EarningsService = {
   syncRewardsHistory: (userId: string, startTime?: number, endTime?: number) => Promise<number>;
   getEarningsSummary: (userId: string) => Promise<EarningsSummary>;
   getEarnPositions: (userId: string) => Promise<any[]>;
-  getRewardsHistory: (userId: string, startDate?: Date, endDate?: Date, asset?: string) => Promise<any[]>;
+  getRewardsHistory: (
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+    asset?: string
+  ) => Promise<any[]>;
 };
 
 /**
@@ -109,9 +114,7 @@ export const createEarningsService = (
               data: {
                 amount: new Decimal(position.amount),
                 currentApy: new Decimal(position.currentApy),
-                dailyEarnings: position.dailyEarnings
-                  ? new Decimal(position.dailyEarnings)
-                  : null,
+                dailyEarnings: position.dailyEarnings ? new Decimal(position.dailyEarnings) : null,
                 lockPeriod: position.lockPeriod,
                 lockedUntil: position.lockedUntil,
                 canRedeem: position.canRedeem,
@@ -134,9 +137,7 @@ export const createEarningsService = (
                 type: position.type as EarnType,
                 amount: new Decimal(position.amount),
                 currentApy: new Decimal(position.currentApy),
-                dailyEarnings: position.dailyEarnings
-                  ? new Decimal(position.dailyEarnings)
-                  : null,
+                dailyEarnings: position.dailyEarnings ? new Decimal(position.dailyEarnings) : null,
                 lockPeriod: position.lockPeriod,
                 lockedUntil: position.lockedUntil,
                 canRedeem: position.canRedeem,
@@ -158,9 +159,7 @@ export const createEarningsService = (
       }
 
       // Delete positions that no longer exist in Binance
-      const currentPositionKeys = positions.map(
-        p => `${p.productId}-${p.asset}`
-      );
+      const currentPositionKeys = positions.map((p) => `${p.productId}-${p.asset}`);
       const existingPositions = await prisma.earnPosition.findMany({
         where: { userId },
       });
@@ -171,9 +170,7 @@ export const createEarningsService = (
           await prisma.earnPosition.delete({
             where: { id: existing.id },
           });
-          logger.info(
-            `Deleted position ${existing.asset} (no longer in Binance account)`
-          );
+          logger.info(`Deleted position ${existing.asset} (no longer in Binance account)`);
         }
       }
 
@@ -211,11 +208,7 @@ export const createEarningsService = (
 
       // Fetch all rewards history from Binance
       logger.info(`Fetching Binance Earn rewards history for user ${userId}`);
-      const rewards = await binanceAdapter.getAllRewardsHistory(
-        undefined,
-        startTime,
-        endTime
-      );
+      const rewards = await binanceAdapter.getAllRewardsHistory(undefined, startTime, endTime);
 
       if (rewards.length === 0) {
         logger.info('No rewards found in Binance Earn history');
@@ -263,10 +256,7 @@ export const createEarningsService = (
             rewardsAdded++;
           }
         } catch (error) {
-          logger.error(
-            `Failed to process reward for ${reward.asset}:`,
-            error
-          );
+          logger.error(`Failed to process reward for ${reward.asset}:`, error);
         }
       }
 
@@ -362,12 +352,7 @@ export const createEarningsService = (
   /**
    * Get rewards history for a user
    */
-  getRewardsHistory: async (
-    userId: string,
-    startDate?: Date,
-    endDate?: Date,
-    asset?: string
-  ) => {
+  getRewardsHistory: async (userId: string, startDate?: Date, endDate?: Date, asset?: string) => {
     return prisma.earnReward.findMany({
       where: {
         userId,

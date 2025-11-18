@@ -12,15 +12,19 @@ if (!fs.existsSync(logDir)) {
 // Helper function to safely stringify objects with circular references
 function safeStringify(obj: unknown, indent = 2): string {
   const seen = new WeakSet();
-  return JSON.stringify(obj, (_key, value) => {
-    if (typeof value === 'object' && value !== null) {
-      if (seen.has(value)) {
-        return '[Circular]';
+  return JSON.stringify(
+    obj,
+    (_key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
       }
-      seen.add(value);
-    }
-    return value;
-  }, indent);
+      return value;
+    },
+    indent
+  );
 }
 
 // Winston logger configuration
@@ -38,18 +42,12 @@ const loggerInstance = winston.createLogger({
     new winston.transports.File({
       filename: env.logging.errorFilePath,
       level: 'error',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     }),
     // All logs
     new winston.transports.File({
       filename: env.logging.filePath,
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     }),
   ],
 });

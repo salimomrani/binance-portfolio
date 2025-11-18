@@ -251,7 +251,9 @@ describe('TransactionService', () => {
       mockTransactionRepo.create.mockRejectedValue(new Error('Database error'));
 
       // Act & Assert
-      await expect(service.addTransaction('holding-1', buyTransactionInput)).rejects.toThrow('Database error');
+      await expect(service.addTransaction('holding-1', buyTransactionInput)).rejects.toThrow(
+        'Database error'
+      );
     });
   });
 
@@ -310,7 +312,13 @@ describe('TransactionService', () => {
         hasNext: false,
         hasPrev: true,
       });
-      expect(mockTransactionRepo.findAll).toHaveBeenCalledWith('holding-1', 'quantity', 'asc', 5, 5);
+      expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
+        'holding-1',
+        'quantity',
+        'asc',
+        5,
+        5
+      );
     });
 
     it('should calculate hasNext correctly', async () => {

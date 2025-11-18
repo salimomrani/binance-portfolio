@@ -4,7 +4,12 @@
 import { Portfolio } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './portfolio.validation';
-import { PortfolioSummary, PortfolioDetails, PortfolioStatistics, AllocationData } from './portfolio.types';
+import {
+  PortfolioSummary,
+  PortfolioDetails,
+  PortfolioStatistics,
+  AllocationData,
+} from './portfolio.types';
 import type { PortfolioRepository } from './portfolio.repository';
 import type { MarketDataService } from '../market-data/market-data.service';
 import type { CalculationsService } from '../../shared/services/calculations.service';
@@ -59,7 +64,7 @@ export const createPortfolioService = (
       const portfolios = await repository.findAllWithHoldings(userId);
 
       const summaries = await Promise.all(
-        portfolios.map(async portfolio => {
+        portfolios.map(async (portfolio) => {
           const summary = await calculatePortfolioSummaryInternal(
             repository,
             marketData,
@@ -96,16 +101,14 @@ export const createPortfolioService = (
       }
 
       // Get current prices for all holdings
-      const symbols = portfolio.holdings.map(h => h.symbol);
-      const prices = symbols.length > 0
-        ? await marketData.getMultiplePrices(symbols)
-        : new Map();
+      const symbols = portfolio.holdings.map((h) => h.symbol);
+      const prices = symbols.length > 0 ? await marketData.getMultiplePrices(symbols) : new Map();
 
       // Calculate total portfolio value
       let totalValue = new Decimal(0);
       let totalCostBasis = new Decimal(0);
 
-      const holdings = portfolio.holdings.map(holding => {
+      const holdings = portfolio.holdings.map((holding) => {
         const currentPrice = prices.get(holding.symbol)?.price || 0;
         const quantity = new Decimal(holding.quantity);
         const avgCost = new Decimal(holding.averageCost);
@@ -115,7 +118,11 @@ export const createPortfolioService = (
         totalValue = totalValue.plus(currentValue);
         totalCostBasis = totalCostBasis.plus(costBasis);
 
-        const gainLoss = calculations.calculateGainLoss(quantity, avgCost, new Decimal(currentPrice));
+        const gainLoss = calculations.calculateGainLoss(
+          quantity,
+          avgCost,
+          new Decimal(currentPrice)
+        );
 
         return {
           id: holding.id,
@@ -136,7 +143,7 @@ export const createPortfolioService = (
       });
 
       // Calculate allocation percentages
-      holdings.forEach(holding => {
+      holdings.forEach((holding) => {
         if (!totalValue.equals(0)) {
           holding.allocationPercentage = new Decimal(holding.currentValue)
             .dividedBy(totalValue)
@@ -328,13 +335,13 @@ async function calculatePortfolioSummaryInternal(
       };
     }
 
-    const symbols = holdings.map(h => h.symbol);
+    const symbols = holdings.map((h) => h.symbol);
     const prices = await marketData.getMultiplePrices(symbols);
 
     let totalValue = new Decimal(0);
     let totalCostBasis = new Decimal(0);
 
-    holdings.forEach(holding => {
+    holdings.forEach((holding) => {
       const currentPrice = prices.get(holding.symbol)?.price || 0;
       const quantity = new Decimal(holding.quantity);
       const avgCost = new Decimal(holding.averageCost);

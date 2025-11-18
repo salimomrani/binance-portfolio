@@ -3,7 +3,12 @@
 
 import { PrismaClient, PriceCache, PriceHistory, Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
-import { CryptoPrice, CryptoMarketData, PriceHistory as PriceHistoryType, Timeframe } from './market-data.types';
+import {
+  CryptoPrice,
+  CryptoMarketData,
+  PriceHistory as PriceHistoryType,
+  Timeframe,
+} from './market-data.types';
 
 /**
  * Market Data Repository Type
@@ -26,20 +31,22 @@ export type MarketDataRepository = {
     low24h?: number | null;
     lastUpdated: Date;
   }) => Promise<PriceCache>;
-  upsertMany: (prices: Array<{
-    symbol: string;
-    name: string;
-    price: number;
-    change1h: number;
-    change24h: number;
-    change7d: number;
-    change30d: number;
-    volume24h: number;
-    marketCap: number;
-    high24h?: number | null;
-    low24h?: number | null;
-    lastUpdated: Date;
-  }>) => Promise<void>;
+  upsertMany: (
+    prices: Array<{
+      symbol: string;
+      name: string;
+      price: number;
+      change1h: number;
+      change24h: number;
+      change7d: number;
+      change30d: number;
+      volume24h: number;
+      marketCap: number;
+      high24h?: number | null;
+      low24h?: number | null;
+      lastUpdated: Date;
+    }>
+  ) => Promise<void>;
   deleteStale: (olderThan: Date) => Promise<number>;
   findHistoricalPrices: (symbol: string, timeframe: Timeframe) => Promise<PriceHistory[]>;
   findHistoricalPricesByDateRange: (
@@ -67,7 +74,6 @@ export type MarketDataRepository = {
  * Factory function for creating market data repository instance
  */
 export const createMarketDataRepository = (prisma: PrismaClient): MarketDataRepository => ({
-
   // ============================================================
   // Price Cache Operations
   // ============================================================
@@ -153,22 +159,24 @@ export const createMarketDataRepository = (prisma: PrismaClient): MarketDataRepo
   /**
    * Upsert multiple price caches in a transaction
    */
-  upsertMany: async (prices: Array<{
-    symbol: string;
-    name: string;
-    price: number;
-    change1h: number;
-    change24h: number;
-    change7d: number;
-    change30d: number;
-    volume24h: number;
-    marketCap: number;
-    high24h?: number | null;
-    low24h?: number | null;
-    lastUpdated: Date;
-  }>) => {
+  upsertMany: async (
+    prices: Array<{
+      symbol: string;
+      name: string;
+      price: number;
+      change1h: number;
+      change24h: number;
+      change7d: number;
+      change30d: number;
+      volume24h: number;
+      marketCap: number;
+      high24h?: number | null;
+      low24h?: number | null;
+      lastUpdated: Date;
+    }>
+  ) => {
     await prisma.$transaction(
-      prices.map(data =>
+      prices.map((data) =>
         prisma.priceCache.upsert({
           where: { symbol: data.symbol },
           create: {
@@ -269,7 +277,7 @@ export const createMarketDataRepository = (prisma: PrismaClient): MarketDataRepo
     history: Array<{ timestamp: Date; price: number; volume: number }>
   ) => {
     await prisma.priceHistory.createMany({
-      data: history.map(record => ({
+      data: history.map((record) => ({
         symbol,
         timeframe,
         timestamp: record.timestamp,
@@ -327,7 +335,7 @@ export const createMarketDataRepository = (prisma: PrismaClient): MarketDataRepo
 
       // Insert new records
       await tx.priceHistory.createMany({
-        data: history.map(record => ({
+        data: history.map((record) => ({
           symbol,
           timeframe,
           timestamp: record.timestamp,

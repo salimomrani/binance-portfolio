@@ -94,11 +94,7 @@ describe('MarketDataController', () => {
       mockService.getFullMarketData.mockResolvedValue(mockMarketData);
 
       // Act
-      await controller.getMarketData(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getMarketData(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getFullMarketData).toHaveBeenCalledWith('BTC');
@@ -116,11 +112,7 @@ describe('MarketDataController', () => {
       mockService.getFullMarketData.mockResolvedValue(mockMarketData);
 
       // Act
-      await controller.getMarketData(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getMarketData(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getFullMarketData).toHaveBeenCalledWith('BTC');
@@ -131,11 +123,7 @@ describe('MarketDataController', () => {
       mockRequest.params = { symbol: '' };
 
       // Act
-      await controller.getMarketData(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getMarketData(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(400);
@@ -158,11 +146,7 @@ describe('MarketDataController', () => {
       mockService.getFullMarketData.mockRejectedValue(error);
 
       // Act
-      await controller.getMarketData(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getMarketData(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -181,11 +165,7 @@ describe('MarketDataController', () => {
       mockService.getMultiplePrices.mockResolvedValue(pricesMap);
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getMultiplePrices).toHaveBeenCalledWith(['BTC', 'ETH']);
@@ -206,11 +186,7 @@ describe('MarketDataController', () => {
       mockService.getMultiplePrices.mockResolvedValue(new Map());
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getMultiplePrices).toHaveBeenCalledWith(['BTC', 'ETH', 'ADA']);
@@ -222,11 +198,7 @@ describe('MarketDataController', () => {
       mockService.getMultiplePrices.mockResolvedValue(new Map());
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getMultiplePrices).toHaveBeenCalledWith(['BTC', 'ETH', 'ADA']);
@@ -237,11 +209,7 @@ describe('MarketDataController', () => {
       mockRequest.query = {};
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(400);
@@ -262,11 +230,7 @@ describe('MarketDataController', () => {
       mockRequest.query = { symbols };
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockResponse.status).toHaveBeenCalledWith(400);
@@ -279,11 +243,7 @@ describe('MarketDataController', () => {
       mockService.getMultiplePrices.mockRejectedValue(error);
 
       // Act
-      await controller.getBatchPrices(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getBatchPrices(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -432,11 +392,7 @@ describe('MarketDataController', () => {
       mockService.getAdapterStatus.mockResolvedValue(mockStatus);
 
       // Act
-      await controller.getAdapterStatus(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getAdapterStatus(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getAdapterStatus).toHaveBeenCalled();
@@ -454,11 +410,7 @@ describe('MarketDataController', () => {
       mockService.getAdapterStatus.mockRejectedValue(error);
 
       // Act
-      await controller.getAdapterStatus(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getAdapterStatus(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);

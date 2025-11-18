@@ -24,7 +24,10 @@ export interface TransactionQueryOptions {
  */
 export type TransactionService = {
   addTransaction: (holdingId: string, data: AddTransactionInput) => Promise<Transaction>;
-  getTransactions: (holdingId: string, options?: TransactionQueryOptions) => Promise<PaginatedResponse<Transaction>>;
+  getTransactions: (
+    holdingId: string,
+    options?: TransactionQueryOptions
+  ) => Promise<PaginatedResponse<Transaction>>;
   updateHoldingAverageCost: (holdingId: string) => Promise<void>;
   deleteTransaction: (transactionId: string) => Promise<void>;
 };
@@ -97,12 +100,7 @@ export const createTransactionService = (
    */
   getTransactions: async (holdingId: string, options: TransactionQueryOptions = {}) => {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        sortBy = 'date',
-        order = 'desc',
-      } = options;
+      const { page = 1, limit = 10, sortBy = 'date', order = 'desc' } = options;
 
       const skip = (page - 1) * limit;
 
@@ -210,10 +208,9 @@ async function updateHoldingAverageCostInternal(
     }
 
     // Calculate new average cost
-    const newAverageCost =
-      totalQuantity.greaterThan(0)
-        ? totalCost.dividedBy(totalQuantity)
-        : new Decimal(0);
+    const newAverageCost = totalQuantity.greaterThan(0)
+      ? totalCost.dividedBy(totalQuantity)
+      : new Decimal(0);
 
     // Update holding
     await holdingsRepo.update(holdingId, {

@@ -31,13 +31,16 @@ export type TransactionRepository = {
     date: Date;
     notes?: string;
   }) => Promise<Transaction>;
-  update: (id: string, data: {
-    quantity?: Decimal;
-    pricePerUnit?: Decimal;
-    fee?: Decimal;
-    date?: Date;
-    notes?: string;
-  }) => Promise<Transaction>;
+  update: (
+    id: string,
+    data: {
+      quantity?: Decimal;
+      pricePerUnit?: Decimal;
+      fee?: Decimal;
+      date?: Date;
+      notes?: string;
+    }
+  ) => Promise<Transaction>;
   delete: (id: string) => Promise<void>;
   getTotalInvested: (holdingId: string) => Promise<number>;
   getAveragePrice: (holdingId: string) => Promise<number>;
@@ -216,8 +219,6 @@ export const createTransactionRepository = (prisma: PrismaClient): TransactionRe
       totalQuantity = totalQuantity.plus(qty);
     }
 
-    return totalQuantity.greaterThan(0)
-      ? totalCost.dividedBy(totalQuantity).toNumber()
-      : 0;
+    return totalQuantity.greaterThan(0) ? totalCost.dividedBy(totalQuantity).toNumber() : 0;
   },
 });

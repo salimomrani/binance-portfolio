@@ -26,7 +26,7 @@ export class CalculationsService {
    * Formula: Sum(quantity * price) / Sum(quantity)
    */
   calculateAverageCost(transactions: Transaction[]): Decimal {
-    const buyTransactions = transactions.filter(t => t.type === 'BUY');
+    const buyTransactions = transactions.filter((t) => t.type === 'BUY');
 
     if (buyTransactions.length === 0) {
       return new Decimal(0);
@@ -87,7 +87,7 @@ export class CalculationsService {
     }, new Decimal(0));
 
     if (totalValue.equals(0)) {
-      return holdings.map(h => ({
+      return holdings.map((h) => ({
         symbol: h.symbol,
         value: new Decimal(0),
         percentage: new Decimal(0),
@@ -95,7 +95,7 @@ export class CalculationsService {
     }
 
     // Calculate allocation for each holding
-    return holdings.map(h => {
+    return holdings.map((h) => {
       const price = prices.get(h.symbol) || new Decimal(0);
       const value = h.quantity.times(price);
       const percentage = value.dividedBy(totalValue).times(100);

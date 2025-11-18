@@ -153,7 +153,7 @@ export class MarketDataCache {
     const prices = new Map<string, CryptoPrice>();
 
     await Promise.all(
-      symbols.map(async symbol => {
+      symbols.map(async (symbol) => {
         const price = await this.getPrice(symbol);
         if (price) {
           prices.set(symbol, price);
@@ -267,7 +267,7 @@ export class MarketDataCache {
       const dbCached = await this.repository.findHistoricalPrices(symbol, timeframe);
 
       if (dbCached.length > 0) {
-        const history = dbCached.map(record => ({
+        const history = dbCached.map((record) => ({
           timestamp: record.timestamp,
           price: record.price.toNumber(),
           volume: record.volume.toNumber(),

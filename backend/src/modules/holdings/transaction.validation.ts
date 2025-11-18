@@ -20,67 +20,66 @@ export const TransactionTypeSchema = z.enum(['BUY', 'SELL'], {
  * - date: Must be a valid date, cannot be in the future
  * - notes: Optional string, max 500 characters
  */
-export const AddTransactionSchema = z.object({
-  type: TransactionTypeSchema,
+export const AddTransactionSchema = z
+  .object({
+    type: TransactionTypeSchema,
 
-  quantity: z
-    .number({
-      required_error: 'Quantity is required',
-      invalid_type_error: 'Quantity must be a number',
-    })
-    .positive('Quantity must be greater than 0')
-    .max(1000000000, 'Quantity too large')
-    .refine(
-      (val) => {
-        // Check that number has at most 8 decimal places
-        const decimalStr = val.toString().split('.')[1];
-        return !decimalStr || decimalStr.length <= 8;
-      },
-      { message: 'Quantity can have at most 8 decimal places' }
-    ),
+    quantity: z
+      .number({
+        required_error: 'Quantity is required',
+        invalid_type_error: 'Quantity must be a number',
+      })
+      .positive('Quantity must be greater than 0')
+      .max(1000000000, 'Quantity too large')
+      .refine(
+        (val) => {
+          // Check that number has at most 8 decimal places
+          const decimalStr = val.toString().split('.')[1];
+          return !decimalStr || decimalStr.length <= 8;
+        },
+        { message: 'Quantity can have at most 8 decimal places' }
+      ),
 
-  pricePerUnit: z
-    .number({
-      required_error: 'Price per unit is required',
-      invalid_type_error: 'Price per unit must be a number',
-    })
-    .positive('Price per unit must be greater than 0')
-    .max(10000000, 'Price per unit too large')
-    .refine(
-      (val) => {
-        const decimalStr = val.toString().split('.')[1];
-        return !decimalStr || decimalStr.length <= 8;
-      },
-      { message: 'Price per unit can have at most 8 decimal places' }
-    ),
+    pricePerUnit: z
+      .number({
+        required_error: 'Price per unit is required',
+        invalid_type_error: 'Price per unit must be a number',
+      })
+      .positive('Price per unit must be greater than 0')
+      .max(10000000, 'Price per unit too large')
+      .refine(
+        (val) => {
+          const decimalStr = val.toString().split('.')[1];
+          return !decimalStr || decimalStr.length <= 8;
+        },
+        { message: 'Price per unit can have at most 8 decimal places' }
+      ),
 
-  fee: z
-    .number({
-      invalid_type_error: 'Fee must be a number',
-    })
-    .nonnegative('Fee cannot be negative')
-    .max(1000000, 'Fee too large')
-    .optional(),
+    fee: z
+      .number({
+        invalid_type_error: 'Fee must be a number',
+      })
+      .nonnegative('Fee cannot be negative')
+      .max(1000000, 'Fee too large')
+      .optional(),
 
-  date: z
-    .string({
-      required_error: 'Transaction date is required',
-    })
-    .datetime('Invalid date format')
-    .refine(
-      (dateStr) => {
-        const date = new Date(dateStr);
-        const now = new Date();
-        return date <= now;
-      },
-      { message: 'Transaction date cannot be in the future' }
-    ),
+    date: z
+      .string({
+        required_error: 'Transaction date is required',
+      })
+      .datetime('Invalid date format')
+      .refine(
+        (dateStr) => {
+          const date = new Date(dateStr);
+          const now = new Date();
+          return date <= now;
+        },
+        { message: 'Transaction date cannot be in the future' }
+      ),
 
-  notes: z
-    .string()
-    .max(500, 'Notes cannot exceed 500 characters')
-    .optional(),
-}).strict();
+    notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
+  })
+  .strict();
 
 /**
  * Schema for transaction query parameters
@@ -98,15 +97,9 @@ export const TransactionQuerySchema = z.object({
     .transform((val) => (val ? parseInt(val, 10) : 10))
     .pipe(z.number().int().positive().max(100).default(10)),
 
-  sortBy: z
-    .enum(['date', 'quantity', 'totalCost', 'type'])
-    .optional()
-    .default('date'),
+  sortBy: z.enum(['date', 'quantity', 'totalCost', 'type']).optional().default('date'),
 
-  order: z
-    .enum(['asc', 'desc'])
-    .optional()
-    .default('desc'),
+  order: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
 /**

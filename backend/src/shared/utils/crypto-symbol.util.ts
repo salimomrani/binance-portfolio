@@ -8,10 +8,10 @@ import { logger } from '../services/logger.service';
  * These are derivative products, wrapped tokens, or platform-specific assets
  */
 const INVALID_SYMBOL_PREFIXES = [
-  'LD',    // Binance Liquid Swap tokens (LDBNB, LDETH, etc.)
-  'RW',    // Binance wrapped tokens
-  'BS',    // Binance Savings tokens
-  'BN',    // Binance-specific tokens
+  'LD', // Binance Liquid Swap tokens (LDBNB, LDETH, etc.)
+  'RW', // Binance wrapped tokens
+  'BS', // Binance Savings tokens
+  'BN', // Binance-specific tokens
 ];
 
 /**
@@ -19,12 +19,12 @@ const INVALID_SYMBOL_PREFIXES = [
  * These are typically stablecoins pegged to USD or fiat-backed assets
  */
 const EXCLUDED_SYMBOLS = new Set([
-  'USDT',  // Tether (used as quote currency)
-  'BUSD',  // Binance USD (deprecated)
-  'USDC',  // USD Coin (often used as quote currency)
-  'DAI',   // Dai stablecoin
-  'TUSD',  // TrueUSD
-  'USDP',  // Pax Dollar
+  'USDT', // Tether (used as quote currency)
+  'BUSD', // Binance USD (deprecated)
+  'USDC', // USD Coin (often used as quote currency)
+  'DAI', // Dai stablecoin
+  'TUSD', // TrueUSD
+  'USDP', // Pax Dollar
   'FDUSD', // First Digital USD
 ]);
 

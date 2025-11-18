@@ -27,8 +27,9 @@ const GetPriceParamsSchema = z.object({
 
 // T145: Batch symbols validation schema
 const GetBatchPricesQuerySchema = z.object({
-  symbols: z.string()
-    .transform(s => s.split(',').map(sym => sym.trim().toUpperCase()))
+  symbols: z
+    .string()
+    .transform((s) => s.split(',').map((sym) => sym.trim().toUpperCase()))
     .pipe(z.array(z.string().min(1).max(10)).min(1).max(50)),
 });
 
@@ -106,7 +107,8 @@ export const createGetBatchPricesHandler = (service: MarketDataService) => {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Invalid or missing symbols parameter. Provide comma-separated symbols (max 50)',
+            message:
+              'Invalid or missing symbols parameter. Provide comma-separated symbols (max 50)',
             details: queryResult.error.errors,
           },
           timestamp: new Date().toISOString(),

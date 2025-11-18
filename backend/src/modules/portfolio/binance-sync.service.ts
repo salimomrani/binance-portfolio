@@ -49,7 +49,9 @@ export const createBinanceSyncService = (
       });
 
       if (!user) {
-        throw new Error(`User with ID ${userId} not found. Please ensure the user exists in the database.`);
+        throw new Error(
+          `User with ID ${userId} not found. Please ensure the user exists in the database.`
+        );
       }
 
       // Fetch balances from Binance
@@ -89,17 +91,18 @@ export const createBinanceSyncService = (
       }
 
       // Get all symbols from balances
-      const allSymbols = balances.map(b => b.asset);
+      const allSymbols = balances.map((b) => b.asset);
 
       // Filter out invalid symbols (Binance-specific tokens, stablecoins, etc.)
       const validSymbols = filterValidSymbols(allSymbols);
 
-      logger.info(`Found ${allSymbols.length} total symbols, ${validSymbols.length} valid for price fetching`);
+      logger.info(
+        `Found ${allSymbols.length} total symbols, ${validSymbols.length} valid for price fetching`
+      );
 
       // Fetch current prices for valid symbols only
-      const prices = validSymbols.length > 0
-        ? await marketData.getMultiplePrices(validSymbols)
-        : new Map();
+      const prices =
+        validSymbols.length > 0 ? await marketData.getMultiplePrices(validSymbols) : new Map();
 
       // Process each balance
       for (const balance of balances) {
@@ -128,10 +131,14 @@ export const createBinanceSyncService = (
             logger.info(`No USDT pair for ${symbol}, trying individual price fetch with fallback`);
             try {
               priceData = await marketData.getCurrentPrice(symbol);
-              logger.info(`Successfully fetched price for ${symbol} using fallback: $${priceData.price}`);
+              logger.info(
+                `Successfully fetched price for ${symbol} using fallback: $${priceData.price}`
+              );
             } catch (fallbackError) {
               logger.warn(`Failed to fetch price for ${symbol} even with fallback:`, fallbackError);
-              errors.push(`No price data available for ${symbol} (no USDT pair and fallback failed)`);
+              errors.push(
+                `No price data available for ${symbol} (no USDT pair and fallback failed)`
+              );
               continue;
             }
           }
@@ -186,8 +193,10 @@ export const createBinanceSyncService = (
 
       // Delete holdings that no longer exist in Binance
       // This will remove holdings that were sold or transferred out
-      const currentSymbols = balances.map(b => b.asset);
-      const holdingsToDelete = portfolio.holdings.filter((h: { symbol: string }) => !currentSymbols.includes(h.symbol));
+      const currentSymbols = balances.map((b) => b.asset);
+      const holdingsToDelete = portfolio.holdings.filter(
+        (h: { symbol: string }) => !currentSymbols.includes(h.symbol)
+      );
 
       for (const holding of holdingsToDelete) {
         await prisma.holding.delete({
