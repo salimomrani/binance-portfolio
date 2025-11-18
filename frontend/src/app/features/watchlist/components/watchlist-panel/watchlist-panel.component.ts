@@ -193,11 +193,20 @@ export class WatchlistPanelComponent implements OnInit {
   /**
    * Format date
    */
-  formatDate(date: Date): string {
+  formatDate(date: Date | undefined): string {
+    const dateToFormat = date || new Date();
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-    }).format(new Date(date));
+    }).format(new Date(dateToFormat));
   }
+
+  /**
+   * Get the most recent added date or current date
+   */
+  protected readonly lastUpdatedDate = computed(() => {
+    const items = this.items();
+    return items.length > 0 ? items[0].addedAt : new Date();
+  });
 }
