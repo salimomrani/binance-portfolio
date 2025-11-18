@@ -16,7 +16,7 @@ import { HoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
 import { TransactionService } from './modules/holdings/transaction.service';
 import { EarningsService } from './modules/earnings/earnings.service';
-import { EarningsController } from './modules/earnings/earnings.controller';
+import { createEarningsRouter } from './modules/earnings/earnings.routes';
 
 /**
  * Create and configure Express application
@@ -52,13 +52,13 @@ export function createApp(): Application {
   const marketDataController = initializeMarketDataController(prisma, cacheService);
   const portfolioController = initializePortfolioController(prisma, cacheService);
   const holdingsController = initializeHoldingsController(prisma, cacheService);
-  const earningsController = initializeEarningsController(prisma, cacheService);
+  const earningsRouter = initializeEarningsRouter(prisma, cacheService);
 
   // API routes
   app.use('/api/market', marketDataController.getRouter());
   app.use('/api/portfolios', portfolioController.router);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
-  app.use('/api/earnings', earningsController.router);
+  app.use('/api/earnings', earningsRouter);
 
   // 404 handler
   app.use(notFoundHandler);
@@ -148,9 +148,9 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
 }
 
 /**
- * Initialize earnings controller with dependencies
+ * Initialize earnings router with dependencies
  */
-function initializeEarningsController(prisma: PrismaClient, cacheService: CacheService) {
+function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheService) {
   const marketData = new MarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
@@ -165,5 +165,5 @@ function initializeEarningsController(prisma: PrismaClient, cacheService: CacheS
   const binanceAdapter = marketData.getBinanceAdapter();
   const earningsService = new EarningsService(prisma, binanceAdapter);
 
-  return new EarningsController(earningsService);
+  return createEarningsRouter(earningsService);
 }

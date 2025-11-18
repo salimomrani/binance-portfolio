@@ -1,46 +1,20 @@
-// Earnings controller - Binance Earn API endpoints
+// Earnings controller - Request handlers for Binance Earn endpoints
 
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { EarningsService } from './earnings.service';
 
-export class EarningsController {
-  public router: Router;
-
-  constructor(private readonly earningsService: EarningsService) {
-    this.router = Router();
-    this.initializeRoutes();
-  }
-
-  private initializeRoutes(): void {
-    // POST /api/earnings/sync - Sync earn positions from Binance
-    this.router.post('/sync', this.syncEarnPositions.bind(this));
-
-    // POST /api/earnings/sync-rewards - Sync rewards history from Binance
-    this.router.post('/sync-rewards', this.syncRewardsHistory.bind(this));
-
-    // GET /api/earnings/summary - Get earnings summary
-    this.router.get('/summary', this.getEarningsSummary.bind(this));
-
-    // GET /api/earnings/positions - Get all earn positions
-    this.router.get('/positions', this.getEarnPositions.bind(this));
-
-    // GET /api/earnings/rewards - Get rewards history
-    this.router.get('/rewards', this.getRewardsHistory.bind(this));
-  }
-
-  /**
-   * POST /api/earnings/sync - Sync earn positions from Binance
-   */
-  private async syncEarnPositions(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+/**
+ * POST /api/earnings/sync - Sync earn positions from Binance
+ */
+export async function syncEarnPositions(
+  earningsService: EarningsService
+) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
       const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
-      const result = await this.earningsService.syncEarnPositions(userId);
+      const result = await earningsService.syncEarnPositions(userId);
 
       res.json({
         success: true,
@@ -51,16 +25,16 @@ export class EarningsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
+}
 
-  /**
-   * POST /api/earnings/sync-rewards - Sync rewards history from Binance
-   */
-  private async syncRewardsHistory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+/**
+ * POST /api/earnings/sync-rewards - Sync rewards history from Binance
+ */
+export async function syncRewardsHistory(
+  earningsService: EarningsService
+) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
       const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
@@ -73,7 +47,7 @@ export class EarningsController {
         ? parseInt(req.query.endTime as string)
         : undefined;
 
-      const rewardsAdded = await this.earningsService.syncRewardsHistory(
+      const rewardsAdded = await earningsService.syncRewardsHistory(
         userId,
         startTime,
         endTime
@@ -88,21 +62,21 @@ export class EarningsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
+}
 
-  /**
-   * GET /api/earnings/summary - Get earnings summary
-   */
-  private async getEarningsSummary(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+/**
+ * GET /api/earnings/summary - Get earnings summary
+ */
+export async function getEarningsSummary(
+  earningsService: EarningsService
+) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
       const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
-      const summary = await this.earningsService.getEarningsSummary(userId);
+      const summary = await earningsService.getEarningsSummary(userId);
 
       res.json({
         success: true,
@@ -112,21 +86,21 @@ export class EarningsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
+}
 
-  /**
-   * GET /api/earnings/positions - Get all earn positions
-   */
-  private async getEarnPositions(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+/**
+ * GET /api/earnings/positions - Get all earn positions
+ */
+export async function getEarnPositions(
+  earningsService: EarningsService
+) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
       const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
-      const positions = await this.earningsService.getEarnPositions(userId);
+      const positions = await earningsService.getEarnPositions(userId);
 
       res.json({
         success: true,
@@ -136,16 +110,16 @@ export class EarningsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
+}
 
-  /**
-   * GET /api/earnings/rewards - Get rewards history
-   */
-  private async getRewardsHistory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+/**
+ * GET /api/earnings/rewards - Get rewards history
+ */
+export async function getRewardsHistory(
+  earningsService: EarningsService
+) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
       const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
@@ -159,7 +133,7 @@ export class EarningsController {
         : undefined;
       const asset = req.query.asset as string | undefined;
 
-      const rewards = await this.earningsService.getRewardsHistory(
+      const rewards = await earningsService.getRewardsHistory(
         userId,
         startDate,
         endDate,
@@ -174,5 +148,5 @@ export class EarningsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 }
