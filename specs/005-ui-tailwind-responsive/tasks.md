@@ -48,7 +48,7 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 - [X] T016 [US1] Update app.component.html sidebar with dark mode classes
 - [X] T017 [US1] Update app.component.html mobile navigation with dark mode classes
 - [X] T018 [P] [US1] Modernize portfolio-dashboard.component.html with dark mode classes
-- [ ] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
+- [X] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
 - [ ] T020 [P] [US1] Modernize portfolio-table.component.html with dark mode classes
 - [ ] T021 [P] [US1] Modernize portfolio-stats.component.html with dark mode classes
 - [ ] T022 [P] [US1] Modernize holdings.component.html with dark mode classes
