@@ -37,23 +37,23 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Repository Layer (US2)
 
-- [ ] T005 [US2] Create `backend/src/modules/market-data/market-data.repository.ts` with Prisma CRUD operations (findBySymbol, findBySymbols, findAll, upsert, upsertMany, deleteStale)
-- [ ] T006 [US2] Create `backend/src/modules/market-data/__tests__/market-data.repository.test.ts` with integration tests (90%+ coverage)
+- [X] T005 [US2] Create `backend/src/modules/market-data/market-data.repository.ts` with Prisma CRUD operations (findBySymbol, findBySymbols, findAll, upsert, upsertMany, deleteStale)
+- [X] T006 [US2] Create `backend/src/modules/market-data/__tests__/market-data.repository.test.ts` with integration tests (90%+ coverage)
 
 ### Service Refactoring (US2)
 
-- [ ] T007 [US2] Refactor `backend/src/modules/market-data/market-data.service.ts` to use MarketDataRepository instead of direct Prisma calls
-- [ ] T008 [US2] Create `backend/src/modules/market-data/__tests__/market-data.service.test.ts` with unit tests using mocked repository (95%+ coverage)
+- [X] T007 [US2] Refactor `backend/src/modules/market-data/market-data.service.ts` to use MarketDataRepository instead of direct Prisma calls
+- [X] T008 [US2] Create `backend/src/modules/market-data/__tests__/market-data.service.test.ts` with unit tests using mocked repository (95%+ coverage)
 
 ### Controller Refactoring (US1)
 
-- [ ] T009 [US1] Refactor `backend/src/modules/market-data/market-data.controller.ts` to only handle HTTP concerns (req/res)
-- [ ] T010 [US1] Create `backend/src/modules/market-data/__tests__/market-data.controller.test.ts` with unit tests using mocked service (90%+ coverage)
+- [X] T009 [US1] Refactor `backend/src/modules/market-data/market-data.controller.ts` to only handle HTTP concerns (req/res)
+- [X] T010 [US1] Create `backend/src/modules/market-data/__tests__/market-data.controller.test.ts` with unit tests using mocked service (90%+ coverage)
 
 ### Routes Layer (US3)
 
-- [ ] T011 [US3] Create `backend/src/modules/market-data/market-data.routes.ts` with Express router factory function
-- [ ] T012 [US3] Create `backend/tests/integration/market-data.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
+- [X] T011 [US3] Create `backend/src/modules/market-data/market-data.routes.ts` with Express router factory function
+- [X] T012 [US3] Create `backend/tests/integration/market-data.integration.test.ts` with E2E tests using Supertest (80%+ coverage)
 
 **Exit Criteria**:
 - All Prisma calls in repository only
