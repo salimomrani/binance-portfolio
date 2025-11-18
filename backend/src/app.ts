@@ -7,7 +7,8 @@ import { errorHandler, notFoundHandler } from './shared/middleware/error-handler
 import { createSuccessResponse } from './shared/types/api-response';
 import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
-import { MarketDataService } from './modules/market-data/market-data.service';
+import { createMarketDataService } from './modules/market-data/market-data.service';
+import { createMarketDataCache } from './modules/market-data/market-data.cache';
 import { createMarketDataHandlers } from './modules/market-data/market-data.controller';
 import createMarketDataRoutes from './modules/market-data/market-data.routes';
 import { createMarketDataRepository } from './modules/market-data/market-data.repository';
@@ -98,7 +99,7 @@ function initializeServices() {
  */
 function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
   const marketDataRepository = createMarketDataRepository(prisma);
-  const marketData = new MarketDataService(
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -107,7 +108,8 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
       retryDelay: 1000,
     },
     marketDataRepository,
-    cacheService
+    cacheService,
+    createMarketDataCache
   );
 
   const marketDataHandlers = createMarketDataHandlers(marketData);
@@ -115,12 +117,13 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
 }
 
 /**
- * Initialize portfolio router with dependencies
+ * Initialize portfolio router with functional dependencies
  */
 function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheService) {
+  // Create calculation service
   const calculations = new CalculationsService();
   const marketDataRepository = createMarketDataRepository(prisma);
-  const marketData = new MarketDataService(
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -129,12 +132,15 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
       retryDelay: 1000,
     },
     marketDataRepository,
-    cacheService
+    cacheService,
+    createMarketDataCache
   );
+
+  // Create portfolio service
   const portfolioRepo = createPortfolioRepository(prisma);
   const portfolioService = createPortfolioService(portfolioRepo, marketData, calculations);
 
-  // Initialize Binance sync service
+  // Create Binance sync service
   const binanceAdapter = marketData.getBinanceAdapter();
   const binanceSyncService = createBinanceSyncService(prisma, binanceAdapter, marketData);
 
@@ -149,7 +155,10 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
  */
 function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheService) {
   const calculations = new CalculationsService();
-  const marketData = new MarketDataService(
+
+  // Create market data dependencies
+  const marketDataRepo = createMarketDataRepository(prisma);
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -157,8 +166,9 @@ function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheServi
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    prisma,
-    cacheService
+    marketDataRepo,
+    cacheService,
+    createMarketDataCache
   );
 
   // Create repositories
@@ -177,10 +187,12 @@ function initializeHoldingsRouter(prisma: PrismaClient, cacheService: CacheServi
 }
 
 /**
- * Initialize earnings router with dependencies
+ * Initialize earnings router with functional dependencies
  */
 function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheService) {
-  const marketData = new MarketDataService(
+  // Create market data dependencies
+  const marketDataRepo = createMarketDataRepository(prisma);
+  const marketDataService = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -188,10 +200,13 @@ function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheServi
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    prisma,
-    cacheService
+    marketDataRepo,
+    cacheService,
+    createMarketDataCache
   );
-  const binanceAdapter = marketData.getBinanceAdapter();
+
+  // Create earnings service
+  const binanceAdapter = marketDataService.getBinanceAdapter();
   const earningsService = createEarningsService(prisma, binanceAdapter);
 
   return createEarningsRouter(earningsService);
@@ -202,7 +217,8 @@ function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheServi
  * T166: Watchlist routes registration
  */
 function initializeWatchlistRouter(prisma: PrismaClient, cacheService: CacheService) {
-  const marketData = new MarketDataService(
+  const marketDataRepo = createMarketDataRepository(prisma);
+  const marketData = createMarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
       binanceSecretKey: env.marketData.binance.apiSecret,
@@ -210,8 +226,9 @@ function initializeWatchlistRouter(prisma: PrismaClient, cacheService: CacheServ
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    prisma,
-    cacheService
+    marketDataRepo,
+    cacheService,
+    createMarketDataCache
   );
   const watchlistRepo = createWatchlistRepository(prisma);
   const watchlistService = createWatchlistService(watchlistRepo, marketData);
