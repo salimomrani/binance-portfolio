@@ -307,25 +307,25 @@ export const createEarningsService = (
       });
 
       // Calculate summary
-      const flexibleCount = positions.filter((p) => p.type === 'FLEXIBLE').length;
-      const lockedCount = positions.filter((p) => p.type === 'LOCKED').length;
+      const flexibleCount = positions.filter((p: any) => p.type === 'FLEXIBLE').length;
+      const lockedCount = positions.filter((p: any) => p.type === 'LOCKED').length;
 
       const totalRewardsLast30Days = rewardsLast30Days.reduce(
-        (sum, r) => sum + r.amount.toNumber(),
+        (sum: number, r: any) => sum + r.amount.toNumber(),
         0
       );
 
       const totalRewardsAllTime = allRewards.reduce(
-        (sum, r) => sum + r.amount.toNumber(),
+        (sum: number, r: any) => sum + r.amount.toNumber(),
         0
       );
 
-      const estimatedDailyEarnings = positions.reduce((sum, p) => {
+      const estimatedDailyEarnings = positions.reduce((sum: number, p: any) => {
         return sum + (p.dailyEarnings?.toNumber() || 0);
       }, 0);
 
       // Group by asset
-      const byAsset = positions.map((p) => ({
+      const byAsset = positions.map((p: any) => ({
         asset: p.asset,
         amount: p.amount.toNumber(),
         apy: p.currentApy.toNumber(),

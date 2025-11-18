@@ -366,7 +366,7 @@ describe('Holdings Controller', () => {
         total: 1,
         totalPages: 1,
         hasNext: false,
-        hasPrev: false,
+        hasPrevious: false,
       },
     };
 

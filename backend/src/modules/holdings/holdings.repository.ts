@@ -145,7 +145,7 @@ export const createHoldingsRepository = (prisma: PrismaClient): HoldingsReposito
       select: { quantity: true, averageCost: true },
     });
 
-    return holdings.reduce((total, holding) => {
+    return holdings.reduce((total: number, holding) => {
       const value = new Decimal(holding.quantity).times(new Decimal(holding.averageCost));
       return total + value.toNumber();
     }, 0);
@@ -160,6 +160,6 @@ export const createHoldingsRepository = (prisma: PrismaClient): HoldingsReposito
       select: { symbol: true },
     });
 
-    return holdings.map(h => h.symbol);
+    return holdings.map((h: { symbol: string }) => h.symbol);
   },
 });

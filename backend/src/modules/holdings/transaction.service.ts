@@ -122,7 +122,7 @@ export const createTransactionService = (
           total,
           totalPages,
           hasNext: page < totalPages,
-          hasPrev: page > 1,
+          hasPrevious: page > 1,
         },
       };
     } catch (error) {
@@ -170,7 +170,7 @@ export const createTransactionService = (
  * Uses weighted average cost method for BUY transactions
  */
 async function updateHoldingAverageCostInternal(
-  transactionRepo: TransactionRepository,
+  _transactionRepo: TransactionRepository,
   holdingsRepo: HoldingsRepository,
   holdingId: string
 ): Promise<void> {

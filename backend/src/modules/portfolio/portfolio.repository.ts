@@ -26,6 +26,13 @@ export type PortfolioRepository = {
 export const createPortfolioRepository = (prisma: PrismaClient): PortfolioRepository => ({
   /**
    * Find all portfolios for a user
+   * Retrieves all portfolios owned by the specified user, ordered by creation date (newest first)
+   *
+   * @param userId - The unique identifier of the user
+   * @returns Promise<Portfolio[]> - Array of portfolios (empty array if none found)
+   * @example
+   * const portfolios = await repository.findAll('user-123');
+   * console.log(`Found ${portfolios.length} portfolios`);
    */
   findAll: async (userId: string) => {
     return prisma.portfolio.findMany({
@@ -49,6 +56,15 @@ export const createPortfolioRepository = (prisma: PrismaClient): PortfolioReposi
 
   /**
    * Find portfolio by ID
+   * Retrieves a single portfolio by its unique identifier
+   *
+   * @param id - The unique identifier of the portfolio
+   * @returns Promise<Portfolio | null> - The portfolio if found, null otherwise
+   * @example
+   * const portfolio = await repository.findById('portfolio-123');
+   * if (portfolio) {
+   *   console.log(`Portfolio: ${portfolio.name}`);
+   * }
    */
   findById: async (id: string) => {
     return prisma.portfolio.findUnique({
@@ -82,6 +98,18 @@ export const createPortfolioRepository = (prisma: PrismaClient): PortfolioReposi
 
   /**
    * Create a new portfolio
+   * Creates a new portfolio with the specified data
+   *
+   * @param data - Portfolio creation data (userId, name, description, isDefault)
+   * @returns Promise<Portfolio> - The newly created portfolio
+   * @throws {PrismaClientKnownRequestError} - If userId doesn't exist or unique constraint is violated
+   * @example
+   * const portfolio = await repository.create({
+   *   user: { connect: { id: 'user-123' } },
+   *   name: 'My Crypto Portfolio',
+   *   description: 'Long-term investments',
+   *   isDefault: false
+   * });
    */
   create: async (data: Prisma.PortfolioCreateInput) => {
     return prisma.portfolio.create({ data });
@@ -89,6 +117,17 @@ export const createPortfolioRepository = (prisma: PrismaClient): PortfolioReposi
 
   /**
    * Update a portfolio
+   * Updates an existing portfolio with the provided data
+   *
+   * @param id - The unique identifier of the portfolio to update
+   * @param data - Portfolio update data (partial fields)
+   * @returns Promise<Portfolio> - The updated portfolio
+   * @throws {PrismaClientKnownRequestError} - If portfolio doesn't exist (P2025)
+   * @example
+   * const updated = await repository.update('portfolio-123', {
+   *   name: 'Updated Name',
+   *   description: 'New description'
+   * });
    */
   update: async (id: string, data: Prisma.PortfolioUpdateInput) => {
     return prisma.portfolio.update({
@@ -99,6 +138,14 @@ export const createPortfolioRepository = (prisma: PrismaClient): PortfolioReposi
 
   /**
    * Delete a portfolio
+   * Permanently deletes a portfolio and all associated holdings (CASCADE)
+   *
+   * @param id - The unique identifier of the portfolio to delete
+   * @returns Promise<void>
+   * @throws {PrismaClientKnownRequestError} - If portfolio doesn't exist (P2025)
+   * @example
+   * await repository.delete('portfolio-123');
+   * console.log('Portfolio deleted');
    */
   delete: async (id: string) => {
     await prisma.portfolio.delete({
@@ -108,7 +155,16 @@ export const createPortfolioRepository = (prisma: PrismaClient): PortfolioReposi
 
   /**
    * Set a portfolio as default for a user
-   * Unsets any other default portfolios for the user
+   * Unsets any other default portfolios for the user and sets the specified portfolio as default
+   * Uses a database transaction to ensure atomicity
+   *
+   * @param userId - The unique identifier of the user
+   * @param portfolioId - The unique identifier of the portfolio to set as default
+   * @returns Promise<Portfolio> - The updated portfolio (now default)
+   * @throws {PrismaClientKnownRequestError} - If portfolio doesn't exist or doesn't belong to user
+   * @example
+   * const defaultPortfolio = await repository.setAsDefault('user-123', 'portfolio-456');
+   * console.log(`${defaultPortfolio.name} is now the default portfolio`);
    */
   setAsDefault: async (userId: string, portfolioId: string) => {
     // Use transaction to ensure atomicity

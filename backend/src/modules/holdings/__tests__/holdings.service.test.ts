@@ -183,6 +183,7 @@ describe('HoldingsService', () => {
     const mockGainLoss = {
       amount: new Decimal(10000),
       percentage: new Decimal(20),
+      isProfit: true,
     };
 
     beforeEach(() => {
@@ -253,7 +254,7 @@ describe('HoldingsService', () => {
 
     it('should handle sorting by gainLoss', async () => {
       // Act
-      const result = await service.getHoldings('portfolio-1', 'gainLoss', 'desc');
+      await service.getHoldings('portfolio-1', 'gainLoss', 'desc');
 
       // Assert
       expect(mockRepository.findAll).toHaveBeenCalledWith('portfolio-1', 'gainLoss', 'desc');
@@ -292,6 +293,7 @@ describe('HoldingsService', () => {
       mockCalculationsService.calculateGainLoss.mockReturnValue({
         amount: new Decimal(10000),
         percentage: new Decimal(20),
+        isProfit: true,
       });
 
       // Act
@@ -417,6 +419,7 @@ describe('HoldingsService', () => {
       mockCalculationsService.calculateGainLoss.mockReturnValue({
         amount: new Decimal(10000),
         percentage: new Decimal(20),
+        isProfit: true,
       });
 
       // Act
