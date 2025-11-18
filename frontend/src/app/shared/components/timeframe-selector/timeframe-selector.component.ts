@@ -1,6 +1,6 @@
 // T134: Timeframe selector component
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type Timeframe = '24h' | '7d' | '30d' | '1y';
@@ -14,14 +14,14 @@ export type Timeframe = '24h' | '7d' | '30d' | '1y';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimeframeSelectorComponent {
-  @Input() selectedTimeframe: Timeframe = '7d';
-  @Output() timeframeChange = new EventEmitter<Timeframe>();
+  // Signal inputs/outputs
+  selectedTimeframe = input<Timeframe>('7d');
+  timeframeChange = output<Timeframe>();
 
   readonly timeframes: Timeframe[] = ['24h', '7d', '30d', '1y'];
 
   selectTimeframe(timeframe: Timeframe): void {
-    if (this.selectedTimeframe !== timeframe) {
-      this.selectedTimeframe = timeframe;
+    if (this.selectedTimeframe() !== timeframe) {
       this.timeframeChange.emit(timeframe);
     }
   }
