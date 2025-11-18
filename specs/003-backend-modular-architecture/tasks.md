@@ -116,8 +116,8 @@ Refactor the backend to follow a consistent layered architecture (Routes → Con
 
 ### Service Refactoring (US2)
 
-- [ ] T025 [US2] Refactor `backend/src/modules/holdings/holdings.service.ts` to use HoldingRepository and TransactionRepository
-- [ ] T026 [US2] Refactor `backend/src/modules/holdings/transaction.service.ts` to use TransactionRepository
+- [X] T025 [US2] Refactor `backend/src/modules/holdings/holdings.service.ts` to use HoldingRepository and TransactionRepository
+- [X] T026 [US2] Refactor `backend/src/modules/holdings/transaction.service.ts` to use TransactionRepository
 - [ ] T027 [US2] Create `backend/src/modules/holdings/__tests__/holdings.service.test.ts` with unit tests using mocked repositories (95%+ coverage)
 - [ ] T028 [US2] Create `backend/src/modules/holdings/__tests__/transaction.service.test.ts` with unit tests using mocked repository (95%+ coverage)
 
