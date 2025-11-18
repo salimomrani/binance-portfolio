@@ -5,6 +5,14 @@ import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import { MarketDataAdapter, CryptoPrice, CryptoMarketData, PriceHistory, Timeframe, AdapterConfig } from './market-data.types';
 import { logger } from '../../shared/services/logger.service';
+import {
+  BinanceFlexiblePosition,
+  BinanceLockedPosition,
+  BinanceFlexibleReward,
+  BinanceLockedReward,
+  EarnPosition,
+  EarnReward,
+} from './binance-earn.types';
 
 export interface BinanceBalance {
   asset: string;
@@ -14,7 +22,9 @@ export interface BinanceBalance {
 
 export class BinanceAdapter implements MarketDataAdapter {
   private readonly client: AxiosInstance;
+  private readonly sapiClient: AxiosInstance;
   private readonly BASE_URL = 'https://api.binance.com/api/v3';
+  private readonly SAPI_BASE_URL = 'https://api.binance.com/sapi/v1';
   private readonly apiKey?: string;
   private readonly apiSecret?: string;
 
@@ -24,6 +34,16 @@ export class BinanceAdapter implements MarketDataAdapter {
 
     this.client = axios.create({
       baseURL: this.BASE_URL,
+      timeout: config.retryDelay || 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(config.binanceApiKey ? { 'X-MBX-APIKEY': config.binanceApiKey } : {}),
+      },
+    });
+
+    // SAPI client for Earn endpoints
+    this.sapiClient = axios.create({
+      baseURL: this.SAPI_BASE_URL,
       timeout: config.retryDelay || 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -283,6 +303,271 @@ export class BinanceAdapter implements MarketDataAdapter {
       } else {
         logger.error('Binance account balances fetch error:', error);
       }
+      throw error;
+    }
+  }
+
+  /**
+   * ============================================================================
+   * BINANCE EARN API METHODS
+   * ============================================================================
+   */
+
+  /**
+   * Fetch flexible savings positions from Binance Earn
+   * Endpoint: GET /sapi/v1/simple-earn/flexible/position
+   */
+  async getFlexibleEarnPositions(): Promise<EarnPosition[]> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        throw new Error('Binance API key and secret are required to fetch earn positions');
+      }
+
+      const timestamp = Date.now();
+      const queryString = `timestamp=${timestamp}`;
+      const signature = this.createSignature(queryString);
+
+      const response = await this.sapiClient.get('/simple-earn/flexible/position', {
+        params: {
+          timestamp,
+          signature,
+        },
+      });
+
+      const positions: EarnPosition[] = response.data.rows.map((pos: BinanceFlexiblePosition) => ({
+        asset: pos.asset,
+        productId: pos.productId,
+        productName: pos.productName || 'Flexible Savings',
+        type: 'FLEXIBLE' as const,
+        amount: parseFloat(pos.totalAmount),
+        currentApy: parseFloat(pos.latestAnnualPercentageRate),
+        dailyEarnings: pos.totalAmount && pos.latestAnnualPercentageRate
+          ? (parseFloat(pos.totalAmount) * parseFloat(pos.latestAnnualPercentageRate)) / 365 / 100
+          : undefined,
+        canRedeem: pos.canRedeem,
+        autoSubscribe: pos.autoSubscribe,
+      }));
+
+      logger.info(`Successfully fetched ${positions.length} flexible earn positions from Binance`);
+      return positions;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Binance flexible earn positions fetch error:', {
+          message: error.message,
+          code: error.response?.data?.code,
+          msg: error.response?.data?.msg,
+        });
+      } else {
+        logger.error('Binance flexible earn positions fetch error:', error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch locked staking positions from Binance Earn
+   * Endpoint: GET /sapi/v1/simple-earn/locked/position
+   */
+  async getLockedEarnPositions(): Promise<EarnPosition[]> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        throw new Error('Binance API key and secret are required to fetch earn positions');
+      }
+
+      const timestamp = Date.now();
+      const queryString = `timestamp=${timestamp}`;
+      const signature = this.createSignature(queryString);
+
+      const response = await this.sapiClient.get('/simple-earn/locked/position', {
+        params: {
+          timestamp,
+          signature,
+        },
+      });
+
+      const positions: EarnPosition[] = response.data.rows.map((pos: BinanceLockedPosition) => ({
+        asset: pos.asset,
+        productId: pos.projectId,
+        productName: 'Locked Staking',
+        type: 'LOCKED' as const,
+        amount: parseFloat(pos.amount),
+        currentApy: parseFloat(pos.apy),
+        lockPeriod: parseInt(pos.duration),
+        lockedUntil: new Date(pos.redeemDate),
+        canRedeem: new Date(pos.redeemDate) <= new Date(),
+        autoSubscribe: pos.isAutoRenew,
+      }));
+
+      logger.info(`Successfully fetched ${positions.length} locked earn positions from Binance`);
+      return positions;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Binance locked earn positions fetch error:', {
+          message: error.message,
+          code: error.response?.data?.code,
+          msg: error.response?.data?.msg,
+        });
+      } else {
+        logger.error('Binance locked earn positions fetch error:', error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all earn positions (flexible + locked)
+   */
+  async getAllEarnPositions(): Promise<EarnPosition[]> {
+    try {
+      const [flexible, locked] = await Promise.all([
+        this.getFlexibleEarnPositions(),
+        this.getLockedEarnPositions(),
+      ]);
+
+      return [...flexible, ...locked];
+    } catch (error) {
+      logger.error('Error fetching all earn positions:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch flexible savings rewards history
+   * Endpoint: GET /sapi/v1/simple-earn/flexible/history/rewardsRecord
+   */
+  async getFlexibleRewardsHistory(
+    asset?: string,
+    startTime?: number,
+    endTime?: number
+  ): Promise<EarnReward[]> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        throw new Error('Binance API key and secret are required to fetch rewards history');
+      }
+
+      const timestamp = Date.now();
+      const params: Record<string, string | number> = {
+        timestamp,
+      };
+
+      if (asset) params.asset = asset;
+      if (startTime) params.startTime = startTime;
+      if (endTime) params.endTime = endTime;
+
+      const queryString = Object.entries(params)
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      const signature = this.createSignature(queryString);
+
+      const response = await this.sapiClient.get('/simple-earn/flexible/history/rewardsRecord', {
+        params: {
+          ...params,
+          signature,
+        },
+      });
+
+      const rewards: EarnReward[] = response.data.rows.map((reward: BinanceFlexibleReward) => ({
+        asset: reward.asset,
+        amount: parseFloat(reward.rewards),
+        type: 'FLEXIBLE' as const,
+        rewardDate: new Date(reward.time),
+        positionId: reward.projectId,
+      }));
+
+      logger.info(`Successfully fetched ${rewards.length} flexible rewards from Binance`);
+      return rewards;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Binance flexible rewards history fetch error:', {
+          message: error.message,
+          code: error.response?.data?.code,
+          msg: error.response?.data?.msg,
+        });
+      } else {
+        logger.error('Binance flexible rewards history fetch error:', error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch locked staking rewards history
+   * Endpoint: GET /sapi/v1/simple-earn/locked/history/rewardsRecord
+   */
+  async getLockedRewardsHistory(
+    asset?: string,
+    startTime?: number,
+    endTime?: number
+  ): Promise<EarnReward[]> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        throw new Error('Binance API key and secret are required to fetch rewards history');
+      }
+
+      const timestamp = Date.now();
+      const params: Record<string, string | number> = {
+        timestamp,
+      };
+
+      if (asset) params.asset = asset;
+      if (startTime) params.startTime = startTime;
+      if (endTime) params.endTime = endTime;
+
+      const queryString = Object.entries(params)
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      const signature = this.createSignature(queryString);
+
+      const response = await this.sapiClient.get('/simple-earn/locked/history/rewardsRecord', {
+        params: {
+          ...params,
+          signature,
+        },
+      });
+
+      const rewards: EarnReward[] = response.data.rows.map((reward: BinanceLockedReward) => ({
+        asset: reward.asset,
+        amount: parseFloat(reward.amount),
+        type: 'LOCKED' as const,
+        rewardDate: new Date(reward.time),
+        positionId: reward.positionId,
+      }));
+
+      logger.info(`Successfully fetched ${rewards.length} locked rewards from Binance`);
+      return rewards;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Binance locked rewards history fetch error:', {
+          message: error.message,
+          code: error.response?.data?.code,
+          msg: error.response?.data?.msg,
+        });
+      } else {
+        logger.error('Binance locked rewards history fetch error:', error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all rewards history (flexible + locked)
+   */
+  async getAllRewardsHistory(
+    asset?: string,
+    startTime?: number,
+    endTime?: number
+  ): Promise<EarnReward[]> {
+    try {
+      const [flexible, locked] = await Promise.all([
+        this.getFlexibleRewardsHistory(asset, startTime, endTime),
+        this.getLockedRewardsHistory(asset, startTime, endTime),
+      ]);
+
+      return [...flexible, ...locked].sort(
+        (a, b) => b.rewardDate.getTime() - a.rewardDate.getTime()
+      );
+    } catch (error) {
+      logger.error('Error fetching all rewards history:', error);
       throw error;
     }
   }

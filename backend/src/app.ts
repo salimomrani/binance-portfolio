@@ -15,6 +15,8 @@ import { BinanceSyncService } from './modules/portfolio/binance-sync.service';
 import { HoldingsService } from './modules/holdings/holdings.service';
 import { HoldingsController } from './modules/holdings/holdings.controller';
 import { TransactionService } from './modules/holdings/transaction.service';
+import { EarningsService } from './modules/earnings/earnings.service';
+import createEarningsRouter from './modules/earnings/earnings.routes';
 
 /**
  * Create and configure Express application
@@ -50,11 +52,13 @@ export function createApp(): Application {
   const marketDataController = initializeMarketDataController(prisma, cacheService);
   const portfolioController = initializePortfolioController(prisma, cacheService);
   const holdingsController = initializeHoldingsController(prisma, cacheService);
+  const earningsRouter = initializeEarningsRouter(prisma, cacheService);
 
   // API routes
   app.use('/api/market', marketDataController.getRouter());
   app.use('/api/portfolios', portfolioController.router);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
+  app.use('/api/earnings', earningsRouter);
 
   // 404 handler
   app.use(notFoundHandler);
@@ -141,4 +145,25 @@ function initializeHoldingsController(prisma: PrismaClient, cacheService: CacheS
   const transactionService = new TransactionService(prisma);
 
   return new HoldingsController(holdingsService, transactionService);
+}
+
+/**
+ * Initialize earnings router with dependencies
+ */
+function initializeEarningsRouter(prisma: PrismaClient, cacheService: CacheService) {
+  const marketData = new MarketDataService(
+    {
+      binanceApiKey: env.marketData.binance.apiKey,
+      binanceSecretKey: env.marketData.binance.apiSecret,
+      cacheTTL: 60,
+      retryAttempts: 3,
+      retryDelay: 1000,
+    },
+    prisma,
+    cacheService
+  );
+  const binanceAdapter = marketData.getBinanceAdapter();
+  const earningsService = new EarningsService(prisma, binanceAdapter);
+
+  return createEarningsRouter(earningsService);
 }
