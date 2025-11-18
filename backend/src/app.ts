@@ -9,6 +9,7 @@ import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
 import { MarketDataController } from './modules/market-data/market-data.controller';
+import createMarketDataRoutes from './modules/market-data/market-data.routes';
 import { createPortfolioService } from './modules/portfolio/portfolio.service';
 import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
@@ -50,13 +51,13 @@ export function createApp(): Application {
 
   // Initialize services and controllers (T067-T068, T120)
   const { prisma, cacheService } = initializeServices();
-  const marketDataController = initializeMarketDataController(prisma, cacheService);
+  const marketDataRouter = initializeMarketDataRouter(prisma, cacheService);
   const portfolioController = initializePortfolioController(prisma, cacheService);
   const holdingsController = initializeHoldingsController(prisma, cacheService);
   const earningsRouter = initializeEarningsRouter(prisma, cacheService);
 
   // API routes
-  app.use('/api/market', marketDataController.getRouter());
+  app.use('/api/market', marketDataRouter);
   app.use('/api/portfolios', portfolioController.router);
   app.use('/api/portfolios/:portfolioId/holdings', holdingsController.router);
   app.use('/api/earnings', earningsRouter);
@@ -81,10 +82,10 @@ function initializeServices() {
 }
 
 /**
- * Initialize market data controller with dependencies
+ * Initialize market data router with dependencies
  * T120: Market data controller with historical endpoints
  */
-function initializeMarketDataController(prisma: PrismaClient, cacheService: CacheService) {
+function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
   const marketData = new MarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
@@ -97,7 +98,8 @@ function initializeMarketDataController(prisma: PrismaClient, cacheService: Cach
     cacheService
   );
 
-  return new MarketDataController(marketData);
+  const marketDataController = new MarketDataController(marketData);
+  return createMarketDataRoutes(marketDataController);
 }
 
 /**

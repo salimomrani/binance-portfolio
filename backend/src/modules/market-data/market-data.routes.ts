@@ -40,3 +40,5 @@ export function createMarketDataRoutes(controller: MarketDataController): Router
 
   return router;
 }
+
+export default createMarketDataRoutes;
