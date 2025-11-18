@@ -7,6 +7,8 @@ import { GainLossBadgeComponent } from '../../../../shared/components/gain-loss-
 import { TrendIndicatorComponent } from '../../../../shared/components/trend-indicator/trend-indicator.component';
 import { ColumnSettingsComponent } from '../../../../shared/components/column-settings/column-settings.component';
 import { TableSettingsService } from '../../../../core/services/table-settings.service';
+import { PriceFlashDirective } from '../../../../shared/directives/price-flash.directive';
+import { PriceUpdateService } from '../../../../core/services/price-update.service';
 
 type SortColumn = 'symbol' | 'quantity' | 'currentValue' | 'gainLoss' | 'gainLossPercentage' | 'priceChange24h' | 'volume24h' | 'marketCap';
 type SortOrder = 'asc' | 'desc';
@@ -14,7 +16,7 @@ type SortOrder = 'asc' | 'desc';
 @Component({
   selector: 'app-portfolio-table',
   standalone: true,
-  imports: [CommonModule, GainLossBadgeComponent, TrendIndicatorComponent, ColumnSettingsComponent],
+  imports: [CommonModule, GainLossBadgeComponent, TrendIndicatorComponent, ColumnSettingsComponent, PriceFlashDirective],
   templateUrl: './portfolio-table.component.html',
   styleUrl: './portfolio-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +28,9 @@ export class PortfolioTableComponent {
   // T154: Inject table settings service for column visibility
   private readonly tableSettingsService = inject(TableSettingsService);
   protected readonly columnSettings = this.tableSettingsService.getColumnSettings();
+
+  // T157: Inject price update service for animated price changes
+  private readonly priceUpdateService = inject(PriceUpdateService);
 
   private readonly sortColumn = signal<SortColumn>('currentValue');
   private readonly sortOrder = signal<SortOrder>('desc');
@@ -147,5 +152,12 @@ export class PortfolioTableComponent {
     } else {
       return this.formatCurrency(value);
     }
+  }
+
+  /**
+   * T157: Get previous price for a symbol from price update service
+   */
+  getPreviousPrice(symbol: string): number | undefined {
+    return this.priceUpdateService.getPriceForSymbol(symbol)?.previousPrice;
   }
 }
