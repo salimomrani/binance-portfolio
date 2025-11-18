@@ -24,10 +24,10 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 **Purpose**: Install dependencies and prepare configuration
 
-- [ ] T001 Install @angular/cdk dependency in frontend
-- [ ] T002 [P] Extend Tailwind config with darkMode: 'class'
-- [ ] T003 [P] Create frontend/src/styles/animations.css for custom animations
-- [ ] T004 [P] Create frontend/src/styles/design-tokens.css for CSS variables
+- [X] T001 Install @angular/cdk dependency in frontend
+- [X] T002 [P] Extend Tailwind config with darkMode: 'class'
+- [X] T003 [P] Create frontend/src/styles/animations.css for custom animations
+- [X] T004 [P] Create frontend/src/styles/design-tokens.css for CSS variables
 
 ---
 
@@ -39,14 +39,14 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create ThemeService in frontend/src/app/core/services/theme.service.ts
-- [ ] T011 [P] [US1] Create ThemeService tests in frontend/src/app/core/services/theme.service.spec.ts
-- [ ] T012 [US1] Add dark mode classes to tailwind.config.js theme.extend.colors
-- [ ] T013 [US1] Add dark mode global styles in frontend/src/styles/globals.css
-- [ ] T014 [US1] Inject ThemeService in app.component.ts and add theme toggle logic
-- [ ] T015 [US1] Add dark/light mode toggle button in app.component.html header
-- [ ] T016 [US1] Update app.component.html sidebar with dark mode classes
-- [ ] T017 [US1] Update app.component.html mobile navigation with dark mode classes
+- [X] T010 [P] [US1] Create ThemeService in frontend/src/app/core/services/theme.service.ts
+- [X] T011 [P] [US1] Create ThemeService tests in frontend/src/app/core/services/theme.service.spec.ts
+- [X] T012 [US1] Add dark mode classes to tailwind.config.js theme.extend.colors
+- [X] T013 [US1] Add dark mode global styles in frontend/src/styles/globals.css
+- [X] T014 [US1] Inject ThemeService in app.component.ts and add theme toggle logic
+- [X] T015 [US1] Add dark/light mode toggle button in app.component.html header
+- [X] T016 [US1] Update app.component.html sidebar with dark mode classes
+- [X] T017 [US1] Update app.component.html mobile navigation with dark mode classes
 - [ ] T018 [P] [US1] Modernize portfolio-dashboard.component.html with dark mode classes
 - [ ] T019 [P] [US1] Modernize portfolio-summary.component.html with dark mode classes
 - [ ] T020 [P] [US1] Modernize portfolio-table.component.html with dark mode classes
