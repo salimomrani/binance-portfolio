@@ -107,7 +107,7 @@ export class BinanceSyncService {
           if (!validSymbols.includes(symbol)) {
             const reason = getSymbolFilterReason(symbol);
             logger.info(`Skipping ${symbol} (${totalQuantity}): ${reason}`);
-            errors.push(`${symbol}: ${reason}`);
+            // Don't add filtered symbols to errors - this is expected behavior
             continue;
           }
 
