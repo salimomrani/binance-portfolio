@@ -8,6 +8,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { portfolioReducer } from './features/portfolio/store/portfolio.reducer';
 import { PortfolioEffects } from './features/portfolio/store/portfolio.effects';
+import { watchlistReducer } from './features/watchlist/store/watchlist.reducer';
+import { WatchlistEffects } from './features/watchlist/store/watchlist.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,9 +17,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     provideStore({
-      portfolio: portfolioReducer
+      portfolio: portfolioReducer,
+      watchlist: watchlistReducer
     }),
-    provideEffects([PortfolioEffects]),
+    provideEffects([PortfolioEffects, WatchlistEffects]),
     provideStoreDevtools({
       maxAge: 25,
       logOnly: !isDevMode(),
