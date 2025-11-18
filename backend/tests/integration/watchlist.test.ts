@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { createWatchlistRepository } from '../../src/modules/watchlist/watchlist.repository';
 import { createWatchlistService } from '../../src/modules/watchlist/watchlist.service';
 import { MarketDataService } from '../../src/modules/market-data/market-data.service';
+import { createMarketDataRepository } from '../../src/modules/market-data/market-data.repository';
 import { CacheService } from '../../src/shared/services/cache.service';
 
 describe('Watchlist Integration Tests', () => {
@@ -27,6 +28,7 @@ describe('Watchlist Integration Tests', () => {
 
     // Initialize services
     const cacheService = new CacheService();
+    const marketDataRepository = createMarketDataRepository(prisma);
     const marketDataService = new MarketDataService(
       {
         binanceApiKey: 'test-key',
@@ -35,7 +37,7 @@ describe('Watchlist Integration Tests', () => {
         retryAttempts: 3,
         retryDelay: 1000,
       },
-      prisma,
+      marketDataRepository,
       cacheService
     );
 
