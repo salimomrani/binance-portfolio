@@ -8,13 +8,13 @@ import { createSuccessResponse } from './shared/types/api-response';
 import { CacheService } from './shared/services/cache.service';
 import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
-import { MarketDataController } from './modules/market-data/market-data.controller';
+import { createMarketDataHandlers } from './modules/market-data/market-data.controller';
 import createMarketDataRoutes from './modules/market-data/market-data.routes';
 import { createMarketDataRepository } from './modules/market-data/market-data.repository';
 import { createPortfolioService } from './modules/portfolio/portfolio.service';
 import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
-import { PortfolioController } from './modules/portfolio/portfolio.controller';
-import { createPortfolioRoutes } from './modules/portfolio/portfolio.routes';
+import { createPortfolioHandlers } from './modules/portfolio/portfolio.controller';
+import createPortfolioRoutes from './modules/portfolio/portfolio.routes';
 import { createBinanceSyncService } from './modules/portfolio/binance-sync.service';
 import { createHoldingsRepository } from './modules/holdings/holdings.repository';
 import { createTransactionRepository } from './modules/holdings/transaction.repository';
@@ -26,8 +26,8 @@ import { createEarningsService } from './modules/earnings/earnings.service';
 import createEarningsRouter from './modules/earnings/earnings.routes';
 import { createWatchlistRepository } from './modules/watchlist/watchlist.repository';
 import { createWatchlistService } from './modules/watchlist/watchlist.service';
-import { WatchlistController } from './modules/watchlist/watchlist.controller';
-import { createWatchlistRoutes } from './modules/watchlist/watchlist.routes';
+import { createWatchlistHandlers } from './modules/watchlist/watchlist.controller';
+import createWatchlistRoutes from './modules/watchlist/watchlist.routes';
 
 /**
  * Create and configure Express application
@@ -94,7 +94,7 @@ function initializeServices() {
 
 /**
  * Initialize market data router with dependencies
- * T120: Market data controller with historical endpoints
+ * T120: Market data routes with functional handlers
  */
 function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
   const marketDataRepository = createMarketDataRepository(prisma);
@@ -110,8 +110,8 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
     cacheService
   );
 
-  const marketDataController = new MarketDataController(marketData);
-  return createMarketDataRoutes(marketDataController);
+  const marketDataHandlers = createMarketDataHandlers(marketData);
+  return createMarketDataRoutes(marketDataHandlers);
 }
 
 /**
@@ -138,8 +138,8 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
   const binanceAdapter = marketData.getBinanceAdapter();
   const binanceSyncService = createBinanceSyncService(prisma, binanceAdapter, marketData);
 
-  const portfolioController = new PortfolioController(portfolioService, binanceSyncService);
-  return createPortfolioRoutes(portfolioController);
+  const portfolioHandlers = createPortfolioHandlers(portfolioService, binanceSyncService);
+  return createPortfolioRoutes(portfolioHandlers);
 }
 
 /**
@@ -215,7 +215,7 @@ function initializeWatchlistRouter(prisma: PrismaClient, cacheService: CacheServ
   );
   const watchlistRepo = createWatchlistRepository(prisma);
   const watchlistService = createWatchlistService(watchlistRepo, marketData);
-  const watchlistController = new WatchlistController(watchlistService);
+  const watchlistHandlers = createWatchlistHandlers(watchlistService);
 
-  return createWatchlistRoutes(watchlistController);
+  return createWatchlistRoutes(watchlistHandlers);
 }
