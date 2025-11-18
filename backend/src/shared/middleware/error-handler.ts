@@ -47,10 +47,7 @@ export function errorHandler(
  * 404 Not Found handler
  */
 export function notFoundHandler(req: Request, res: Response): void {
-  const response = createErrorResponse(
-    'NOT_FOUND',
-    `Route ${req.method} ${req.path} not found`
-  );
+  const response = createErrorResponse('NOT_FOUND', `Route ${req.method} ${req.path} not found`);
   res.status(404).json(response);
 }
 

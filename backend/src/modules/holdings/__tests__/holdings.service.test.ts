@@ -89,11 +89,7 @@ describe('HoldingsService', () => {
     } as any;
 
     // Create service instance using factory function
-    service = createHoldingsService(
-      mockRepository,
-      mockMarketDataService,
-      mockCalculationsService
-    );
+    service = createHoldingsService(mockRepository, mockMarketDataService, mockCalculationsService);
   });
 
   // ============================================================
@@ -147,7 +143,9 @@ describe('HoldingsService', () => {
       mockRepository.create.mockRejectedValue(new Error('Database error'));
 
       // Act & Assert
-      await expect(service.addHolding('portfolio-1', addHoldingDto)).rejects.toThrow('Database error');
+      await expect(service.addHolding('portfolio-1', addHoldingDto)).rejects.toThrow(
+        'Database error'
+      );
     });
   });
 

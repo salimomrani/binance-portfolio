@@ -16,12 +16,14 @@ export const rateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (_req, res) => {
-    res.status(429).json(
-      createErrorResponse(
-        'RATE_LIMIT_EXCEEDED',
-        'Too many requests from this IP, please try again later'
-      )
-    );
+    res
+      .status(429)
+      .json(
+        createErrorResponse(
+          'RATE_LIMIT_EXCEEDED',
+          'Too many requests from this IP, please try again later'
+        )
+      );
   },
 });
 
@@ -32,18 +34,14 @@ export const rateLimiter = rateLimit({
 export const strictRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
-  message: createErrorResponse(
-    'RATE_LIMIT_EXCEEDED',
-    'Too many attempts, please try again later'
-  ),
+  message: createErrorResponse('RATE_LIMIT_EXCEEDED', 'Too many attempts, please try again later'),
   standardHeaders: true,
   legacyHeaders: false,
   handler: (_req, res) => {
-    res.status(429).json(
-      createErrorResponse(
-        'RATE_LIMIT_EXCEEDED',
-        'Too many attempts, please try again later'
-      )
-    );
+    res
+      .status(429)
+      .json(
+        createErrorResponse('RATE_LIMIT_EXCEEDED', 'Too many attempts, please try again later')
+      );
   },
 });

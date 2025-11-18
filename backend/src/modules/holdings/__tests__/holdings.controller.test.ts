@@ -475,7 +475,10 @@ describe('Holdings Controller', () => {
       await handler(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
-      expect(mockTransactionService.addTransaction).toHaveBeenCalledWith('holding-1', mockRequest.body);
+      expect(mockTransactionService.addTransaction).toHaveBeenCalledWith(
+        'holding-1',
+        mockRequest.body
+      );
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,

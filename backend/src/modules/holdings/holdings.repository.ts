@@ -11,7 +11,11 @@ import Decimal from 'decimal.js';
  * Holdings Repository Type
  */
 export type HoldingsRepository = {
-  findAll: (portfolioId: string, sortBy?: 'symbol' | 'value' | 'gainLoss', order?: 'asc' | 'desc') => Promise<Holding[]>;
+  findAll: (
+    portfolioId: string,
+    sortBy?: 'symbol' | 'value' | 'gainLoss',
+    order?: 'asc' | 'desc'
+  ) => Promise<Holding[]>;
   findById: (id: string) => Promise<Holding | null>;
   findBySymbol: (portfolioId: string, symbol: string) => Promise<Holding | null>;
   findWithTransactions: (id: string) => Promise<(Holding & { transactions: any[] }) | null>;
@@ -23,11 +27,14 @@ export type HoldingsRepository = {
     averageCost: Decimal;
     notes?: string;
   }) => Promise<Holding>;
-  update: (id: string, data: {
-    quantity?: Decimal;
-    averageCost?: Decimal;
-    notes?: string;
-  }) => Promise<Holding>;
+  update: (
+    id: string,
+    data: {
+      quantity?: Decimal;
+      averageCost?: Decimal;
+      notes?: string;
+    }
+  ) => Promise<Holding>;
   delete: (id: string) => Promise<void>;
   getTotalValue: (portfolioId: string) => Promise<number>;
   getSymbols: (portfolioId: string) => Promise<string[]>;
@@ -40,7 +47,11 @@ export const createHoldingsRepository = (prisma: PrismaClient): HoldingsReposito
   /**
    * Find all holdings for a portfolio
    */
-  findAll: async (portfolioId: string, sortBy?: 'symbol' | 'value' | 'gainLoss', order: 'asc' | 'desc' = 'asc') => {
+  findAll: async (
+    portfolioId: string,
+    sortBy?: 'symbol' | 'value' | 'gainLoss',
+    order: 'asc' | 'desc' = 'asc'
+  ) => {
     return prisma.holding.findMany({
       where: { portfolioId },
       orderBy: sortBy ? { [sortBy]: order } : { createdAt: 'asc' },

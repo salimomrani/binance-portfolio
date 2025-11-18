@@ -27,7 +27,7 @@ export const createGetPortfoliosHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware (for now use mock)
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Fetching portfolios for user ${userId}`);
 
@@ -52,7 +52,7 @@ export const createCreatePortfolioHandler = (service: PortfolioService) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // TODO: Get userId from auth middleware
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Creating portfolio for user ${userId}`);
 
@@ -202,7 +202,8 @@ export const createSyncFromBinanceHandler = (binanceSyncService?: BinanceSyncSer
           error: {
             code: 'SERVICE_NOT_AVAILABLE',
             message: 'Binance sync service is not configured',
-            details: 'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
+            details:
+              'Please configure BINANCE_API_KEY and BINANCE_API_SECRET in your environment variables',
           },
           timestamp: new Date().toISOString(),
         });
@@ -210,7 +211,7 @@ export const createSyncFromBinanceHandler = (binanceSyncService?: BinanceSyncSer
       }
 
       // TODO: Get userId from auth middleware
-      const userId = req.headers['x-user-id'] as string || 'mock-user-id';
+      const userId = (req.headers['x-user-id'] as string) || 'mock-user-id';
 
       logger.info(`Syncing portfolio from Binance for user ${userId}`);
 

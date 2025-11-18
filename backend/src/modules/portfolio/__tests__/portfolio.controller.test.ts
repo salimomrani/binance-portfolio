@@ -143,11 +143,7 @@ describe('PortfolioController', () => {
       mockService.getPortfolios.mockResolvedValue([mockPortfolioSummary]);
 
       // Act
-      await controller.getPortfolios(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getPortfolios(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getPortfolios).toHaveBeenCalledWith('user-1');
@@ -165,11 +161,7 @@ describe('PortfolioController', () => {
       mockService.getPortfolios.mockResolvedValue([]);
 
       // Act
-      await controller.getPortfolios(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getPortfolios(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getPortfolios).toHaveBeenCalledWith('mock-user-id');
@@ -182,11 +174,7 @@ describe('PortfolioController', () => {
       mockService.getPortfolios.mockRejectedValue(error);
 
       // Act
-      await controller.getPortfolios(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getPortfolios(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -206,11 +194,7 @@ describe('PortfolioController', () => {
       mockService.createPortfolio.mockResolvedValue(mockPortfolio);
 
       // Act
-      await controller.createPortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.createPortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.createPortfolio).toHaveBeenCalledWith('user-1', createData);
@@ -230,11 +214,7 @@ describe('PortfolioController', () => {
       mockService.createPortfolio.mockRejectedValue(error);
 
       // Act
-      await controller.createPortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.createPortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -248,11 +228,7 @@ describe('PortfolioController', () => {
       mockService.getPortfolioById.mockResolvedValue(mockPortfolioDetails);
 
       // Act
-      await controller.getPortfolioById(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getPortfolioById(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.getPortfolioById).toHaveBeenCalledWith('portfolio-1');
@@ -271,11 +247,7 @@ describe('PortfolioController', () => {
       mockService.getPortfolioById.mockRejectedValue(error);
 
       // Act
-      await controller.getPortfolioById(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.getPortfolioById(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -297,11 +269,7 @@ describe('PortfolioController', () => {
       });
 
       // Act
-      await controller.updatePortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.updatePortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.updatePortfolio).toHaveBeenCalledWith('portfolio-1', updateData);
@@ -322,11 +290,7 @@ describe('PortfolioController', () => {
       mockService.updatePortfolio.mockRejectedValue(error);
 
       // Act
-      await controller.updatePortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.updatePortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -340,11 +304,7 @@ describe('PortfolioController', () => {
       mockService.deletePortfolio.mockResolvedValue(undefined);
 
       // Act
-      await controller.deletePortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.deletePortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockService.deletePortfolio).toHaveBeenCalledWith('portfolio-1');
@@ -359,11 +319,7 @@ describe('PortfolioController', () => {
       mockService.deletePortfolio.mockRejectedValue(error);
 
       // Act
-      await controller.deletePortfolio(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.deletePortfolio(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);
@@ -459,11 +415,7 @@ describe('PortfolioController', () => {
       mockBinanceSyncService.syncFromBinance.mockResolvedValue(mockSyncResult);
 
       // Act
-      await controller.syncFromBinance(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.syncFromBinance(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockBinanceSyncService.syncFromBinance).toHaveBeenCalledWith('user-1');
@@ -508,11 +460,7 @@ describe('PortfolioController', () => {
       mockBinanceSyncService.syncFromBinance.mockRejectedValue(error);
 
       // Act
-      await controller.syncFromBinance(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
+      await controller.syncFromBinance(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockNext).toHaveBeenCalledWith(error);

@@ -49,7 +49,10 @@ export function divide(a: string | number | Decimal, b: string | number | Decima
 /**
  * Calculate percentage
  */
-export function percentage(value: string | number | Decimal, total: string | number | Decimal): Decimal {
+export function percentage(
+  value: string | number | Decimal,
+  total: string | number | Decimal
+): Decimal {
   if (toDecimal(total).isZero()) {
     return new Decimal(0);
   }

@@ -20,9 +20,7 @@ export type WatchlistRepository = {
  * Create Watchlist Repository
  * Factory function for creating watchlist repository instance
  */
-export const createWatchlistRepository = (
-  prisma: PrismaClient
-): WatchlistRepository => ({
+export const createWatchlistRepository = (prisma: PrismaClient): WatchlistRepository => ({
   /**
    * Find all watchlist items for a user
    */
