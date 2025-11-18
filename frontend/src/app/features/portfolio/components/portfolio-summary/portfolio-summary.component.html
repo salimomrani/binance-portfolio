@@ -3,16 +3,16 @@
 @if (portfolio()) {
   <div class="portfolio-summary grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <!-- Total Value Card -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-xl p-6 transition-colors duration-200">
       <div class="flex items-center justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
-          <p class="mt-2 text-3xl font-bold text-gray-900">{{ formatCurrency(portfolio()!.totalValue) }}</p>
-          <p class="mt-2 text-sm text-gray-500">{{ portfolio()!.holdingsCount }} holding{{ portfolio()!.holdingsCount !== 1 ? 's' : '' }}</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide transition-colors duration-200">Total Value</p>
+          <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-neutral-100 transition-colors duration-200">{{ formatCurrency(portfolio()!.totalValue) }}</p>
+          <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400 transition-colors duration-200">{{ portfolio()!.holdingsCount }} holding{{ portfolio()!.holdingsCount !== 1 ? 's' : '' }}</p>
         </div>
         <div class="ml-4">
-          <div class="p-3 bg-blue-100 rounded-full">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-primary/10 dark:bg-primary/20 rounded-full transition-colors duration-200">
+            <svg class="w-8 h-8 text-primary dark:text-primary-light transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -21,10 +21,10 @@
     </div>
 
     <!-- Total Gain/Loss Card - T111: Integrated gain-loss-badge -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-xl p-6 transition-colors duration-200">
       <div class="flex items-center justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Gain/Loss</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide transition-colors duration-200">Total Gain/Loss</p>
           <div class="mt-2">
             <app-gain-loss-badge
               [value]="portfolio()!.totalGainLoss"
@@ -36,20 +36,20 @@
         </div>
         <div class="ml-4">
           @if (getGainLossIcon() === 'trending-up') {
-            <div class="p-3 bg-green-100 rounded-full">
-              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-profit/10 dark:bg-profit/20 rounded-full transition-colors duration-200">
+              <svg class="w-8 h-8 text-profit dark:text-profit-light transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
           } @else if (getGainLossIcon() === 'trending-down') {
-            <div class="p-3 bg-red-100 rounded-full">
-              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-loss/10 dark:bg-loss/20 rounded-full transition-colors duration-200">
+              <svg class="w-8 h-8 text-loss dark:text-loss-light transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
           } @else {
-            <div class="p-3 bg-gray-100 rounded-full">
-              <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-neutral-100 dark:bg-neutral-700 rounded-full transition-colors duration-200">
+              <svg class="w-8 h-8 text-neutral dark:text-neutral-400 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18" />
               </svg>
             </div>
@@ -59,18 +59,18 @@
     </div>
 
     <!-- Last Updated Card -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-xl p-6 transition-colors duration-200">
       <div class="flex items-center justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Last Updated</p>
-          <p class="mt-2 text-lg font-medium text-gray-900">{{ getRelativeTime() }}</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide transition-colors duration-200">Last Updated</p>
+          <p class="mt-2 text-lg font-medium text-gray-900 dark:text-neutral-100 transition-colors duration-200">{{ getRelativeTime() }}</p>
           @if (lastUpdated()) {
-            <p class="mt-2 text-sm text-gray-500">{{ lastUpdated() | date:'short' }}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400 transition-colors duration-200">{{ lastUpdated() | date:'short' }}</p>
           }
         </div>
         <div class="ml-4">
-          <div class="p-3 bg-gray-100 rounded-full">
-            <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-neutral-100 dark:bg-neutral-700 rounded-full transition-colors duration-200">
+            <svg class="w-8 h-8 text-neutral dark:text-neutral-400 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -79,7 +79,7 @@
     </div>
   </div>
 } @else {
-  <div class="bg-white rounded-lg shadow p-6 mb-6">
-    <p class="text-gray-500 text-center">No portfolio selected</p>
+  <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-xl p-6 mb-6 transition-colors duration-200">
+    <p class="text-gray-500 dark:text-neutral-400 text-center transition-colors duration-200">No portfolio selected</p>
   </div>
 }
