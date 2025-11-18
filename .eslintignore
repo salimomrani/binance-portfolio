@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.angular/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# TypeScript build artifacts
+**/*.js.map
+**/*.d.ts.map
+
+# Prisma generated client
+backend/node_modules/.prisma/
+
+# OS
+.DS_Store
+Thumbs.db

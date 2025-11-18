@@ -4,11 +4,11 @@
   <div class="portfolio-stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <!-- Best Performer Card -->
     @if (statistics()!.bestPerformer) {
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div class="flex items-center justify-between">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Best Performer</p>
-            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.bestPerformer.symbol }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Best Performer</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ statistics()!.bestPerformer.symbol }}</p>
             <p class="mt-2 text-lg font-semibold text-green-600">
               {{ formatPercentage(statistics()!.bestPerformer.gainLossPercentage) }}
             </p>
@@ -26,11 +26,11 @@
 
     <!-- Worst Performer Card -->
     @if (statistics()!.worstPerformer) {
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div class="flex items-center justify-between">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Worst Performer</p>
-            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.worstPerformer.symbol }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Worst Performer</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ statistics()!.worstPerformer.symbol }}</p>
             <p class="mt-2 text-lg font-semibold text-red-600">
               {{ formatPercentage(statistics()!.worstPerformer.gainLossPercentage) }}
             </p>
@@ -48,11 +48,11 @@
 
     <!-- Largest Holding Card -->
     @if (statistics()!.largestHolding) {
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div class="flex items-center justify-between">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Largest Holding</p>
-            <p class="mt-2 text-2xl font-bold text-gray-900">{{ statistics()!.largestHolding.symbol }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Largest Holding</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ statistics()!.largestHolding.symbol }}</p>
             <p class="mt-2 text-lg font-semibold text-blue-600">
               {{ formatPercentage(statistics()!.largestHolding.percentage) }} of portfolio
             </p>
@@ -91,13 +91,13 @@
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
           <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatCurrency(statistics()!.totalValue) }}</p>
-          <p class="mt-1 text-sm text-gray-500">Cost basis: {{ formatCurrency(statistics()!.totalCostBasis) }}</p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Cost basis: {{ formatCurrency(statistics()!.totalCostBasis) }}</p>
         </div>
       </div>
     </div>
   </div>
 } @else {
-  <div class="bg-white rounded-lg shadow p-6 mb-6">
-    <p class="text-gray-500 text-center">No statistics available</p>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+    <p class="text-gray-500 dark:text-gray-400 text-center">No statistics available</p>
   </div>
 }
