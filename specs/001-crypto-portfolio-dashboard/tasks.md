@@ -636,11 +636,11 @@
 
 ### Testing & Quality
 
-- [ ] T183 [P] Run all backend unit tests: cd backend && npm test
-- [ ] T184 [P] Run all backend integration tests with coverage: cd backend && npm run test:coverage
+- [X] T183 [P] Run all backend unit tests: cd backend && npm test
+- [X] T184 [P] Run all backend integration tests with coverage: cd backend && npm run test:coverage
 - [ ] T185 [P] Run all frontend component tests: cd frontend && npm test
 - [ ] T186 [P] Verify test coverage meets target (>80% for business logic)
-- [ ] T187 [P] Run ESLint on backend: cd backend && npm run lint
+- [X] T187 [P] Run ESLint on backend: cd backend && npm run lint
 - [ ] T188 [P] Run ESLint on frontend: cd frontend && npm run lint
 - [ ] T189 [P] Run Prettier formatting check on both projects
 
@@ -648,7 +648,7 @@
 
 - [ ] T190 [P] Audit backend dependencies: cd backend && npm audit
 - [ ] T191 [P] Audit frontend dependencies: cd frontend && npm audit
-- [ ] T192 Verify .env.example matches actual .env structure (no secrets committed)
+- [X] T192 Verify .env.example matches actual .env structure (no secrets committed)
 - [ ] T193 [P] Test rate limiting: Send >100 requests in 15 minutes, verify 429 responses
 - [ ] T194 [P] Verify CORS configuration only allows frontend origin
 - [ ] T195 [P] Test input validation with malformed data (SQL injection attempts, XSS)
@@ -689,17 +689,17 @@
 
 ### Documentation
 
-- [ ] T215 [P] Create backend/README.md with:
+- [X] T215 [P] Create backend/README.md with:
   - Setup instructions
   - Environment variables documentation
   - API endpoints overview
   - Testing guide
-- [ ] T216 [P] Create frontend/README.md with:
+- [X] T216 [P] Create frontend/README.md with:
   - Setup instructions
   - Component architecture
   - State management overview
   - Build & deployment
-- [ ] T217 [P] Update root README.md with:
+- [X] T217 [P] Update root README.md with:
   - Project overview
   - Quick start (link to specs/001-crypto-portfolio-dashboard/quickstart.md)
   - Architecture diagram
@@ -716,7 +716,7 @@
   - Health check endpoint
 - [ ] T221 [P] Create Dockerfile for frontend/Dockerfile (Nginx to serve static files)
 - [ ] T222 [P] Update docker-compose.yml to include backend and frontend services (for local full-stack testing)
-- [ ] T223 [P] Create .dockerignore files for both backend and frontend
+- [X] T223 [P] Create .dockerignore files for both backend and frontend
 - [ ] T224 Test full Docker setup: docker-compose up -d (all services healthy)
 - [ ] T225 [P] Create GitHub Actions workflow for CI/CD:
   - Run linting
