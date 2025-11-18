@@ -105,238 +105,239 @@ const dbToCryptoMarketData = (dbPrice: {
 export const createMarketDataCache = (
   repository: MarketDataRepository,
   cache: CacheService
-): MarketDataCache => ({
+): MarketDataCache => {
+  const cacheInstance: MarketDataCache = {
+    /**
+     * Get cached price for a symbol
+     */
+    getPrice: async (symbol: string) => {
+      try {
+        // Try Redis cache first
+        const cacheKey = `price:${symbol}`;
+        const cached = await cache.get<CryptoPrice>(cacheKey);
 
-  /**
-   * Get cached price for a symbol
-   */
-  getPrice: async (symbol: string) => {
-    try {
-      // Try Redis cache first
-      const cacheKey = `price:${symbol}`;
-      const cached = await cache.get<CryptoPrice>(cacheKey);
-
-      if (cached) {
-        logger.debug(`Cache hit for ${symbol}`);
-        return cached;
-      }
-
-      // Try database cache
-      const dbCached = await repository.findBySymbol(symbol);
-
-      if (dbCached && isFresh(dbCached.lastUpdated)) {
-        const price = dbToCryptoPrice(dbCached);
-        // Restore to Redis cache
-        await cache.set(cacheKey, price, CACHE_TTL);
-        return price;
-      }
-
-      return null;
-    } catch (error) {
-      logger.error(`Error getting cached price for ${symbol}:`, error);
-      return null;
-    }
-  },
-
-  /**
-   * Set cached price for a symbol
-   */
-  setPrice: async (symbol: string, price: CryptoPrice) => {
-    try {
-      const cacheKey = `price:${symbol}`;
-
-      // Set in Redis cache
-      await cache.set(cacheKey, price, CACHE_TTL);
-
-      // Update database cache using repository
-      await repository.upsert({
-        symbol,
-        name: price.name,
-        price: price.price,
-        change1h: price.change1h || 0,
-        change24h: price.change24h,
-        change7d: price.change7d || 0,
-        change30d: price.change30d || 0,
-        volume24h: price.volume24h,
-        marketCap: price.marketCap,
-        high24h: price.high24h || null,
-        low24h: price.low24h || null,
-        lastUpdated: price.lastUpdated,
-      });
-
-      logger.debug(`Cached price for ${symbol}`);
-    } catch (error) {
-      logger.error(`Error caching price for ${symbol}:`, error);
-    }
-  },
-
-  /**
-   * T146: Get cached full market data for a symbol
-   */
-  getFullMarketData: async (symbol: string) => {
-    try {
-      // Try Redis cache first
-      const cacheKey = `market-data:${symbol}`;
-      const cached = await cache.get<CryptoMarketData>(cacheKey);
-
-      if (cached) {
-        logger.debug(`Cache hit for full market data ${symbol}`);
-        return cached;
-      }
-
-      // Try database cache
-      const dbCached = await repository.findBySymbol(symbol);
-
-      if (dbCached && isFresh(dbCached.lastUpdated)) {
-        const marketData = dbToCryptoMarketData(dbCached);
-        // Restore to Redis cache
-        await cache.set(cacheKey, marketData, CACHE_TTL);
-        return marketData;
-      }
-
-      return null;
-    } catch (error) {
-      logger.error(`Error getting cached full market data for ${symbol}:`, error);
-      return null;
-    }
-  },
-
-  /**
-   * T146: Set cached full market data for a symbol
-   */
-  setFullMarketData: async (symbol: string, data: CryptoMarketData) => {
-    try {
-      const cacheKey = `market-data:${symbol}`;
-
-      // Set in Redis cache
-      await cache.set(cacheKey, data, CACHE_TTL);
-
-      // Update database cache using repository
-      await repository.upsert({
-        symbol,
-        name: data.name,
-        price: data.price,
-        change1h: data.change1h,
-        change24h: data.change24h,
-        change7d: data.change7d,
-        change30d: data.change30d,
-        volume24h: data.volume24h,
-        marketCap: data.marketCap,
-        high24h: data.high24h || null,
-        low24h: data.low24h || null,
-        lastUpdated: data.lastUpdated,
-      });
-
-      logger.debug(`Cached full market data for ${symbol}`);
-    } catch (error) {
-      logger.error(`Error caching full market data for ${symbol}:`, error);
-    }
-  },
-
-  /**
-   * Get cached prices for multiple symbols
-   */
-  getPrices: async (symbols: string[]) => {
-    const prices = new Map<string, CryptoPrice>();
-    const cacheInstance = createMarketDataCache(repository, cache);
-
-    await Promise.all(
-      symbols.map(async symbol => {
-        const price = await cacheInstance.getPrice(symbol);
-        if (price) {
-          prices.set(symbol, price);
+        if (cached) {
+          logger.debug(`Cache hit for ${symbol}`);
+          return cached;
         }
-      })
-    );
 
-    return prices;
-  },
+        // Try database cache
+        const dbCached = await repository.findBySymbol(symbol);
 
-  /**
-   * Set cached prices for multiple symbols
-   */
-  setPrices: async (prices: Map<string, CryptoPrice>) => {
-    const cacheInstance = createMarketDataCache(repository, cache);
-    await Promise.all(
-      Array.from(prices.entries()).map(([symbol, price]) => cacheInstance.setPrice(symbol, price))
-    );
-  },
-
-  /**
-   * Get cached historical prices for a symbol and timeframe
-   * T122: Historical data caching with 5 min TTL
-   */
-  getHistoricalPrices: async (symbol: string, timeframe: Timeframe) => {
-    try {
-      // Try Redis cache first
-      const cacheKey = `history:${symbol}:${timeframe}`;
-      const cached = await cache.get<PriceHistory[]>(cacheKey);
-
-      if (cached) {
-        logger.debug(`Cache hit for historical data ${symbol} ${timeframe}`);
-        return cached;
-      }
-
-      // Try database cache using repository
-      const dbCached = await repository.findHistoricalPrices(symbol, timeframe);
-
-      if (dbCached.length > 0) {
-        const history = dbCached.map(record => ({
-          timestamp: record.timestamp,
-          price: record.price.toNumber(),
-          volume: record.volume.toNumber(),
-        }));
-
-        // Check if data is fresh (within last 5 minutes)
-        const latestTimestamp = dbCached[dbCached.length - 1].timestamp;
-        if (isHistoryFresh(latestTimestamp)) {
+        if (dbCached && isFresh(dbCached.lastUpdated)) {
+          const price = dbToCryptoPrice(dbCached);
           // Restore to Redis cache
-          await cache.set(cacheKey, history, HISTORY_CACHE_TTL);
-          return history;
+          await cache.set(cacheKey, price, CACHE_TTL);
+          return price;
         }
+
+        return null;
+      } catch (error) {
+        logger.error(`Error getting cached price for ${symbol}:`, error);
+        return null;
       }
+    },
 
-      return null;
-    } catch (error) {
-      logger.error(`Error getting cached historical data for ${symbol}:`, error);
-      return null;
-    }
-  },
+    /**
+     * Set cached price for a symbol
+     */
+    setPrice: async (symbol: string, price: CryptoPrice) => {
+      try {
+        const cacheKey = `price:${symbol}`;
 
-  /**
-   * Set cached historical prices for a symbol and timeframe
-   * T122: Historical data caching with 5 min TTL
-   */
-  setHistoricalPrices: async (
-    symbol: string,
-    timeframe: Timeframe,
-    history: PriceHistory[]
-  ) => {
-    try {
-      const cacheKey = `history:${symbol}:${timeframe}`;
+        // Set in Redis cache
+        await cache.set(cacheKey, price, CACHE_TTL);
 
-      // Set in Redis cache
-      await cache.set(cacheKey, history, HISTORY_CACHE_TTL);
+        // Update database cache using repository
+        await repository.upsert({
+          symbol,
+          name: price.name,
+          price: price.price,
+          change1h: price.change1h || 0,
+          change24h: price.change24h,
+          change7d: price.change7d || 0,
+          change30d: price.change30d || 0,
+          volume24h: price.volume24h,
+          marketCap: price.marketCap,
+          high24h: price.high24h || null,
+          low24h: price.low24h || null,
+          lastUpdated: price.lastUpdated,
+        });
 
-      // Store in database for persistence using repository
-      await repository.replaceHistoricalPrices(symbol, timeframe, history);
+        logger.debug(`Cached price for ${symbol}`);
+      } catch (error) {
+        logger.error(`Error caching price for ${symbol}:`, error);
+      }
+    },
 
-      logger.debug(`Cached historical data for ${symbol} ${timeframe}`);
-    } catch (error) {
-      logger.error(`Error caching historical data for ${symbol}:`, error);
-    }
-  },
+    /**
+     * T146: Get cached full market data for a symbol
+     */
+    getFullMarketData: async (symbol: string) => {
+      try {
+        // Try Redis cache first
+        const cacheKey = `market-data:${symbol}`;
+        const cached = await cache.get<CryptoMarketData>(cacheKey);
 
-  /**
-   * Clear all cached prices
-   */
-  clearAll: async () => {
-    try {
-      await cache.clear('price:*');
-      await cache.clear('history:*');
-      logger.info('Cleared all price caches');
-    } catch (error) {
-      logger.error('Error clearing price caches:', error);
-    }
-  },
-});
+        if (cached) {
+          logger.debug(`Cache hit for full market data ${symbol}`);
+          return cached;
+        }
+
+        // Try database cache
+        const dbCached = await repository.findBySymbol(symbol);
+
+        if (dbCached && isFresh(dbCached.lastUpdated)) {
+          const marketData = dbToCryptoMarketData(dbCached);
+          // Restore to Redis cache
+          await cache.set(cacheKey, marketData, CACHE_TTL);
+          return marketData;
+        }
+
+        return null;
+      } catch (error) {
+        logger.error(`Error getting cached full market data for ${symbol}:`, error);
+        return null;
+      }
+    },
+
+    /**
+     * T146: Set cached full market data for a symbol
+     */
+    setFullMarketData: async (symbol: string, data: CryptoMarketData) => {
+      try {
+        const cacheKey = `market-data:${symbol}`;
+
+        // Set in Redis cache
+        await cache.set(cacheKey, data, CACHE_TTL);
+
+        // Update database cache using repository
+        await repository.upsert({
+          symbol,
+          name: data.name,
+          price: data.price,
+          change1h: data.change1h,
+          change24h: data.change24h,
+          change7d: data.change7d,
+          change30d: data.change30d,
+          volume24h: data.volume24h,
+          marketCap: data.marketCap,
+          high24h: data.high24h || null,
+          low24h: data.low24h || null,
+          lastUpdated: data.lastUpdated,
+        });
+
+        logger.debug(`Cached full market data for ${symbol}`);
+      } catch (error) {
+        logger.error(`Error caching full market data for ${symbol}:`, error);
+      }
+    },
+
+    /**
+     * Get cached prices for multiple symbols
+     */
+    getPrices: async (symbols: string[]) => {
+      const prices = new Map<string, CryptoPrice>();
+
+      await Promise.all(
+        symbols.map(async symbol => {
+          const price = await cacheInstance.getPrice(symbol);
+          if (price) {
+            prices.set(symbol, price);
+          }
+        })
+      );
+
+      return prices;
+    },
+
+    /**
+     * Set cached prices for multiple symbols
+     */
+    setPrices: async (prices: Map<string, CryptoPrice>) => {
+      await Promise.all(
+        Array.from(prices.entries()).map(([symbol, price]) => cacheInstance.setPrice(symbol, price))
+      );
+    },
+
+    /**
+     * Get cached historical prices for a symbol and timeframe
+     * T122: Historical data caching with 5 min TTL
+     */
+    getHistoricalPrices: async (symbol: string, timeframe: Timeframe) => {
+      try {
+        // Try Redis cache first
+        const cacheKey = `history:${symbol}:${timeframe}`;
+        const cached = await cache.get<PriceHistory[]>(cacheKey);
+
+        if (cached) {
+          logger.debug(`Cache hit for historical data ${symbol} ${timeframe}`);
+          return cached;
+        }
+
+        // Try database cache using repository
+        const dbCached = await repository.findHistoricalPrices(symbol, timeframe);
+
+        if (dbCached.length > 0) {
+          const history = dbCached.map(record => ({
+            timestamp: record.timestamp,
+            price: record.price.toNumber(),
+            volume: record.volume.toNumber(),
+          }));
+
+          // Check if data is fresh (within last 5 minutes)
+          const latestTimestamp = dbCached[dbCached.length - 1].timestamp;
+          if (isHistoryFresh(latestTimestamp)) {
+            // Restore to Redis cache
+            await cache.set(cacheKey, history, HISTORY_CACHE_TTL);
+            return history;
+          }
+        }
+
+        return null;
+      } catch (error) {
+        logger.error(`Error getting cached historical data for ${symbol}:`, error);
+        return null;
+      }
+    },
+
+    /**
+     * Set cached historical prices for a symbol and timeframe
+     * T122: Historical data caching with 5 min TTL
+     */
+    setHistoricalPrices: async (
+      symbol: string,
+      timeframe: Timeframe,
+      history: PriceHistory[]
+    ) => {
+      try {
+        const cacheKey = `history:${symbol}:${timeframe}`;
+
+        // Set in Redis cache
+        await cache.set(cacheKey, history, HISTORY_CACHE_TTL);
+
+        // Store in database for persistence using repository
+        await repository.replaceHistoricalPrices(symbol, timeframe, history);
+
+        logger.debug(`Cached historical data for ${symbol} ${timeframe}`);
+      } catch (error) {
+        logger.error(`Error caching historical data for ${symbol}:`, error);
+      }
+    },
+
+    /**
+     * Clear all cached prices
+     */
+    clearAll: async () => {
+      try {
+        await cache.clear('price:*');
+        await cache.clear('history:*');
+        logger.info('Cleared all price caches');
+      } catch (error) {
+        logger.error('Error clearing price caches:', error);
+      }
+    },
+  };
+
+  return cacheInstance;
+};
