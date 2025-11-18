@@ -10,6 +10,7 @@ import { CalculationsService } from './shared/services/calculations.service';
 import { MarketDataService } from './modules/market-data/market-data.service';
 import { MarketDataController } from './modules/market-data/market-data.controller';
 import createMarketDataRoutes from './modules/market-data/market-data.routes';
+import { createMarketDataRepository } from './modules/market-data/market-data.repository';
 import { createPortfolioService } from './modules/portfolio/portfolio.service';
 import { createPortfolioRepository } from './modules/portfolio/portfolio.repository';
 import { PortfolioController } from './modules/portfolio/portfolio.controller';
@@ -96,6 +97,7 @@ function initializeServices() {
  * T120: Market data controller with historical endpoints
  */
 function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheService) {
+  const marketDataRepository = createMarketDataRepository(prisma);
   const marketData = new MarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
@@ -104,7 +106,7 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    prisma,
+    marketDataRepository,
     cacheService
   );
 
@@ -117,6 +119,7 @@ function initializeMarketDataRouter(prisma: PrismaClient, cacheService: CacheSer
  */
 function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheService) {
   const calculations = new CalculationsService();
+  const marketDataRepository = createMarketDataRepository(prisma);
   const marketData = new MarketDataService(
     {
       binanceApiKey: env.marketData.binance.apiKey,
@@ -125,7 +128,7 @@ function initializePortfolioRouter(prisma: PrismaClient, cacheService: CacheServ
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    prisma,
+    marketDataRepository,
     cacheService
   );
   const portfolioRepo = createPortfolioRepository(prisma);

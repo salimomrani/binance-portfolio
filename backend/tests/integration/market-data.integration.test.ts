@@ -7,7 +7,7 @@
 import request from 'supertest';
 import express, { Express } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { MarketDataRepository } from '../../src/modules/market-data/market-data.repository';
+import { MarketDataRepository, createMarketDataRepository } from '../../src/modules/market-data/market-data.repository';
 import { MarketDataService } from '../../src/modules/market-data/market-data.service';
 import { MarketDataController } from '../../src/modules/market-data/market-data.controller';
 import { createMarketDataRoutes } from '../../src/modules/market-data/market-data.routes';
@@ -45,7 +45,7 @@ describe('Market Data Integration Tests', () => {
   beforeAll(async () => {
     // Setup Prisma client
     prisma = createTestPrismaClient();
-    repository = new MarketDataRepository(prisma);
+    repository = createMarketDataRepository(prisma);
 
     // Setup mock cache service
     mockCacheService = {
