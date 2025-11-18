@@ -66,7 +66,7 @@ export const createWatchlistService = (
 
       // Get current prices for all symbols
       const symbols = items.map((item) => item.symbol);
-      const priceDataMap = await marketData.getCurrentPrices(symbols);
+      const priceDataMap = await marketData.getMultiplePrices(symbols);
 
       // Combine watchlist items with current market data
       const itemsWithPrices: WatchlistItemDetails[] = items.map((item) => {
