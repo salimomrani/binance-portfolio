@@ -70,9 +70,9 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 ### Implementation for User Story 2
 
-- [ ] T030 [P] [US2] Create ResponsiveService in frontend/src/app/core/services/responsive.service.ts
-- [ ] T031 [P] [US2] Create ResponsiveService tests in frontend/src/app/core/services/responsive.service.spec.ts
-- [ ] T032 [US2] Add responsive breakpoints to tailwind.config.js screens
+- [X] T030 [P] [US2] Create ResponsiveService in frontend/src/app/core/services/responsive.service.ts
+- [X] T031 [P] [US2] Create ResponsiveService tests in frontend/src/app/core/services/responsive.service.spec.ts
+- [X] T032 [US2] Add responsive breakpoints to tailwind.config.js screens
 - [ ] T033 [US2] Optimize app.component.html grid layouts with responsive classes (sm:, md:, lg:, xl:)
 - [ ] T034 [US2] Optimize portfolio-dashboard.component.html grid from grid-cols-1 to responsive grid
 - [ ] T035 [US2] Add horizontal scroll + sticky first column to portfolio-table.component.html
