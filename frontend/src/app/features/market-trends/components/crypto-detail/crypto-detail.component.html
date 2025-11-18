@@ -7,7 +7,7 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" role="alert">
+  <div *ngIf="error() && !loading()" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg" role="alert">
     <strong class="font-bold">Error!</strong>
     <span class="block sm:inline">{{ error() }}</span>
     <button (click)="goBack()" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
@@ -18,26 +18,26 @@
   <!-- Crypto Data Display -->
   <div *ngIf="cryptoData() && !loading()" class="space-y-6">
     <!-- Header Section -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <button (click)="goBack()" class="text-blue-600 hover:text-blue-800 mb-4 flex items-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <button (click)="goBack()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-4 flex items-center">
         <span class="mr-2">←</span> Back to Portfolio
       </button>
 
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="text-4xl font-bold text-gray-900">{{ name() }}</h1>
-          <p class="text-xl text-gray-600">{{ symbol() }}</p>
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ name() }}</h1>
+          <p class="text-xl text-gray-600 dark:text-gray-400">{{ symbol() }}</p>
         </div>
         <div class="text-right">
-          <p class="text-5xl font-bold text-gray-900">${{ priceFormatted() }}</p>
+          <p class="text-5xl font-bold text-gray-900 dark:text-gray-100">${{ priceFormatted() }}</p>
         </div>
       </div>
     </div>
 
     <!-- Percentage Changes Section -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <p class="text-sm text-gray-600 mb-2">1 Hour Change</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">1 Hour Change</p>
         <app-trend-indicator
           [change]="cryptoData()!.change1h"
           size="large"
@@ -45,8 +45,8 @@
         </app-trend-indicator>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <p class="text-sm text-gray-600 mb-2">24 Hour Change</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">24 Hour Change</p>
         <app-trend-indicator
           [change]="cryptoData()!.change24h"
           size="large"
@@ -54,8 +54,8 @@
         </app-trend-indicator>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <p class="text-sm text-gray-600 mb-2">7 Day Change</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">7 Day Change</p>
         <app-trend-indicator
           [change]="cryptoData()!.change7d"
           size="large"
@@ -63,8 +63,8 @@
         </app-trend-indicator>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-4">
-        <p class="text-sm text-gray-600 mb-2">30 Day Change</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">30 Day Change</p>
         <app-trend-indicator
           [change]="cryptoData()!.change30d"
           size="large"
@@ -75,25 +75,25 @@
 
     <!-- Market Stats Section -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <p class="text-sm text-gray-600 mb-2">24h Volume</p>
-        <p class="text-2xl font-bold text-gray-900">{{ volumeFormatted() }}</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">24h Volume</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ volumeFormatted() }}</p>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <p class="text-sm text-gray-600 mb-2">Market Cap</p>
-        <p class="text-2xl font-bold text-gray-900">{{ marketCapFormatted() }}</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Market Cap</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ marketCapFormatted() }}</p>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <p class="text-sm text-gray-600 mb-2">24h Range</p>
-        <p class="text-2xl font-bold text-gray-900">{{ priceRange24h() }}</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">24h Range</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ priceRange24h() }}</p>
       </div>
     </div>
 
     <!-- Price Chart Section (Placeholder for future implementation) -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Price Chart</h2>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Price Chart</h2>
 
       <!-- Timeframe Selector -->
       <div class="flex space-x-2 mb-6">
@@ -103,20 +103,22 @@
           [class.bg-blue-600]="selectedTimeframe() === timeframe"
           [class.text-white]="selectedTimeframe() === timeframe"
           [class.bg-gray-200]="selectedTimeframe() !== timeframe"
+          [class.dark:bg-gray-700]="selectedTimeframe() !== timeframe"
           [class.text-gray-700]="selectedTimeframe() !== timeframe"
+          [class.dark:text-gray-300]="selectedTimeframe() !== timeframe"
           class="px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 hover:text-white transition-colors">
           {{ timeframe }}
         </button>
       </div>
 
       <!-- Chart Placeholder -->
-      <div class="bg-gray-100 rounded-lg p-8 text-center min-h-[300px] flex items-center justify-center">
-        <p class="text-gray-600">Price chart will be rendered here using the line-chart component from Phase 5</p>
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 text-center min-h-[300px] flex items-center justify-center">
+        <p class="text-gray-600 dark:text-gray-300">Price chart will be rendered here using the line-chart component from Phase 5</p>
       </div>
     </div>
 
     <!-- Last Updated -->
-    <div class="text-sm text-gray-500 text-center">
+    <div class="text-sm text-gray-500 dark:text-gray-400 text-center">
       Last updated: {{ cryptoData()!.lastUpdated | date:'short' }}
     </div>
   </div>

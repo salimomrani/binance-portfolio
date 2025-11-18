@@ -2,17 +2,17 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">All Holdings</h1>
-      <p class="text-sm text-gray-600 mt-1">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">All Holdings</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
         Aggregated view of all cryptocurrency holdings across all portfolios
       </p>
     </div>
     <button
       (click)="onRefresh()"
-      class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+      class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       [disabled]="loading()"
     >
-      <span class="text-sm font-medium">Refresh</span>
+      <span class="text-sm font-medium dark:text-gray-100">Refresh</span>
     </button>
   </div>
 
@@ -40,17 +40,17 @@
   @if (loading()) {
     <div class="flex items-center justify-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <span class="ml-3 text-gray-600">Loading holdings...</span>
+      <span class="ml-3 text-gray-600 dark:text-gray-300">Loading holdings...</span>
     </div>
   }
   @else if (isEmpty()) {
     <!-- Empty State -->
-    <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+    <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
       </svg>
-      <h3 class="mt-4 text-lg font-medium text-gray-900">No holdings yet</h3>
-      <p class="mt-2 text-sm text-gray-500">
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No holdings yet</h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Create a portfolio and add cryptocurrency holdings to get started
       </p>
       <button
@@ -65,16 +65,16 @@
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <!-- Total Value Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="text-sm text-gray-600 mb-1">Total Value</div>
-        <div class="text-2xl font-bold text-gray-900">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Value</div>
+        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ formatCurrency(totalValue()) }}
         </div>
       </div>
 
       <!-- Total Gain/Loss Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="text-sm text-gray-600 mb-1">Total Gain/Loss</div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Gain/Loss</div>
         <div class="text-2xl font-bold" [class.text-green-600]="totalGainLoss() >= 0" [class.text-red-600]="totalGainLoss() < 0">
           {{ formatCurrency(totalGainLoss()) }}
         </div>
@@ -84,12 +84,12 @@
       </div>
 
       <!-- Holdings Count Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="text-sm text-gray-600 mb-1">Unique Holdings</div>
-        <div class="text-2xl font-bold text-gray-900">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Unique Holdings</div>
+        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ aggregatedHoldings().length }}
         </div>
-        <div class="text-sm text-gray-600">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
           cryptocurrencies
         </div>
       </div>
@@ -101,12 +101,12 @@
     ></app-portfolio-table>
 
     <!-- Info Footer -->
-    <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
       <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
-        <div class="text-sm text-blue-800">
+        <div class="text-sm text-blue-800 dark:text-blue-300">
           <strong>Aggregated View:</strong> Holdings with the same cryptocurrency across different portfolios are combined.
           The average cost shown is the weighted average across all portfolios.
           If a holding appears in multiple portfolios, the notes column will indicate this.
