@@ -22,7 +22,14 @@ export class MarketDataApiService {
   private readonly api = inject(ApiService);
 
   getHistoricalPrices(symbol: string, timeframe: Timeframe): Observable<PriceHistory[]> {
-    return this.api.get<PriceHistory[]>(`/market/history/${symbol}`, { timeframe });
+    return this.api.get<Array<{timestamp: string; price: number; volume: number}>>(`/market/history/${symbol}`, { timeframe })
+      .pipe(
+        map(data => data.map(item => ({
+          timestamp: new Date(item.timestamp),
+          price: item.price,
+          volume: item.volume
+        })))
+      );
   }
 
   getCryptoMarketData(symbol: string): Observable<CryptoMarketData> {
