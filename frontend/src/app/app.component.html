@@ -79,39 +79,6 @@
               <path [attr.d]="themeIcon()"></path>
             </svg>
           </button>
-          <button
-            (click)="refreshPrices()"
-            class="rounded-xl border border-gray-200 dark:border-neutral-600 px-4 py-2 text-sm font-medium text-neutral dark:text-neutral-300 transition-all duration-200 hover:border-primary dark:hover:border-primary-light hover:text-primary dark:hover:text-primary-light hover:shadow-lg hover:scale-105"
-          >
-            Refresh
-          </button>
-          <button class="rounded-xl bg-primary dark:bg-primary-light px-4 py-2 text-sm font-semibold text-white shadow-soft transition-all duration-200 hover:bg-primary-dark dark:hover:bg-primary hover:shadow-lg hover:scale-105">
-            New Investment
-          </button>
-        </div>
-      </div>
-      <div class="border-t border-gray-100 dark:border-neutral-700 px-4 pb-3 pt-2 lg:hidden transition-colors duration-200">
-        <div class="flex flex-wrap items-center gap-2">
-          <span
-            class="rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-200"
-            [ngClass]="[syncStatus().bg, syncStatus().color]"
-          >
-            {{ syncStatus().label }}
-          </span>
-          <span class="text-xs text-neutral dark:text-neutral-400 transition-colors duration-200">
-            {{ lastUpdateText() }}
-          </span>
-          <!-- Theme toggle button for mobile -->
-          <button
-            (click)="toggleTheme()"
-            [attr.aria-label]="themeLabel()"
-            class="ml-auto rounded-lg border border-gray-200 dark:border-neutral-600 p-1.5 text-neutral dark:text-neutral-300 transition-all duration-200 hover:border-primary dark:hover:border-primary-light hover:text-primary dark:hover:text-primary-light"
-            title="{{ themeLabel() }}"
-          >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-              <path [attr.d]="themeIcon()"></path>
-            </svg>
-          </button>
         </div>
       </div>
     </header>

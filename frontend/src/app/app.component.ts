@@ -113,11 +113,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.updateTimerSubscription?.unsubscribe();
   }
 
-  refreshPrices(): void {
-    // Manual refresh trigger
-    this.lastPriceUpdate.set(new Date());
-    // In real app, would call price-update.service.refresh()
-  }
+
 
   /**
    * Toggle between light and dark theme
