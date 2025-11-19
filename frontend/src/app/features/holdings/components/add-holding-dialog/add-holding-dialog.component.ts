@@ -1,14 +1,16 @@
 // T087: Add Holding Dialog component with signal-based inputs
+// T075, T079: Enhanced with focus trap and ESC key handling
 
-import { Component, output, input, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, input, signal, OnInit, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AddHoldingRequest } from '../../../../shared/models/portfolio.model';
+import { FocusTrapDirective } from '../../../../shared/directives/focus-trap.directive';
 
 @Component({
   selector: 'app-add-holding-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FocusTrapDirective],
   templateUrl: './add-holding-dialog.component.html',
   styleUrl: './add-holding-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +65,17 @@ export class AddHoldingDialogComponent implements OnInit {
     this.form()?.reset();
     this.isSubmitting.set(false);
     this.close.emit();
+  }
+
+  /**
+   * Handle ESC key to close dialog
+   */
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscKey(event: KeyboardEvent): void {
+    if (this.isOpen()) {
+      event.preventDefault();
+      this.onClose();
+    }
   }
 
   /**

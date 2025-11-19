@@ -4,7 +4,7 @@
   <div class="portfolio-stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <!-- Best Performer Card -->
     @if (statistics()!.bestPerformer) {
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="bg-gradient-to-br from-white to-profit-50/30 dark:from-gray-800 dark:to-profit-900/10 rounded-2xl shadow-soft dark:shadow-soft-lg p-6 transition-all duration-200 hover:shadow-xl hover:-translate-y-1">
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Best Performer</p>
@@ -26,7 +26,7 @@
 
     <!-- Worst Performer Card -->
     @if (statistics()!.worstPerformer) {
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="bg-gradient-to-br from-white to-loss-50/30 dark:from-gray-800 dark:to-loss-900/10 rounded-2xl shadow-soft dark:shadow-soft-lg p-6 transition-all duration-200 hover:shadow-xl hover:-translate-y-1">
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Worst Performer</p>
@@ -48,7 +48,7 @@
 
     <!-- Largest Holding Card -->
     @if (statistics()!.largestHolding) {
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="bg-gradient-to-br from-white to-primary-50/30 dark:from-gray-800 dark:to-primary-900/10 rounded-2xl shadow-soft dark:shadow-soft-lg p-6 transition-all duration-200 hover:shadow-xl hover:-translate-y-1">
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Largest Holding</p>
@@ -69,7 +69,7 @@
     }
 
     <!-- Total Gain/Loss Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 rounded-2xl shadow-soft dark:shadow-soft-lg p-6 transition-all duration-200 hover:shadow-xl hover:-translate-y-1">
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Gain/Loss</p>
@@ -86,7 +86,7 @@
     </div>
 
     <!-- Total Value Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 rounded-2xl shadow-soft dark:shadow-soft-lg p-6 transition-all duration-200 hover:shadow-xl hover:-translate-y-1">
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Value</p>

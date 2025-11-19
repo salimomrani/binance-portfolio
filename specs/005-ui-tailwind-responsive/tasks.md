@@ -97,19 +97,19 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 ### Implementation for User Story 3
 
-- [ ] T050 [P] [US3] Add custom animations to tailwind.config.js (fade-in, slide-up, flash-price)
-- [ ] T051 [P] [US3] Create animations.css with @keyframes for flash-green, flash-red, fade-in
-- [ ] T052 [P] [US3] Add transition classes to all buttons (transition-all duration-200 ease-in-out)
-- [ ] T053 [P] [US3] Add hover effects to buttons (hover:scale-105 hover:shadow-lg)
-- [ ] T054 [P] [US3] Add hover effects to cards (hover:shadow-xl hover:-translate-y-1)
-- [ ] T055 [P] [US3] Add gradients to portfolio summary cards (bg-gradient-to-br)
-- [ ] T056 [P] [US3] Add subtle gradients to dashboard header
-- [ ] T057 [US3] Implement price flash animation in portfolio-table (green=up, red=down)
-- [ ] T058 [P] [US3] Add fade-in animation to data loading states
-- [ ] T059 [P] [US3] Add modern shadows to sidebar and mobile nav (shadow-lg shadow-xl)
-- [ ] T060 [US3] Add prefers-reduced-motion media query in animations.css
-- [ ] T061 [P] [US3] Update tailwind.config.js with custom shadow scales
-- [ ] T062 [P] [US3] Add border-radius tokens (rounded-2xl, rounded-3xl) to components
+- [X] T050 [P] [US3] Add custom animations to tailwind.config.js (fade-in, slide-up, flash-price)
+- [X] T051 [P] [US3] Create animations.css with @keyframes for flash-green, flash-red, fade-in
+- [X] T052 [P] [US3] Add transition classes to all buttons (transition-all duration-200 ease-in-out)
+- [X] T053 [P] [US3] Add hover effects to buttons (hover:scale-105 hover:shadow-lg)
+- [X] T054 [P] [US3] Add hover effects to cards (hover:shadow-xl hover:-translate-y-1)
+- [X] T055 [P] [US3] Add gradients to portfolio summary cards (bg-gradient-to-br)
+- [X] T056 [P] [US3] Add subtle gradients to dashboard header
+- [X] T057 [US3] Implement price flash animation in portfolio-table (green=up, red=down)
+- [X] T058 [P] [US3] Add fade-in animation to data loading states
+- [X] T059 [P] [US3] Add modern shadows to sidebar and mobile nav (shadow-lg shadow-xl)
+- [X] T060 [US3] Add prefers-reduced-motion media query in animations.css
+- [X] T061 [P] [US3] Update tailwind.config.js with custom shadow scales
+- [X] T062 [P] [US3] Add border-radius tokens (rounded-2xl, rounded-3xl) to components
 
 **Checkpoint**: Animations fluides <200ms, gradients subtils, ombres modernes, respect prefers-reduced-motion
 
@@ -123,20 +123,20 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 ### Implementation for User Story 4
 
-- [ ] T070 [P] [US4] Create FocusTrapDirective in frontend/src/app/shared/directives/focus-trap.directive.ts
-- [ ] T071 [P] [US4] Add design tokens to tailwind.config.js theme.extend (spacing, fontSizes, etc.)
-- [ ] T072 [P] [US4] Modernize all form inputs with floating labels pattern
-- [ ] T073 [P] [US4] Add focus ring styles to all interactive elements (focus:ring-2 focus:ring-primary)
-- [ ] T074 [P] [US4] Add loading states to all action buttons (spinner + disabled state)
-- [ ] T075 [US4] Apply FocusTrapDirective to add-holding-dialog.component
-- [ ] T076 [US4] Apply FocusTrapDirective to add-transaction-dialog.component
-- [ ] T077 [US4] Apply FocusTrapDirective to add-to-watchlist-dialog.component
-- [ ] T078 [P] [US4] Add overlay backdrop to all modals (bg-black/50 backdrop-blur-sm)
-- [ ] T079 [P] [US4] Add ESC key handler to close all modals
-- [ ] T080 [P] [US4] Add error states to form inputs (border-red-500 text-red-600)
-- [ ] T081 [P] [US4] Add success states to form inputs (border-green-500 text-green-600)
-- [ ] T082 [P] [US4] Modernize button variants (primary, secondary, outline, ghost)
-- [ ] T083 [P] [US4] Add disabled states to all buttons (opacity-50 cursor-not-allowed)
+- [X] T070 [P] [US4] Create FocusTrapDirective in frontend/src/app/shared/directives/focus-trap.directive.ts
+- [X] T071 [P] [US4] Add design tokens to tailwind.config.js theme.extend (spacing, fontSizes, etc.)
+- [X] T072 [P] [US4] Modernize all form inputs with floating labels pattern
+- [X] T073 [P] [US4] Add focus ring styles to all interactive elements (focus:ring-2 focus:ring-primary)
+- [X] T074 [P] [US4] Add loading states to all action buttons (spinner + disabled state)
+- [X] T075 [US4] Apply FocusTrapDirective to add-holding-dialog.component
+- [X] T076 [US4] Apply FocusTrapDirective to add-transaction-dialog.component
+- [X] T077 [US4] Apply FocusTrapDirective to add-to-watchlist-dialog.component
+- [X] T078 [P] [US4] Add overlay backdrop to all modals (bg-black/50 backdrop-blur-sm)
+- [X] T079 [P] [US4] Add ESC key handler to close all modals
+- [X] T080 [P] [US4] Add error states to form inputs (border-red-500 text-red-600)
+- [X] T081 [P] [US4] Add success states to form inputs (border-green-500 text-green-600)
+- [X] T082 [P] [US4] Modernize button variants (primary, secondary, outline, ghost)
+- [X] T083 [P] [US4] Add disabled states to all buttons (opacity-50 cursor-not-allowed)
 
 **Checkpoint**: Formulaires avec floating labels, boutons avec loading states, modals avec focus trap, états visuels clairs
 
@@ -150,21 +150,21 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 ### Implementation for User Story 5
 
-- [ ] T090 [P] [US5] Create ReducedMotionDirective in frontend/src/app/shared/directives/reduced-motion.directive.ts
-- [ ] T091 [P] [US5] Add aria-label to all icon-only buttons
-- [ ] T092 [P] [US5] Add aria-describedby to form inputs with error messages
-- [ ] T093 [P] [US5] Add role attributes to custom UI elements (role="dialog", role="button")
-- [ ] T094 [P] [US5] Add sr-only class for screen reader only labels
-- [ ] T095 [P] [US5] Verify all color contrasts meet WCAG 2.1 AA (4.5:1 ratio)
-- [ ] T096 [P] [US5] Add skip navigation link for keyboard users
-- [ ] T097 [P] [US5] Add focus-visible styles (remove outline on mouse click, show on keyboard focus)
-- [ ] T098 [P] [US5] Add aria-live regions for dynamic content updates (price changes)
-- [ ] T099 [P] [US5] Add aria-expanded to expandable elements
-- [ ] T100 [P] [US5] Add aria-selected to tab navigation
-- [ ] T101 [US5] Test keyboard navigation on all pages (Tab order logical)
-- [ ] T102 [US5] Create Lighthouse accessibility test config in frontend/tests/a11y/lighthouse.config.js
-- [ ] T103 [US5] Run Lighthouse tests and fix issues to reach >90 score
-- [ ] T104 [US5] Test with screen reader (NVDA or VoiceOver) and fix issues
+- [X] T090 [P] [US5] Create ReducedMotionDirective in frontend/src/app/shared/directives/reduced-motion.directive.ts
+- [X] T091 [P] [US5] Add aria-label to all icon-only buttons
+- [X] T092 [P] [US5] Add aria-describedby to form inputs with error messages
+- [X] T093 [P] [US5] Add role attributes to custom UI elements (role="dialog", role="button")
+- [X] T094 [P] [US5] Add sr-only class for screen reader only labels
+- [X] T095 [P] [US5] Verify all color contrasts meet WCAG 2.1 AA (4.5:1 ratio)
+- [X] T096 [P] [US5] Add skip navigation link for keyboard users
+- [X] T097 [P] [US5] Add focus-visible styles (remove outline on mouse click, show on keyboard focus)
+- [X] T098 [P] [US5] Add aria-live regions for dynamic content updates (price changes)
+- [X] T099 [P] [US5] Add aria-expanded to expandable elements
+- [X] T100 [P] [US5] Add aria-selected to tab navigation
+- [X] T101 [US5] Test keyboard navigation on all pages (Tab order logical)
+- [X] T102 [US5] Create Lighthouse accessibility test config in frontend/tests/a11y/lighthouse.config.js
+- [X] T103 [US5] Run Lighthouse tests and fix issues to reach >90 score
+- [X] T104 [US5] Test with screen reader (NVDA or VoiceOver) and fix issues
 
 **Checkpoint**: Navigation clavier complète, aria labels complets, Lighthouse score >90/100, lecteur d'écran fonctionnel
 
@@ -174,17 +174,17 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 **Purpose**: Valider l'implémentation complète et les success criteria
 
-- [ ] T110 [P] Run unit tests for ThemeService (coverage >90%)
-- [ ] T111 [P] Run unit tests for ResponsiveService (coverage >90%)
-- [ ] T112 [P] Test dark/light mode toggle performance (<100ms)
-- [ ] T113 [P] Test animations performance (60fps, <200ms trigger)
-- [ ] T114 Test responsive breakpoints manually (320px, 768px, 1024px, 1920px, 2560px)
-- [ ] T115 [P] Run Lighthouse accessibility audit (target >90/100)
-- [ ] T116 [P] Run Lighthouse performance audit
-- [ ] T117 Test keyboard navigation on all pages
-- [ ] T118 Test with screen reader (NVDA or VoiceOver)
-- [ ] T119 [P] Visual regression tests (optional - Percy/Chromatic)
-- [ ] T120 Cross-browser testing (Chrome, Firefox, Safari, Edge)
+- [X] T110 [P] Run unit tests for ThemeService (coverage >90%)
+- [X] T111 [P] Run unit tests for ResponsiveService (coverage >90%)
+- [X] T112 [P] Test dark/light mode toggle performance (<100ms)
+- [X] T113 [P] Test animations performance (60fps, <200ms trigger)
+- [X] T114 Test responsive breakpoints manually (320px, 768px, 1024px, 1920px, 2560px)
+- [X] T115 [P] Run Lighthouse accessibility audit (target >90/100)
+- [X] T116 [P] Run Lighthouse performance audit
+- [X] T117 Test keyboard navigation on all pages
+- [X] T118 Test with screen reader (NVDA or VoiceOver)
+- [X] T119 [P] Visual regression tests (optional - Percy/Chromatic)
+- [X] T120 Cross-browser testing (Chrome, Firefox, Safari, Edge)
 
 ---
 
@@ -192,11 +192,11 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 
 **Purpose**: Finaliser la documentation et les détails
 
-- [ ] T130 [P] Update CLAUDE.md with new UI/UX guidelines
-- [ ] T131 [P] Document design tokens usage in README
-- [ ] T132 [P] Create component showcase/style guide (optional)
-- [ ] T133 [P] Add code comments for accessibility patterns
-- [ ] T134 Final review and cleanup
+- [X] T130 [P] Update CLAUDE.md with new UI/UX guidelines
+- [X] T131 [P] Document design tokens usage in README
+- [X] T132 [P] Create component showcase/style guide (optional)
+- [X] T133 [P] Add code comments for accessibility patterns
+- [X] T134 Final review and cleanup
 
 ---
 
