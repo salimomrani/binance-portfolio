@@ -69,10 +69,10 @@
     }
 
     <!-- Total Gain/Loss Card -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Gain/Loss</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Gain/Loss</p>
           <div class="mt-2">
             <app-gain-loss-badge
               [value]="statistics()!.totalGainLoss"
@@ -86,11 +86,11 @@
     </div>
 
     <!-- Total Value Card -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatCurrency(statistics()!.totalValue) }}</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Value</p>
+          <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(statistics()!.totalValue) }}</p>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Cost basis: {{ formatCurrency(statistics()!.totalCostBasis) }}</p>
         </div>
       </div>

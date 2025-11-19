@@ -73,17 +73,17 @@ description: "Task list for UI/UX Modernization with TailwindCSS"
 - [X] T030 [P] [US2] Create ResponsiveService in frontend/src/app/core/services/responsive.service.ts
 - [X] T031 [P] [US2] Create ResponsiveService tests in frontend/src/app/core/services/responsive.service.spec.ts
 - [X] T032 [US2] Add responsive breakpoints to tailwind.config.js screens
-- [ ] T033 [US2] Optimize app.component.html grid layouts with responsive classes (sm:, md:, lg:, xl:)
-- [ ] T034 [US2] Optimize portfolio-dashboard.component.html grid from grid-cols-1 to responsive grid
-- [ ] T035 [US2] Add horizontal scroll + sticky first column to portfolio-table.component.html
-- [ ] T036 [P] [US2] Optimize portfolio-summary cards layout for mobile stacking
-- [ ] T037 [P] [US2] Optimize portfolio-stats grid for tablet 2-column layout
-- [ ] T038 [P] [US2] Optimize holdings.component.html responsive layout
-- [ ] T039 [P] [US2] Optimize watchlist.component.html responsive layout
-- [ ] T040 [P] [US2] Optimize market-overview cards for mobile/tablet/desktop
-- [ ] T041 [P] [US2] Add responsive text sizes (text-sm sm:text-base lg:text-lg) across components
-- [ ] T042 [P] [US2] Add responsive spacing (p-4 sm:p-6 lg:p-10) across components
-- [ ] T043 [US2] Test all breakpoints: 320px, 640px, 768px, 1024px, 1920px
+- [X] T033 [US2] Optimize app.component.html grid layouts with responsive classes (sm:, md:, lg:, xl:)
+- [X] T034 [US2] Optimize portfolio-dashboard.component.html grid from grid-cols-1 to responsive grid
+- [X] T035 [US2] Add horizontal scroll + sticky first column to portfolio-table.component.html
+- [X] T036 [P] [US2] Optimize portfolio-summary cards layout for mobile stacking
+- [X] T037 [P] [US2] Optimize portfolio-stats grid for tablet 2-column layout
+- [X] T038 [P] [US2] Optimize holdings.component.html responsive layout
+- [X] T039 [P] [US2] Optimize watchlist.component.html responsive layout
+- [X] T040 [P] [US2] Optimize market-overview cards for mobile/tablet/desktop
+- [X] T041 [P] [US2] Add responsive text sizes (text-sm sm:text-base lg:text-lg) across components
+- [X] T042 [P] [US2] Add responsive spacing (p-4 sm:p-6 lg:p-10) across components
+- [X] T043 [US2] Test all breakpoints: 320px, 640px, 768px, 1024px, 1920px
 
 **Checkpoint**: Interface parfaitement responsive sur tous les devices, sticky columns, grids adaptatives
 
