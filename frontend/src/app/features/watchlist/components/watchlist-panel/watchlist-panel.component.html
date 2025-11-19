@@ -2,14 +2,14 @@
 
 <div class="watchlist-panel">
   <!-- Header with Add button -->
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200">
       Watchlist ({{ items().length }})
     </h2>
     <button
       type="button"
       (click)="onAddToWatchlist()"
-      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
+      class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
     >
       <svg
         class="w-5 h-5"
@@ -24,7 +24,7 @@
           d="M12 4v16m8-8H4"
         />
       </svg>
-      Add to Watchlist
+      <span class="text-sm sm:text-base">Add to Watchlist</span>
     </button>
   </div>
 
@@ -98,10 +98,10 @@
     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
       <thead class="bg-gray-50 dark:bg-gray-900">
         <tr>
-          <!-- Symbol/Name column -->
+          <!-- Symbol/Name column - sticky on scroll -->
           <th
             scope="col"
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            class="sticky left-0 z-10 bg-gray-50 dark:bg-gray-900 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)] px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
             (click)="onSort('symbol')"
           >
             <div class="flex items-center gap-2">
@@ -197,8 +197,8 @@
           *ngFor="let item of sortedItems()"
           class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
         >
-          <!-- Symbol/Name -->
-          <td class="px-6 py-4 whitespace-nowrap">
+          <!-- Symbol/Name - sticky on scroll -->
+          <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)] px-6 py-4 whitespace-nowrap">
             <div class="flex flex-col">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {{ item.symbol }}
