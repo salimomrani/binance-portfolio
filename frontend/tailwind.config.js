@@ -122,9 +122,14 @@ module.exports = {
           dark: '#DC2626',
         },
       },
+      // Custom animations
       animation: {
         'price-flash-up': 'flashUp 0.6s ease-out',
         'price-flash-down': 'flashDown 0.6s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-in',
+        'slide-up': 'slideUp 0.2s ease-out',
+        'slide-down': 'slideDown 0.2s ease-out',
+        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         flashUp: {
@@ -135,6 +140,44 @@ module.exports = {
           '0%, 100%': { backgroundColor: 'transparent' },
           '50%': { backgroundColor: 'rgba(239, 68, 68, 0.2)' },
         },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+      // Custom shadows for modern design
+      boxShadow: {
+        'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
+        'soft-lg': '0 4px 16px 0 rgba(0, 0, 0, 0.12)',
+        'soft-xl': '0 8px 24px 0 rgba(0, 0, 0, 0.15)',
+        'soft-2xl': '0 12px 32px 0 rgba(0, 0, 0, 0.18)',
+        'glow-primary': '0 0 20px rgba(59, 130, 246, 0.3)',
+        'glow-profit': '0 0 20px rgba(16, 185, 129, 0.3)',
+        'glow-loss': '0 0 20px rgba(239, 68, 68, 0.3)',
+      },
+      // Enhanced border radius tokens
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
+      },
+      // Design tokens for consistent spacing
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      // Typography scale
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
       },
     },
   },
