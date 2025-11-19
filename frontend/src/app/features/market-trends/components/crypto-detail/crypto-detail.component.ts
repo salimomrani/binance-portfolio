@@ -4,14 +4,16 @@ import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, switchMap, catchError, of } from 'rxjs';
-import { MarketDataApiService, Timeframe } from '../../services/market-data-api.service';
+import { MarketDataApiService, Timeframe, PriceHistory } from '../../services/market-data-api.service';
 import { CryptoMarketData } from '../../../../shared/models/crypto-market-data.model';
 import { TrendIndicatorComponent } from '../../../../shared/components/trend-indicator/trend-indicator.component';
+import { LineChartComponent } from '../../../portfolio/components/portfolio-charts/line-chart/line-chart.component';
+import { CRYPTO_COLOR_PALETTE } from '../../../../shared/utils/chart-colors.util';
 
 @Component({
   selector: 'app-crypto-detail',
   standalone: true,
-  imports: [CommonModule, TrendIndicatorComponent],
+  imports: [CommonModule, TrendIndicatorComponent, LineChartComponent],
   templateUrl: './crypto-detail.component.html',
   styleUrls: ['./crypto-detail.component.scss'],
 })
@@ -26,9 +28,14 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
   selectedTimeframe = signal<Timeframe>('7d');
+  priceHistory = signal<PriceHistory[]>([]);
+  chartLoading = signal<boolean>(false);
 
   // Available timeframes for the chart
   timeframes: Timeframe[] = ['24h', '7d', '30d', '1y'];
+
+  // Chart color palette
+  readonly CRYPTO_COLOR_PALETTE = CRYPTO_COLOR_PALETTE;
 
   // Computed values
   symbol = computed(() => this.cryptoData()?.symbol || '');
@@ -85,8 +92,27 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
       .subscribe(data => {
         if (data) {
           this.cryptoData.set(data);
+          // Load initial price history for default timeframe
+          this.loadPriceHistory(data.symbol, this.selectedTimeframe());
         }
         this.loading.set(false);
+      });
+  }
+
+  private loadPriceHistory(symbol: string, timeframe: Timeframe): void {
+    this.chartLoading.set(true);
+    this.marketDataApi.getHistoricalPrices(symbol, timeframe)
+      .pipe(
+        catchError(err => {
+          console.error('Failed to load price history:', err);
+          this.chartLoading.set(false);
+          return of([]);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(history => {
+        this.priceHistory.set(history);
+        this.chartLoading.set(false);
       });
   }
 
@@ -101,6 +127,10 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
 
   selectTimeframe(timeframe: Timeframe): void {
     this.selectedTimeframe.set(timeframe);
+    const currentSymbol = this.symbol();
+    if (currentSymbol) {
+      this.loadPriceHistory(currentSymbol, timeframe);
+    }
   }
 
   private formatLargeNumber(value: number): string {
