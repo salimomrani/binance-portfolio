@@ -11,7 +11,7 @@ import {
   effect,
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
-import { createGradient, CRYPTO_COLOR_PALETTE } from '../../../../shared/utils/chart-colors.util';
+import { createGradient, CRYPTO_COLOR_PALETTE } from '../../../../../shared/utils/chart-colors.util';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -122,6 +122,9 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
             callbacks: {
               label: (context) => {
                 const value = context.parsed.y;
+                if (value === null || value === undefined) {
+                  return 'Price: N/A';
+                }
                 return `Price: $${value.toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -203,7 +206,6 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     );
     this.chart.data.datasets[0].borderColor = this.color();
     this.chart.data.datasets[0].backgroundColor = createGradient(ctx, this.color());
-    this.chart.data.datasets[0].pointHoverBackgroundColor = this.color();
 
     this.chart.update();
   }
