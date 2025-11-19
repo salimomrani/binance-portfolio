@@ -7,7 +7,7 @@
       <div class="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity" (click)="onClose()"></div>
 
       <!-- Modal panel with focus trap (T075) -->
-      <div appFocusTrap class="inline-block align-bottom bg-white dark:bg-neutral-800 rounded-2xl text-left overflow-hidden shadow-soft-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-slide-up">
+      <div [appFocusTrap]="true" class="inline-block align-bottom bg-white dark:bg-neutral-800 rounded-2xl text-left overflow-hidden shadow-soft-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-slide-up">
         @if (form()) {
           <form [formGroup]="form()!" (ngSubmit)="onSubmit()">
             <!-- Header -->
