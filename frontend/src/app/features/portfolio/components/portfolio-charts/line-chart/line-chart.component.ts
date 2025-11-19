@@ -9,6 +9,7 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
   effect,
+  computed,
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import { createGradient, CRYPTO_COLOR_PALETTE } from '../../../../../shared/utils/chart-colors.util';
@@ -34,6 +35,9 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   historyData = input<PriceHistoryData[]>([]);
   title = input<string>('Portfolio Performance');
   color = input<string>(CRYPTO_COLOR_PALETTE[0]);
+
+  // Computed signal for chart visibility
+  protected readonly showChart = computed(() => this.historyData().length > 0);
 
   @ViewChild('chartCanvas', { static: false })
   chartCanvas!: ElementRef<HTMLCanvasElement>;

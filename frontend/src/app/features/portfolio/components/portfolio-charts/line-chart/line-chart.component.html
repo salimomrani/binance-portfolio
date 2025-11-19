@@ -1,6 +1,6 @@
 <!-- T129: Line chart component template -->
 <div class="line-chart-container">
-  @if (historyData.length > 0) {
+  @if (showChart()) {
     <div class="chart-wrapper">
       <canvas #chartCanvas></canvas>
     </div>
